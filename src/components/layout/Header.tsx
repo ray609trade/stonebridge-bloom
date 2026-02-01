@@ -4,7 +4,6 @@ import { Menu, X, ShoppingBag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/hooks/useCart";
-import logo from "@/assets/logo.png";
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -45,15 +44,19 @@ export function Header() {
       <div className="container mx-auto px-4">
         <nav className="flex items-center justify-between h-16 md:h-20">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2">
+          <Link to="/" className="flex items-center gap-3">
             <img
-              src={logo}
-              alt="Stonebridge Bagels Logo"
+              src="/assets/logo.png"
+              alt="Stonebridge Bagels"
               className="h-10 md:h-12 w-auto"
+              onError={(e) => {
+                e.currentTarget.style.display = "none";
+                e.currentTarget.nextElementSibling?.classList.remove("hidden");
+              }}
             />
             <span
               className={cn(
-                "font-serif text-xl md:text-2xl font-semibold transition-colors",
+                "hidden font-serif text-xl md:text-2xl font-semibold transition-colors",
                 isScrolled || !isHomePage ? "text-foreground" : "text-primary-foreground"
               )}
             >

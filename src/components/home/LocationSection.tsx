@@ -18,15 +18,17 @@ export function LocationSection() {
             transition={{ duration: 0.5 }}
             className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-card border border-border shadow-card"
           >
-            <div className="absolute inset-0 flex items-center justify-center bg-secondary">
-              <div className="text-center p-8">
-                <MapPin className="h-16 w-16 text-muted-foreground/50 mx-auto mb-4" />
-                <p className="text-muted-foreground">
-                  Map embed placeholder<br />
-                  <span className="text-sm">Configure address in site settings</span>
-                </p>
-              </div>
-            </div>
+            <iframe
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3041.8!2d-74.5867!3d40.1789!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89c160e5b0a89a8d%3A0x1234567890abcdef!2s1278%20Yardville-Allentown%20Rd%2C%20Allentown%2C%20NJ%2008501!5e0!3m2!1sen!2sus!4v1700000000000!5m2!1sen!2sus"
+              width="100%"
+              height="100%"
+              style={{ border: 0 }}
+              allowFullScreen
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+              title="Stonebridge Bagels Location"
+              className="absolute inset-0"
+            />
           </motion.div>
 
           {/* Info */}

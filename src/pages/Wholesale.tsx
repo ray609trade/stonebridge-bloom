@@ -11,6 +11,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { wholesaleAccountSchema, validateForm } from "@/lib/validation";
+import { logError, getUserFriendlyError } from "@/lib/errorUtils";
 
 const benefits = [
   {
@@ -38,6 +40,9 @@ const benefits = [
 export default function Wholesale() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  // Honeypot field for bot detection
+  const [honeypot, setHoneypot] = useState("");
 
   const [formData, setFormData] = useState({
     businessName: "",
@@ -52,16 +57,42 @@ export default function Wholesale() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Check honeypot - bots will fill this hidden field
+    if (honeypot) {
+      // Silently reject bot submissions
+      setIsSubmitted(true);
+      return;
+    }
+
+    // Validate form data
+    const validation = validateForm(wholesaleAccountSchema, formData);
+    if (!validation.success) {
+      setFieldErrors((validation as { success: false; errors: Record<string, string> }).errors);
+      toast.error("Please fix the errors in the form");
+      return;
+    }
+    setFieldErrors({});
+
     setIsSubmitting(true);
 
     try {
+      const validatedData = validation.data;
+      
+      // Build notes safely - already validated and length-limited
+      const notesContent = [
+        validatedData.volume && `Volume: ${validatedData.volume}`,
+        validatedData.preference && `Preference: ${validatedData.preference}`,
+        validatedData.notes,
+      ].filter(Boolean).join(". ");
+
       const { error } = await supabase.from("wholesale_accounts").insert({
-        business_name: formData.businessName,
-        contact_name: formData.contactName,
-        email: formData.email,
-        phone: formData.phone,
-        address: formData.address,
-        notes: `Volume: ${formData.volume}, Preference: ${formData.preference}. ${formData.notes}`,
+        business_name: validatedData.businessName,
+        contact_name: validatedData.contactName,
+        email: validatedData.email,
+        phone: validatedData.phone,
+        address: validatedData.address || null,
+        notes: notesContent || null,
         status: "pending",
       });
 
@@ -69,9 +100,9 @@ export default function Wholesale() {
 
       setIsSubmitted(true);
       toast.success("Application submitted successfully!");
-    } catch (error) {
-      console.error("Error:", error);
-      toast.error("Failed to submit application. Please try again.");
+    } catch (error: any) {
+      logError("Wholesale.handleSubmit", error);
+      toast.error(getUserFriendlyError(error));
     } finally {
       setIsSubmitting(false);
     }
@@ -179,24 +210,46 @@ export default function Wholesale() {
                   onSubmit={handleSubmit}
                   className="space-y-6 p-8 rounded-xl bg-card border border-border"
                 >
+                  {/* Honeypot field - hidden from users, bots will fill it */}
+                  <input
+                    type="text"
+                    name="website"
+                    value={honeypot}
+                    onChange={(e) => setHoneypot(e.target.value)}
+                    tabIndex={-1}
+                    autoComplete="off"
+                    className="absolute -left-[9999px] opacity-0 h-0 w-0"
+                    aria-hidden="true"
+                  />
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="businessName">Business Name *</Label>
                       <Input
                         id="businessName"
                         required
+                        maxLength={100}
                         value={formData.businessName}
                         onChange={(e) => setFormData({ ...formData, businessName: e.target.value })}
+                        className={fieldErrors.businessName ? "border-red-500" : ""}
                       />
+                      {fieldErrors.businessName && (
+                        <p className="text-sm text-red-500">{fieldErrors.businessName}</p>
+                      )}
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="contactName">Contact Name *</Label>
                       <Input
                         id="contactName"
                         required
+                        maxLength={100}
                         value={formData.contactName}
                         onChange={(e) => setFormData({ ...formData, contactName: e.target.value })}
+                        className={fieldErrors.contactName ? "border-red-500" : ""}
                       />
+                      {fieldErrors.contactName && (
+                        <p className="text-sm text-red-500">{fieldErrors.contactName}</p>
+                      )}
                     </div>
                   </div>
 
@@ -207,9 +260,14 @@ export default function Wholesale() {
                         id="email"
                         type="email"
                         required
+                        maxLength={255}
                         value={formData.email}
                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                        className={fieldErrors.email ? "border-red-500" : ""}
                       />
+                      {fieldErrors.email && (
+                        <p className="text-sm text-red-500">{fieldErrors.email}</p>
+                      )}
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="phone">Phone *</Label>
@@ -217,9 +275,14 @@ export default function Wholesale() {
                         id="phone"
                         type="tel"
                         required
+                        maxLength={20}
                         value={formData.phone}
                         onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                        className={fieldErrors.phone ? "border-red-500" : ""}
                       />
+                      {fieldErrors.phone && (
+                        <p className="text-sm text-red-500">{fieldErrors.phone}</p>
+                      )}
                     </div>
                   </div>
 
@@ -227,9 +290,14 @@ export default function Wholesale() {
                     <Label htmlFor="address">Business Address</Label>
                     <Input
                       id="address"
+                      maxLength={500}
                       value={formData.address}
                       onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                      className={fieldErrors.address ? "border-red-500" : ""}
                     />
+                    {fieldErrors.address && (
+                      <p className="text-sm text-red-500">{fieldErrors.address}</p>
+                    )}
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -273,10 +341,16 @@ export default function Wholesale() {
                     <Textarea
                       id="notes"
                       placeholder="Tell us about your business and needs..."
+                      maxLength={1000}
                       value={formData.notes}
                       onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                       rows={4}
+                      className={fieldErrors.notes ? "border-red-500" : ""}
                     />
+                    {fieldErrors.notes && (
+                      <p className="text-sm text-red-500">{fieldErrors.notes}</p>
+                    )}
+                    <p className="text-xs text-muted-foreground">{formData.notes.length}/1000 characters</p>
                   </div>
 
                   <Button

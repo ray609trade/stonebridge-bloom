@@ -9,6 +9,7 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { logError, getUserFriendlyError } from "@/lib/errorUtils";
 
 interface Category {
   id: string;
@@ -74,8 +75,8 @@ export function ProductForm({ product, categories, onClose, onSuccess }: Product
 
       onSuccess();
     } catch (error: any) {
-      console.error("Error:", error);
-      toast.error(error.message || "Failed to save product");
+      logError("ProductForm.handleSubmit", error);
+      toast.error(getUserFriendlyError(error));
     } finally {
       setIsSubmitting(false);
     }

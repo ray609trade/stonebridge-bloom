@@ -93,12 +93,15 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="mt-12 pt-8 border-t border-primary-foreground/20 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-primary-foreground/60">
-          <p>© {new Date().getFullYear()} Stonebridge Bagels. All rights reserved.</p>
-          <div className="flex gap-6">
-            <a href="#" className="hover:text-primary-foreground transition-colors">Privacy Policy</a>
-            <a href="#" className="hover:text-primary-foreground transition-colors">Terms of Service</a>
+        <div className="mt-12 pt-8 border-t border-primary-foreground/20 flex flex-col items-center gap-4 text-sm text-primary-foreground/60">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4 w-full">
+            <p>© {new Date().getFullYear()} Stonebridge Bagels. All rights reserved.</p>
+            <div className="flex gap-6">
+              <a href="#" className="hover:text-primary-foreground transition-colors">Privacy Policy</a>
+              <a href="#" className="hover:text-primary-foreground transition-colors">Terms of Service</a>
+            </div>
           </div>
+          <p className="text-xs text-primary-foreground/40">Designed by Ray Management Group LLC</p>
         </div>
       </div>
     </footer>

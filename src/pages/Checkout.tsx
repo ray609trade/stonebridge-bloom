@@ -14,6 +14,8 @@ import { useCart } from "@/hooks/useCart";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
+import { checkoutFormSchema, validateForm } from "@/lib/validation";
+import { logError, getUserFriendlyError } from "@/lib/errorUtils";
 
 const timeSlots = [
   "ASAP (15-20 min)",
@@ -39,14 +41,15 @@ export default function Checkout() {
   const navigate = useNavigate();
   const { items, subtotal, clearCart } = useCart();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     phone: "",
-    pickupType: "pickup",
+    pickupType: "pickup" as "pickup" | "dine_in",
     pickupTime: "",
-    paymentMethod: "pay_at_pickup",
+    paymentMethod: "pay_at_pickup" as "pay_at_pickup" | "card",
     notes: "",
   });
 
@@ -60,9 +63,20 @@ export default function Checkout() {
       return;
     }
 
+    // Validate form data
+    const validation = validateForm(checkoutFormSchema, formData);
+    if (!validation.success) {
+      setFieldErrors((validation as { success: false; errors: Record<string, string> }).errors);
+      toast.error("Please fix the errors in the form");
+      return;
+    }
+    setFieldErrors({});
+
     setIsSubmitting(true);
 
     try {
+      const validatedData = validation.data;
+      
       const orderItems = items.map((item) => ({
         productId: item.productId,
         name: item.name,
@@ -73,17 +87,17 @@ export default function Checkout() {
 
       const { data, error } = await supabase.from("orders").insert({
         order_type: "retail",
-        customer_name: formData.name,
-        customer_email: formData.email,
-        customer_phone: formData.phone,
+        customer_name: validatedData.name,
+        customer_email: validatedData.email,
+        customer_phone: validatedData.phone,
         items: orderItems,
         subtotal,
         tax,
         total,
-        pickup_type: formData.pickupType,
-        scheduled_time: formData.pickupTime === "ASAP (15-20 min)" ? null : new Date().toISOString(),
-        payment_method: formData.paymentMethod,
-        notes: formData.notes,
+        pickup_type: validatedData.pickupType,
+        scheduled_time: validatedData.pickupTime === "ASAP (15-20 min)" ? null : new Date().toISOString(),
+        payment_method: validatedData.paymentMethod,
+        notes: validatedData.notes || null,
         status: "pending",
       }).select().single();
 
@@ -91,9 +105,9 @@ export default function Checkout() {
 
       clearCart();
       navigate(`/order/confirmation/${data.order_number}`);
-    } catch (error) {
-      console.error("Order error:", error);
-      toast.error("Failed to place order. Please try again.");
+    } catch (error: any) {
+      logError("Checkout.handleSubmit", error);
+      toast.error(getUserFriendlyError(error));
     } finally {
       setIsSubmitting(false);
     }
@@ -192,7 +206,7 @@ export default function Checkout() {
                     </h2>
                     <RadioGroup
                       value={formData.pickupType}
-                      onValueChange={(v) => setFormData({ ...formData, pickupType: v })}
+                      onValueChange={(v) => setFormData({ ...formData, pickupType: v as "pickup" | "dine_in" })}
                       className="flex gap-4"
                     >
                       <div className="flex items-center gap-2 p-4 rounded-lg border border-border bg-card cursor-pointer hover:border-accent transition-colors">
@@ -241,7 +255,7 @@ export default function Checkout() {
                     </h2>
                     <RadioGroup
                       value={formData.paymentMethod}
-                      onValueChange={(v) => setFormData({ ...formData, paymentMethod: v })}
+                      onValueChange={(v) => setFormData({ ...formData, paymentMethod: v as "pay_at_pickup" | "card" })}
                       className="flex gap-4"
                     >
                       <div className="flex items-center gap-2 p-4 rounded-lg border border-border bg-card cursor-pointer hover:border-accent transition-colors">

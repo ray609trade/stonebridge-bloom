@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { logError, getUserFriendlyError } from "@/lib/errorUtils";
 
 export default function AdminLogin() {
   const navigate = useNavigate();
@@ -63,8 +64,8 @@ export default function AdminLogin() {
       toast.success("Welcome back!");
       navigate("/admin");
     } catch (error: any) {
-      console.error("Login error:", error);
-      toast.error(error.message || "Failed to login");
+      logError("AdminLogin.handleSubmit", error);
+      toast.error(getUserFriendlyError(error));
     } finally {
       setIsLoading(false);
     }

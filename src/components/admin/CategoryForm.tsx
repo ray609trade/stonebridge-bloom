@@ -9,6 +9,7 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { logError, getUserFriendlyError } from "@/lib/errorUtils";
 
 interface CategoryFormProps {
   category?: any;
@@ -56,8 +57,8 @@ export function CategoryForm({ category, onClose, onSuccess }: CategoryFormProps
 
       onSuccess();
     } catch (error: any) {
-      console.error("Error:", error);
-      toast.error(error.message || "Failed to save category");
+      logError("CategoryForm.handleSubmit", error);
+      toast.error(getUserFriendlyError(error));
     } finally {
       setIsSubmitting(false);
     }

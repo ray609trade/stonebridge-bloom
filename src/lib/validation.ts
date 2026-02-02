@@ -78,8 +78,97 @@ export const checkoutFormSchema = z.object({
     .or(z.literal("")),
 });
 
+// Admin form schemas
+export const productFormSchema = z.object({
+  name: z
+    .string()
+    .trim()
+    .min(2, "Product name must be at least 2 characters")
+    .max(200, "Product name must be less than 200 characters"),
+  slug: z
+    .string()
+    .trim()
+    .max(200, "Slug must be less than 200 characters")
+    .optional()
+    .or(z.literal("")),
+  description: z
+    .string()
+    .trim()
+    .max(2000, "Description must be less than 2000 characters")
+    .optional()
+    .or(z.literal("")),
+  category_id: z
+    .string()
+    .optional()
+    .or(z.literal("")),
+  retail_price: z
+    .string()
+    .refine((val) => {
+      const num = parseFloat(val);
+      return !isNaN(num) && num >= 0 && num <= 9999.99;
+    }, "Price must be between 0 and 9999.99"),
+  wholesale_price: z
+    .string()
+    .optional()
+    .or(z.literal(""))
+    .refine((val) => {
+      if (!val || val === "") return true;
+      const num = parseFloat(val);
+      return !isNaN(num) && num >= 0 && num <= 9999.99;
+    }, "Wholesale price must be between 0 and 9999.99"),
+  wholesale_minimum: z
+    .string()
+    .refine((val) => {
+      const num = parseInt(val);
+      return !isNaN(num) && num >= 1 && num <= 10000;
+    }, "Minimum quantity must be between 1 and 10000"),
+  dietary_tags: z
+    .string()
+    .max(500, "Dietary tags must be less than 500 characters")
+    .optional()
+    .or(z.literal("")),
+  active: z.boolean(),
+  featured: z.boolean(),
+  sort_order: z
+    .string()
+    .refine((val) => {
+      const num = parseInt(val);
+      return !isNaN(num) && num >= 0 && num <= 9999;
+    }, "Sort order must be between 0 and 9999"),
+});
+
+export const categoryFormSchema = z.object({
+  name: z
+    .string()
+    .trim()
+    .min(2, "Category name must be at least 2 characters")
+    .max(100, "Category name must be less than 100 characters"),
+  slug: z
+    .string()
+    .trim()
+    .max(100, "Slug must be less than 100 characters")
+    .optional()
+    .or(z.literal("")),
+  description: z
+    .string()
+    .trim()
+    .max(500, "Description must be less than 500 characters")
+    .optional()
+    .or(z.literal("")),
+  visibility: z.enum(["retail", "wholesale", "both"]),
+  active: z.boolean(),
+  sort_order: z
+    .string()
+    .refine((val) => {
+      const num = parseInt(val);
+      return !isNaN(num) && num >= 0 && num <= 9999;
+    }, "Sort order must be between 0 and 9999"),
+});
+
 export type WholesaleAccountFormData = z.infer<typeof wholesaleAccountSchema>;
 export type CheckoutFormData = z.infer<typeof checkoutFormSchema>;
+export type ProductFormData = z.infer<typeof productFormSchema>;
+export type CategoryFormData = z.infer<typeof categoryFormSchema>;
 
 /**
  * Validate form data and return result with errors

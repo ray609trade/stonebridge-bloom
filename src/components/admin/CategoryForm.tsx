@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { logError, getUserFriendlyError } from "@/lib/errorUtils";
+import { categoryFormSchema, validateForm } from "@/lib/validation";
 
 interface CategoryFormProps {
   category?: any;
@@ -19,27 +20,40 @@ interface CategoryFormProps {
 
 export function CategoryForm({ category, onClose, onSuccess }: CategoryFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [formData, setFormData] = useState({
     name: category?.name || "",
     slug: category?.slug || "",
     description: category?.description || "",
-    visibility: category?.visibility || "both",
+    visibility: (category?.visibility || "both") as "retail" | "wholesale" | "both",
     active: category?.active ?? true,
     sort_order: category?.sort_order?.toString() || "0",
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate form data
+    const validation = validateForm(categoryFormSchema, formData);
+    if (!validation.success) {
+      setFieldErrors((validation as { success: false; errors: Record<string, string> }).errors);
+      toast.error("Please fix the errors in the form");
+      return;
+    }
+    setFieldErrors({});
+    
     setIsSubmitting(true);
 
     try {
+      const validatedData = validation.data;
+      
       const data = {
-        name: formData.name,
-        slug: formData.slug || formData.name.toLowerCase().replace(/\s+/g, "-"),
-        description: formData.description || null,
-        visibility: formData.visibility as "retail" | "wholesale" | "both",
-        active: formData.active,
-        sort_order: parseInt(formData.sort_order) || 0,
+        name: validatedData.name,
+        slug: validatedData.slug || validatedData.name.toLowerCase().replace(/\s+/g, "-"),
+        description: validatedData.description || null,
+        visibility: validatedData.visibility,
+        active: validatedData.active,
+        sort_order: parseInt(validatedData.sort_order) || 0,
       };
 
       if (category?.id) {
@@ -87,36 +101,51 @@ export function CategoryForm({ category, onClose, onSuccess }: CategoryFormProps
             <Input
               id="name"
               required
+              maxLength={100}
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              className={fieldErrors.name ? "border-destructive" : ""}
             />
+            {fieldErrors.name && (
+              <p className="text-sm text-destructive">{fieldErrors.name}</p>
+            )}
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="slug">Slug</Label>
             <Input
               id="slug"
+              maxLength={100}
               value={formData.slug}
               onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
               placeholder="auto-generated-from-name"
+              className={fieldErrors.slug ? "border-destructive" : ""}
             />
+            {fieldErrors.slug && (
+              <p className="text-sm text-destructive">{fieldErrors.slug}</p>
+            )}
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="description">Description</Label>
             <Textarea
               id="description"
+              maxLength={500}
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               rows={2}
+              className={fieldErrors.description ? "border-destructive" : ""}
             />
+            {fieldErrors.description && (
+              <p className="text-sm text-destructive">{fieldErrors.description}</p>
+            )}
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="visibility">Visibility</Label>
             <Select
               value={formData.visibility}
-              onValueChange={(v) => setFormData({ ...formData, visibility: v })}
+              onValueChange={(v) => setFormData({ ...formData, visibility: v as "retail" | "wholesale" | "both" })}
             >
               <SelectTrigger>
                 <SelectValue />

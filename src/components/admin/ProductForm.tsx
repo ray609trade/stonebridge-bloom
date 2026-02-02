@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { logError, getUserFriendlyError } from "@/lib/errorUtils";
+import { productFormSchema, validateForm } from "@/lib/validation";
 
 interface Category {
   id: string;
@@ -25,6 +26,7 @@ interface ProductFormProps {
 
 export function ProductForm({ product, categories, onClose, onSuccess }: ProductFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [formData, setFormData] = useState({
     name: product?.name || "",
     slug: product?.slug || "",
@@ -41,23 +43,35 @@ export function ProductForm({ product, categories, onClose, onSuccess }: Product
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate form data
+    const validation = validateForm(productFormSchema, formData);
+    if (!validation.success) {
+      setFieldErrors((validation as { success: false; errors: Record<string, string> }).errors);
+      toast.error("Please fix the errors in the form");
+      return;
+    }
+    setFieldErrors({});
+    
     setIsSubmitting(true);
 
     try {
+      const validatedData = validation.data;
+      
       const data = {
-        name: formData.name,
-        slug: formData.slug || formData.name.toLowerCase().replace(/\s+/g, "-"),
-        description: formData.description || null,
-        category_id: formData.category_id || null,
-        retail_price: parseFloat(formData.retail_price) || 0,
-        wholesale_price: formData.wholesale_price ? parseFloat(formData.wholesale_price) : null,
-        wholesale_minimum: parseInt(formData.wholesale_minimum) || 1,
-        dietary_tags: formData.dietary_tags
-          ? formData.dietary_tags.split(",").map((t) => t.trim()).filter(Boolean)
+        name: validatedData.name,
+        slug: validatedData.slug || validatedData.name.toLowerCase().replace(/\s+/g, "-"),
+        description: validatedData.description || null,
+        category_id: validatedData.category_id || null,
+        retail_price: parseFloat(validatedData.retail_price) || 0,
+        wholesale_price: validatedData.wholesale_price ? parseFloat(validatedData.wholesale_price) : null,
+        wholesale_minimum: parseInt(validatedData.wholesale_minimum) || 1,
+        dietary_tags: validatedData.dietary_tags
+          ? validatedData.dietary_tags.split(",").map((t) => t.trim()).filter(Boolean)
           : [],
-        active: formData.active,
-        featured: formData.featured,
-        sort_order: parseInt(formData.sort_order) || 0,
+        active: validatedData.active,
+        featured: validatedData.featured,
+        sort_order: parseInt(validatedData.sort_order) || 0,
       };
 
       if (product?.id) {
@@ -105,29 +119,44 @@ export function ProductForm({ product, categories, onClose, onSuccess }: Product
             <Input
               id="name"
               required
+              maxLength={200}
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              className={fieldErrors.name ? "border-destructive" : ""}
             />
+            {fieldErrors.name && (
+              <p className="text-sm text-destructive">{fieldErrors.name}</p>
+            )}
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="slug">Slug</Label>
             <Input
               id="slug"
+              maxLength={200}
               value={formData.slug}
               onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
               placeholder="auto-generated-from-name"
+              className={fieldErrors.slug ? "border-destructive" : ""}
             />
+            {fieldErrors.slug && (
+              <p className="text-sm text-destructive">{fieldErrors.slug}</p>
+            )}
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="description">Description</Label>
             <Textarea
               id="description"
+              maxLength={2000}
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               rows={3}
+              className={fieldErrors.description ? "border-destructive" : ""}
             />
+            {fieldErrors.description && (
+              <p className="text-sm text-destructive">{fieldErrors.description}</p>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -156,10 +185,16 @@ export function ProductForm({ product, categories, onClose, onSuccess }: Product
                 id="retail_price"
                 type="number"
                 step="0.01"
+                min="0"
+                max="9999.99"
                 required
                 value={formData.retail_price}
                 onChange={(e) => setFormData({ ...formData, retail_price: e.target.value })}
+                className={fieldErrors.retail_price ? "border-destructive" : ""}
               />
+              {fieldErrors.retail_price && (
+                <p className="text-sm text-destructive">{fieldErrors.retail_price}</p>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="wholesale_price">Wholesale Price</Label>
@@ -167,9 +202,15 @@ export function ProductForm({ product, categories, onClose, onSuccess }: Product
                 id="wholesale_price"
                 type="number"
                 step="0.01"
+                min="0"
+                max="9999.99"
                 value={formData.wholesale_price}
                 onChange={(e) => setFormData({ ...formData, wholesale_price: e.target.value })}
+                className={fieldErrors.wholesale_price ? "border-destructive" : ""}
               />
+              {fieldErrors.wholesale_price && (
+                <p className="text-sm text-destructive">{fieldErrors.wholesale_price}</p>
+              )}
             </div>
           </div>
 
@@ -177,10 +218,15 @@ export function ProductForm({ product, categories, onClose, onSuccess }: Product
             <Label htmlFor="dietary_tags">Dietary Tags (comma separated)</Label>
             <Input
               id="dietary_tags"
+              maxLength={500}
               value={formData.dietary_tags}
               onChange={(e) => setFormData({ ...formData, dietary_tags: e.target.value })}
               placeholder="Vegan, Gluten-Free, Dairy-Free"
+              className={fieldErrors.dietary_tags ? "border-destructive" : ""}
             />
+            {fieldErrors.dietary_tags && (
+              <p className="text-sm text-destructive">{fieldErrors.dietary_tags}</p>
+            )}
           </div>
 
           <div className="flex items-center justify-between py-2">

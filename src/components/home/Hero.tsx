@@ -3,9 +3,11 @@ import { Link } from "react-router-dom";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { ArrowRight, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { getBusinessStatus } from "@/lib/businessHours";
 import heroBagels from "@/assets/hero-bagels.jpg";
 
 export function Hero() {
+  const [businessStatus, setBusinessStatus] = useState(getBusinessStatus());
   const containerRef = useRef<HTMLDivElement>(null);
   const { scrollY } = useScroll();
   const [windowHeight, setWindowHeight] = useState(0);
@@ -14,7 +16,16 @@ export function Hero() {
     setWindowHeight(window.innerHeight);
     const handleResize = () => setWindowHeight(window.innerHeight);
     window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+    
+    // Update business status every minute
+    const interval = setInterval(() => {
+      setBusinessStatus(getBusinessStatus());
+    }, 60000);
+    
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      clearInterval(interval);
+    };
   }, []);
 
   const y = useTransform(scrollY, [0, windowHeight], [0, windowHeight * 0.4]);
@@ -50,7 +61,7 @@ export function Hero() {
             className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm text-primary-foreground/90 text-sm font-medium mb-6"
           >
             <Clock className="h-4 w-4" />
-            <span>Fresh bagels daily from 6am</span>
+            <span>{businessStatus.message}</span>
           </motion.div>
 
           <motion.h1

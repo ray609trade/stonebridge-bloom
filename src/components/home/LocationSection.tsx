@@ -2,8 +2,10 @@ import { motion } from "framer-motion";
 import { MapPin, Phone, Clock, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { getFormattedSchedule } from "@/lib/businessHours";
 
 export function LocationSection() {
+  const schedule = getFormattedSchedule();
   return (
     <section className="py-24 bg-secondary/50">
       <div className="container mx-auto px-4">
@@ -62,8 +64,12 @@ export function LocationSection() {
                 <div>
                   <h4 className="font-semibold text-foreground mb-1">Hours</h4>
                   <p className="text-muted-foreground">
-                    Mon–Fri: 6am – 3pm<br />
-                    Sat–Sun: 7am – 4pm
+                    {schedule.map((s, i) => (
+                      <span key={s.label}>
+                        {s.label}: {s.hours}
+                        {i < schedule.length - 1 && <br />}
+                      </span>
+                    ))}
                   </p>
                 </div>
               </div>

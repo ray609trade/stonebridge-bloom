@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Menu, X, ShoppingBag } from "lucide-react";
+import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/hooks/useCart";
+import stonebridgeLogo from "@/assets/stonebridge-logo.png";
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -43,25 +45,21 @@ export function Header() {
     >
       <div className="container mx-auto px-4">
         <nav className="flex items-center justify-between h-16 md:h-20">
-          {/* Logo */}
+          {/* Animated Logo */}
           <Link to="/" className="flex items-center gap-3">
-            <img
-              src="/assets/logo.png"
+            <motion.img
+              src={stonebridgeLogo}
               alt="Stonebridge Bagels"
-              className="h-10 md:h-12 w-auto"
-              onError={(e) => {
-                e.currentTarget.style.display = "none";
-                e.currentTarget.nextElementSibling?.classList.remove("hidden");
+              className="h-12 md:h-14 lg:h-16 w-auto"
+              initial={{ opacity: 0, scale: 0.8, x: -20 }}
+              animate={{ opacity: 1, scale: 1, x: 0 }}
+              transition={{
+                type: "spring",
+                stiffness: 260,
+                damping: 20,
+                duration: 0.6,
               }}
             />
-            <span
-              className={cn(
-                "hidden font-serif text-xl md:text-2xl font-semibold transition-colors",
-                isScrolled || !isHomePage ? "text-foreground" : "text-primary-foreground"
-              )}
-            >
-              Stonebridge Bagels
-            </span>
           </Link>
 
           {/* Desktop Navigation */}

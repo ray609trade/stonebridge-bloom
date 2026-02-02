@@ -103,7 +103,7 @@ export function Hero() {
             <Button
               size="lg"
               variant="outline"
-              className="border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground px-8"
+              className="border-primary-foreground/50 bg-primary-foreground/10 text-primary-foreground hover:bg-primary-foreground/20 px-8"
               asChild
             >
               <Link to="/wholesale">Wholesale Portal</Link>

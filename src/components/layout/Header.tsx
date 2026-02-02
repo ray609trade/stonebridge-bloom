@@ -50,14 +50,14 @@ export function Header() {
             <motion.img
               src={stonebridgeLogo}
               alt="Stonebridge Bagels"
-              className="h-16 md:h-20 lg:h-24 w-auto"
+              className="h-16 md:h-20 lg:h-24 w-auto cursor-pointer"
               initial={{ opacity: 0, scale: 0.8, x: -20 }}
               animate={{ opacity: 1, scale: 1, x: 0 }}
+              whileHover={{ scale: 1.05 }}
               transition={{
                 type: "spring",
                 stiffness: 260,
                 damping: 20,
-                duration: 0.6,
               }}
             />
           </Link>

@@ -50,7 +50,7 @@ export function Header() {
             <motion.img
               src={stonebridgeLogo}
               alt="Stonebridge Bagels"
-              className="h-12 md:h-14 lg:h-16 w-auto"
+              className="h-16 md:h-20 lg:h-24 w-auto"
               initial={{ opacity: 0, scale: 0.8, x: -20 }}
               animate={{ opacity: 1, scale: 1, x: 0 }}
               transition={{

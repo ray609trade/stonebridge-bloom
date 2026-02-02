@@ -63,17 +63,17 @@ export function Footer() {
               <div className="flex items-start gap-3">
                 <MapPin className="h-4 w-4 mt-0.5 shrink-0 text-accent" />
                 <span className="text-primary-foreground/80">
-                  [Address placeholder]<br />
-                  [City, State ZIP]
+                  1278 Yardville-Allentown Road<br />
+                  Allentown, NJ 08501
                 </span>
               </div>
               <div className="flex items-center gap-3">
                 <Phone className="h-4 w-4 shrink-0 text-accent" />
-                <span className="text-primary-foreground/80">[Phone placeholder]</span>
+                <a href="tel:+16097383222" className="text-primary-foreground/80 hover:text-primary-foreground transition-colors">(609) 738-3222</a>
               </div>
               <div className="flex items-center gap-3">
                 <Mail className="h-4 w-4 shrink-0 text-accent" />
-                <span className="text-primary-foreground/80">[Email placeholder]</span>
+                <a href="mailto:steven@stonebridgebagels.com" className="text-primary-foreground/80 hover:text-primary-foreground transition-colors">steven@stonebridgebagels.com</a>
               </div>
             </div>
           </div>

@@ -51,8 +51,8 @@ export function LocationSection() {
                 <div>
                   <h4 className="font-semibold text-foreground mb-1">Address</h4>
                   <p className="text-muted-foreground">
-                    [Address placeholder]<br />
-                    [City, State ZIP]
+                    1278 Yardville-Allentown Road<br />
+                    Allentown, NJ 08501
                   </p>
                 </div>
               </div>
@@ -80,7 +80,7 @@ export function LocationSection() {
                 </div>
                 <div>
                   <h4 className="font-semibold text-foreground mb-1">Phone</h4>
-                  <p className="text-muted-foreground">[Phone placeholder]</p>
+                  <a href="tel:+16097383222" className="text-muted-foreground hover:text-foreground transition-colors">(609) 738-3222</a>
                 </div>
               </div>
 
@@ -90,7 +90,7 @@ export function LocationSection() {
                 </div>
                 <div>
                   <h4 className="font-semibold text-foreground mb-1">Email</h4>
-                  <p className="text-muted-foreground">[Email placeholder]</p>
+                  <a href="mailto:steven@stonebridgebagels.com" className="text-muted-foreground hover:text-foreground transition-colors">steven@stonebridgebagels.com</a>
                 </div>
               </div>
             </div>
@@ -100,7 +100,7 @@ export function LocationSection() {
                 <Link to="/order">Order Now</Link>
               </Button>
               <Button size="lg" variant="outline" asChild>
-                <a href="tel:+1234567890">Call Us</a>
+                <a href="tel:+16097383222">Call Us</a>
               </Button>
             </div>
           </motion.div>

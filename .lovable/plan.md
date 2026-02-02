@@ -1,51 +1,69 @@
 
-# Dynamic Business Hours Implementation
+
+# Animated Logo Header Implementation
 
 ## Overview
-Create a smart system that knows the current day and time to display accurate opening hours throughout the website. The hero badge will show today's specific hours, and the Location section will display the full weekly schedule with the correct times.
+Add the Stonebridge Bagels & Deli logo to the header with a stunning staggered entrance animation. When the page loads, the logo will animate in with a sequence: bagel appears first, then the text fades in, creating a premium, custom-built feel.
 
-## Your Business Hours
-| Day | Hours |
-|-----|-------|
-| Monday - Friday | 5:30 AM - 3 PM |
-| Saturday - Sunday | 6 AM - 2 PM |
+## What You'll See
 
-## What Will Change
+### Animation Sequence (on page load)
+1. **0.0s** - Header fades in smoothly
+2. **0.2s** - Bagel logo scales up with a bounce effect
+3. **0.4s** - The entire logo settles into place with a subtle glow pulse
 
-### 1. Hero Section Badge
-**Current:** "Fresh bagels daily from 6am"
+### Final Result
+- Logo prominently displayed on the left side of the header
+- Smooth, professional animation that plays once on page load
+- Logo remains static after animation completes (no annoying loops)
+- Works beautifully on both desktop and mobile
 
-**After implementation, it will dynamically show:**
-- On weekdays: "Fresh bagels today from 5:30am"
-- On weekends: "Fresh bagels today from 6am"
-- When currently open: "Open now until 3pm" (or 2pm on weekends)
-- When closed: "Opens tomorrow at 5:30am" (or appropriate next opening)
+## Technical Implementation
 
-### 2. Location Section Hours
-**Current:** Shows incorrect placeholder hours
+### 1. Copy Logo to Project
+Move your uploaded logo from `user-uploads://` to `src/assets/stonebridge-logo.png` so it can be imported properly in the React component.
 
-**After:** Will display your actual hours:
+### 2. Update Header Component (`src/components/layout/Header.tsx`)
+- Import framer-motion's `motion` component
+- Import the logo using ES6 import syntax for optimal bundling
+- Replace the current logo placeholder with animated logo
+- Add staggered animation using framer-motion:
+
+```text
+Animation Configuration:
+┌─────────────────────────────────────────────────┐
+│  Logo Container                                 │
+│  ├── initial: { opacity: 0, scale: 0.8, x: -20 }│
+│  ├── animate: { opacity: 1, scale: 1, x: 0 }   │
+│  └── transition:                               │
+│      ├── duration: 0.6s                        │
+│      ├── ease: "easeOut"                       │
+│      └── type: "spring" (for bounce)           │
+└─────────────────────────────────────────────────┘
 ```
-Mon-Fri: 5:30am - 3pm
-Sat-Sun: 6am - 2pm
-```
 
-## Technical Approach
+### 3. Animation Details
+Using framer-motion (already installed) for smooth, GPU-accelerated animations:
+- **Spring physics** for natural bounce feel
+- **Scale transform** (0.8 → 1) for "pop" effect
+- **Opacity fade** (0 → 1) for smooth reveal
+- **Slight horizontal slide** (-20px → 0) for dynamic entry
 
-### New File: `src/lib/businessHours.ts`
-A utility module containing:
-- **Business hours data** - Your weekly schedule stored in a structured format
-- **`getBusinessStatus()`** - Returns whether you're currently open/closed
-- **`getTodayHours()`** - Returns today's opening and closing times
-- **`getNextOpenTime()`** - Calculates when you next open (for "Opens at..." messaging)
-- **`formatTime()`** - Formats times nicely (e.g., "5:30am" not "05:30")
+### 4. Responsive Sizing
+- Mobile: `h-12` (48px height)
+- Desktop: `h-14 md:h-16` (56-64px height)
+- Auto width to maintain aspect ratio
 
-### Updated Components
-1. **Hero.tsx** - Will use the new utility to show dynamic, day-aware messaging
-2. **LocationSection.tsx** - Will display the correct weekly hours from the centralized data
+## Files Changed
+
+| File | Change |
+|------|--------|
+| `src/assets/stonebridge-logo.png` | New file - your uploaded logo |
+| `src/components/layout/Header.tsx` | Add framer-motion import, animated logo component |
 
 ## Benefits
-- **Single source of truth** - Change hours in one place, updates everywhere
-- **Real-time awareness** - Shows "Open now" or "Closed" based on actual time
-- **User-friendly** - Customers immediately see today's hours without searching
-- **Future-proof** - Easy to add holiday hours or special schedules later
+- **Modern feel** - Smooth animations signal quality and attention to detail
+- **Brand recognition** - Logo is prominently displayed and memorable
+- **Performance** - Framer-motion uses GPU acceleration for 60fps animations
+- **One-time animation** - Plays on load only, doesn't distract returning visitors
+

@@ -1,4 +1,4 @@
-import { X, Printer, Clock, User, Phone, Mail, MapPin } from "lucide-react";
+import { X, Printer, Clock, User, Phone, Mail, MapPin, Truck, ExternalLink } from "lucide-react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -24,6 +24,10 @@ interface Order {
   status: string | null;
   scheduled_time: string | null;
   created_at: string | null;
+  shipstation_order_id?: string | null;
+  tracking_number?: string | null;
+  carrier_code?: string | null;
+  shipped_at?: string | null;
 }
 
 interface OrderDetailModalProps {
@@ -105,6 +109,50 @@ export function OrderDetailModal({ order, onClose }: OrderDetailModalProps) {
               </div>
             )}
           </div>
+
+          {/* Shipping Info - only for wholesale */}
+          {order.order_type === 'wholesale' && (
+            <div className="p-4 rounded-lg bg-primary/5 border border-primary/20 space-y-2">
+              <div className="flex items-center gap-2 font-medium text-primary">
+                <Truck className="h-4 w-4" />
+                Shipping Information
+              </div>
+              {order.tracking_number ? (
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Carrier</span>
+                    <span className="font-medium uppercase">{order.carrier_code || 'N/A'}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Tracking #</span>
+                    <a
+                      href={`https://www.google.com/search?q=${order.carrier_code}+tracking+${order.tracking_number}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-medium text-primary hover:underline flex items-center gap-1"
+                    >
+                      {order.tracking_number}
+                      <ExternalLink className="h-3 w-3" />
+                    </a>
+                  </div>
+                  {order.shipped_at && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-muted-foreground">Shipped</span>
+                      <span className="text-sm">{new Date(order.shipped_at).toLocaleDateString()}</span>
+                    </div>
+                  )}
+                </div>
+              ) : order.shipstation_order_id ? (
+                <p className="text-sm text-muted-foreground">
+                  Order synced to fulfillment — awaiting shipment
+                </p>
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  Not yet synced to fulfillment system
+                </p>
+              )}
+            </div>
+          )}
 
           {/* Items */}
           <div>

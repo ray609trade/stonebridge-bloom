@@ -13,7 +13,9 @@ import {
   Trash2,
   Clock,
   CheckCircle,
-  Eye
+  Eye,
+  Truck,
+  ExternalLink
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -37,6 +39,10 @@ interface Order {
   status: string | null;
   scheduled_time: string | null;
   created_at: string | null;
+  shipstation_order_id: string | null;
+  tracking_number: string | null;
+  carrier_code: string | null;
+  shipped_at: string | null;
 }
 
 const statusColors: Record<string, string> = {
@@ -157,6 +163,39 @@ export default function Admin() {
     },
   });
 
+  const syncToShipStation = useMutation({
+    mutationFn: async (orderId: string) => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("Not authenticated");
+
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/shipstation-sync`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({ orderId }),
+        }
+      );
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to sync to ShipStation');
+      }
+
+      return response.json();
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["admin-orders"] });
+      toast.success(`Order synced to ShipStation: ${data.orderNumber}`);
+    },
+    onError: (error: Error) => {
+      toast.error(error.message);
+    },
+  });
+
   const handleLogout = async () => {
     await supabase.auth.signOut();
     navigate("/admin/login");
@@ -249,6 +288,7 @@ export default function Admin() {
                     <th className="px-4 py-3 text-left text-sm font-medium">Customer</th>
                     <th className="px-4 py-3 text-left text-sm font-medium">Total</th>
                     <th className="px-4 py-3 text-left text-sm font-medium">Status</th>
+                    <th className="px-4 py-3 text-left text-sm font-medium">Shipping</th>
                     <th className="px-4 py-3 text-left text-sm font-medium">Time</th>
                     <th className="px-4 py-3 text-right text-sm font-medium">Actions</th>
                   </tr>
@@ -271,6 +311,42 @@ export default function Admin() {
                         <Badge className={cn("capitalize", statusColors[order.status || "pending"])}>
                           {order.status || "pending"}
                         </Badge>
+                      </td>
+                      <td className="px-4 py-3">
+                        {order.tracking_number ? (
+                          <div className="flex items-center gap-1">
+                            <Badge variant="outline" className="text-xs">
+                              <Truck className="h-3 w-3 mr-1" />
+                              {order.carrier_code?.toUpperCase() || 'SHIPPED'}
+                            </Badge>
+                            <a
+                              href={`https://www.google.com/search?q=${order.carrier_code}+tracking+${order.tracking_number}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-xs text-primary hover:underline flex items-center gap-0.5"
+                            >
+                              {order.tracking_number.slice(0, 12)}...
+                              <ExternalLink className="h-3 w-3" />
+                            </a>
+                          </div>
+                        ) : order.shipstation_order_id ? (
+                          <Badge variant="secondary" className="text-xs">
+                            Awaiting shipment
+                          </Badge>
+                        ) : order.order_type === 'wholesale' ? (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-7 text-xs"
+                            disabled={syncToShipStation.isPending}
+                            onClick={() => syncToShipStation.mutate(order.id)}
+                          >
+                            <Truck className="h-3 w-3 mr-1" />
+                            Sync
+                          </Button>
+                        ) : (
+                          <span className="text-xs text-muted-foreground">—</span>
+                        )}
                       </td>
                       <td className="px-4 py-3 text-sm text-muted-foreground">
                         {order.created_at

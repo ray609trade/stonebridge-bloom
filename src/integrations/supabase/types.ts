@@ -52,6 +52,7 @@ export type Database = {
       }
       orders: {
         Row: {
+          carrier_code: string | null
           created_at: string | null
           customer_email: string
           customer_name: string
@@ -65,15 +66,20 @@ export type Database = {
           payment_status: string | null
           pickup_type: string | null
           scheduled_time: string | null
+          ship_to_address: Json | null
+          shipped_at: string | null
+          shipstation_order_id: string | null
           status: Database["public"]["Enums"]["order_status"] | null
           subtotal: number
           tax: number
           total: number
+          tracking_number: string | null
           updated_at: string | null
           user_id: string | null
           wholesale_account_id: string | null
         }
         Insert: {
+          carrier_code?: string | null
           created_at?: string | null
           customer_email: string
           customer_name: string
@@ -87,15 +93,20 @@ export type Database = {
           payment_status?: string | null
           pickup_type?: string | null
           scheduled_time?: string | null
+          ship_to_address?: Json | null
+          shipped_at?: string | null
+          shipstation_order_id?: string | null
           status?: Database["public"]["Enums"]["order_status"] | null
           subtotal?: number
           tax?: number
           total?: number
+          tracking_number?: string | null
           updated_at?: string | null
           user_id?: string | null
           wholesale_account_id?: string | null
         }
         Update: {
+          carrier_code?: string | null
           created_at?: string | null
           customer_email?: string
           customer_name?: string
@@ -109,10 +120,14 @@ export type Database = {
           payment_status?: string | null
           pickup_type?: string | null
           scheduled_time?: string | null
+          ship_to_address?: Json | null
+          shipped_at?: string | null
+          shipstation_order_id?: string | null
           status?: Database["public"]["Enums"]["order_status"] | null
           subtotal?: number
           tax?: number
           total?: number
+          tracking_number?: string | null
           updated_at?: string | null
           user_id?: string | null
           wholesale_account_id?: string | null
@@ -247,6 +262,7 @@ export type Database = {
           id: string
           notes: string | null
           phone: string | null
+          shipping_address: Json | null
           status: Database["public"]["Enums"]["wholesale_account_status"] | null
           tier: Database["public"]["Enums"]["wholesale_tier"] | null
           updated_at: string | null
@@ -261,6 +277,7 @@ export type Database = {
           id?: string
           notes?: string | null
           phone?: string | null
+          shipping_address?: Json | null
           status?:
             | Database["public"]["Enums"]["wholesale_account_status"]
             | null
@@ -277,6 +294,7 @@ export type Database = {
           id?: string
           notes?: string | null
           phone?: string | null
+          shipping_address?: Json | null
           status?:
             | Database["public"]["Enums"]["wholesale_account_status"]
             | null

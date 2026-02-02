@@ -68,7 +68,7 @@ export default function OrderConfirmation() {
                   <div>
                     <p className="font-medium text-foreground">Questions?</p>
                     <p className="text-sm text-muted-foreground">
-                      Call us at [Phone placeholder] if you have any questions.
+                      Call us at <a href="tel:+16097383222" className="text-accent hover:underline">(609) 738-3222</a> if you have any questions.
                     </p>
                   </div>
                 </div>

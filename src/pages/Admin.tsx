@@ -16,7 +16,8 @@ import {
   Eye,
   Truck,
   ExternalLink,
-  Ship
+  Ship,
+  Home
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -227,6 +228,7 @@ export default function Admin() {
 
         <nav className="space-y-1">
           {[
+            { id: "home", label: "View Site", icon: Home, href: "/" },
             { id: "orders", label: "Orders", icon: ShoppingCart },
             { id: "products", label: "Products", icon: Package },
             { id: "categories", label: "Categories", icon: LayoutDashboard },
@@ -236,7 +238,13 @@ export default function Admin() {
           ].map((item) => (
             <button
               key={item.id}
-              onClick={() => setActiveTab(item.id)}
+              onClick={() => {
+                if (item.href) {
+                  navigate(item.href);
+                } else {
+                  setActiveTab(item.id);
+                }
+              }}
               className={cn(
                 "w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors",
                 activeTab === item.id

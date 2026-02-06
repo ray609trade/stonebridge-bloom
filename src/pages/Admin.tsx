@@ -348,7 +348,11 @@ export default function Admin() {
                 </thead>
                 <tbody>
                   {orders?.map((order) => (
-                    <tr key={order.id} className="border-b border-border last:border-0 hover:bg-secondary/30">
+                    <tr 
+                      key={order.id} 
+                      className="border-b border-border last:border-0 hover:bg-secondary/30 cursor-pointer"
+                      onClick={() => setSelectedOrder(order)}
+                    >
                       <td className="px-4 py-3 font-medium">{order.order_number}</td>
                       <td className="px-4 py-3">
                         <Badge variant="outline" className="capitalize">
@@ -377,6 +381,7 @@ export default function Admin() {
                               target="_blank"
                               rel="noopener noreferrer"
                               className="text-xs text-primary hover:underline flex items-center gap-0.5"
+                              onClick={(e) => e.stopPropagation()}
                             >
                               {order.tracking_number.slice(0, 12)}...
                               <ExternalLink className="h-3 w-3" />
@@ -392,7 +397,10 @@ export default function Admin() {
                             size="sm"
                             className="h-7 text-xs"
                             disabled={syncToShipStation.isPending}
-                            onClick={() => syncToShipStation.mutate(order.id)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              syncToShipStation.mutate(order.id);
+                            }}
                           >
                             <Truck className="h-3 w-3 mr-1" />
                             Sync
@@ -411,7 +419,10 @@ export default function Admin() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            onClick={() => setSelectedOrder(order)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedOrder(order);
+                            }}
                           >
                             <Eye className="h-4 w-4" />
                           </Button>
@@ -419,7 +430,8 @@ export default function Admin() {
                             <Button
                               variant="ghost"
                               size="icon"
-                              onClick={() => {
+                              onClick={(e) => {
+                                e.stopPropagation();
                                 const nextStatus: Record<string, string> = {
                                   pending: "confirmed",
                                   confirmed: "preparing",

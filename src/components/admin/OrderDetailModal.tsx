@@ -36,6 +36,7 @@ interface Order {
 interface OrderDetailModalProps {
   order: Order;
   onClose: () => void;
+  onUpdateStatus?: (orderId: string, status: string) => void;
 }
 
 const statusColors: Record<string, string> = {
@@ -47,13 +48,26 @@ const statusColors: Record<string, string> = {
   cancelled: "bg-red-100 text-red-800",
 };
 
-export function OrderDetailModal({ order, onClose }: OrderDetailModalProps) {
+export function OrderDetailModal({ order, onClose, onUpdateStatus }: OrderDetailModalProps) {
   const items = Array.isArray(order.items) ? order.items : [];
   const [isSendingText, setIsSendingText] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
 
   const handlePrint = () => {
     window.print();
   };
+
+  const handleStatusUpdate = async (status: string) => {
+    if (!onUpdateStatus || isUpdating) return;
+    setIsUpdating(true);
+    try {
+      await onUpdateStatus(order.id, status);
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const statusWorkflow = ["pending", "confirmed", "preparing", "ready", "completed"];
 
   const handleSendText = async () => {
     if (!order.customer_phone) {
@@ -243,6 +257,27 @@ export function OrderDetailModal({ order, onClose }: OrderDetailModalProps) {
               <span>${order.total.toFixed(2)}</span>
             </div>
           </div>
+
+          {/* Status Update Controls */}
+          {onUpdateStatus && order.status !== "cancelled" && (
+            <div className="pt-4 border-t border-border space-y-3 print:hidden">
+              <h4 className="font-medium">Update Status</h4>
+              <div className="flex flex-wrap gap-2">
+                {statusWorkflow.map((status) => (
+                  <Button
+                    key={status}
+                    variant={order.status === status ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => handleStatusUpdate(status)}
+                    disabled={order.status === status || isUpdating}
+                    className="capitalize"
+                  >
+                    {status}
+                  </Button>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </motion.div>
     </div>

@@ -1,56 +1,77 @@
 
-# Wholesale Order System Implementation Plan
+# Add Real-Time Updates to Leads Tab
 
-## ✅ COMPLETED
+## Overview
 
-The wholesale ordering system has been fully implemented.
+Add Supabase Realtime subscription to the Leads tab so new wholesale applications appear automatically without requiring a page refresh.
 
-## What Was Built
+## Implementation Steps
 
-### Phase 1: Wholesale Authentication ✅
-- **WholesaleLogin.tsx** (`/wholesale/login`) - Login/signup for wholesale customers
-- Links wholesale accounts to auth users via `user_id` column
-- Validates approved status before allowing access
+### Step 1: Enable Realtime on the Table
 
-### Phase 2: Wholesale Menu & Cart ✅
-- **WholesaleMenu.tsx** - Product listing with wholesale pricing
-- **useWholesaleCart.tsx** - Separate cart context for wholesale orders
-- Enforces minimum order quantities
-- Uses wholesale pricing from database
+Create a database migration to add `wholesale_accounts` to the Supabase realtime publication:
 
-### Phase 3: Wholesale Checkout ✅
-- **WholesaleCheckout.tsx** (`/wholesale/checkout`) - Checkout for wholesale orders
-- Pre-populates from logged-in wholesale account
-- Full shipping address form
-- Payment method: "Pay by Invoice"
-- Orders saved with `order_type: "wholesale"`
+```text
+ALTER PUBLICATION supabase_realtime ADD TABLE public.wholesale_accounts;
+```
 
-### Phase 4: Admin Integration ✅
-- Orders automatically appear in Admin with "wholesale" badge
-- Shipping tab already filtered for wholesale orders
+### Step 2: Add Realtime Subscription in LeadsTab
 
-## New Routes
+Update `src/components/admin/shipping/LeadsTab.tsx` to:
 
-| Route | Component | Description |
-|-------|-----------|-------------|
-| `/wholesale/login` | WholesaleLogin | Login/signup for wholesale customers |
-| `/wholesale/portal` | WholesalePortal | Dashboard with ordering and history |
-| `/wholesale/checkout` | WholesaleCheckout | Checkout for wholesale orders |
+1. Import `useEffect` from React
+2. Add a `useEffect` hook that:
+   - Creates a Supabase realtime channel subscribed to `wholesale_accounts` table changes
+   - Listens for INSERT, UPDATE, and DELETE events
+   - Calls `queryClient.invalidateQueries` when any change occurs
+   - Cleans up the subscription on unmount
+
+### Code Changes
+
+**File: `src/components/admin/shipping/LeadsTab.tsx`**
+
+Add import:
+```text
+import { useState, useEffect } from "react";
+```
+
+Add `useEffect` hook after the existing query hooks:
+```text
+// Real-time subscription for wholesale accounts
+useEffect(() => {
+  const channel = supabase
+    .channel('wholesale-accounts-changes')
+    .on(
+      'postgres_changes',
+      {
+        event: '*',
+        schema: 'public',
+        table: 'wholesale_accounts'
+      },
+      (payload) => {
+        console.log('Wholesale account change:', payload);
+        queryClient.invalidateQueries({ queryKey: ["wholesale-accounts-shipping"] });
+      }
+    )
+    .subscribe();
+
+  return () => {
+    supabase.removeChannel(channel);
+  };
+}, [queryClient]);
+```
 
 ## How It Works
 
-1. Business applies at `/wholesale` (existing)
-2. Admin approves account in Shipping > Leads tab
-3. Customer creates auth account at `/wholesale/login`
-4. Customer logs in and places orders at `/wholesale/portal`
-5. Orders appear in Admin with `order_type: "wholesale"`
-6. ShipStation sync handles fulfillment
+1. When the LeadsTab component mounts, it subscribes to the `wholesale_accounts` table changes
+2. When a new wholesale application is submitted (INSERT), the subscription triggers
+3. The React Query cache is invalidated, causing an automatic refetch
+4. The new lead appears in the table without manual refresh
+5. Same applies for status updates (UPDATE) and deletions (DELETE)
 
-## Files Created
+## Testing
 
-- `src/pages/WholesaleLogin.tsx`
-- `src/pages/WholesalePortal.tsx`
-- `src/pages/WholesaleCheckout.tsx`
-- `src/hooks/useWholesaleCart.tsx`
-- `src/components/wholesale/WholesaleMenu.tsx`
-- `src/components/wholesale/WholesaleCartDrawer.tsx`
+After implementation:
+1. Open the Admin → Shipping → Leads tab
+2. In a separate browser/tab, submit a new wholesale application at `/wholesale`
+3. The new application should appear automatically in the Leads table within seconds

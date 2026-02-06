@@ -29,24 +29,35 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 const CART_STORAGE_KEY = "stonebridge-cart";
 
 export function CartProvider({ children }: { children: ReactNode }) {
-  const [items, setItems] = useState<CartItem[]>(() => {
+  const [items, setItems] = useState<CartItem[]>([]);
+  const [isOpen, setIsOpen] = useState(false);
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  // Load cart from localStorage on mount (client-side only)
+  useEffect(() => {
     try {
       const saved = localStorage.getItem(CART_STORAGE_KEY);
-      return saved ? JSON.parse(saved) : [];
-    } catch {
-      return [];
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          setItems(parsed);
+        }
+      }
+    } catch (error) {
+      console.error("Failed to load cart from localStorage:", error);
     }
-  });
-  const [isOpen, setIsOpen] = useState(false);
+    setIsHydrated(true);
+  }, []);
 
-  // Persist cart to localStorage whenever items change
+  // Persist cart to localStorage whenever items change (after hydration)
   useEffect(() => {
+    if (!isHydrated) return;
     try {
       localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
     } catch (error) {
       console.error("Failed to save cart to localStorage:", error);
     }
-  }, [items]);
+  }, [items, isHydrated]);
 
   const itemCount = items.reduce((acc, item) => acc + item.quantity, 0);
   const subtotal = items.reduce((acc, item) => acc + item.price * item.quantity, 0);

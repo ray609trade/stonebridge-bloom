@@ -1,6 +1,7 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Building2, Truck, Clock, DollarSign, CheckCircle } from "lucide-react";
+import { Building2, Truck, Clock, DollarSign, CheckCircle, LogIn } from "lucide-react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
@@ -136,10 +137,16 @@ export default function Wholesale() {
               <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl font-semibold text-primary-foreground mb-4 md:mb-6">
                 Wholesale Partnership
               </h1>
-              <p className="text-lg md:text-xl text-primary-foreground/80 leading-relaxed">
+              <p className="text-lg md:text-xl text-primary-foreground/80 leading-relaxed mb-6">
                 Partner with Stonebridge to bring fresh, handcrafted bagels to your cafe, 
                 restaurant, or business. Quality products with reliable service.
               </p>
+              <Button asChild variant="secondary" size="lg" className="font-semibold">
+                <Link to="/wholesale/login">
+                  <LogIn className="mr-2 h-5 w-5" />
+                  Existing Partner? Login Here
+                </Link>
+              </Button>
             </motion.div>
           </div>
         </section>

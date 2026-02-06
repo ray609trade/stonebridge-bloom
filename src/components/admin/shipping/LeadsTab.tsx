@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Search, Eye, CheckCircle, XCircle, Mail, Phone, MapPin, Building2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -53,6 +53,29 @@ export function LeadsTab() {
       return data as WholesaleAccount[];
     },
   });
+
+  // Real-time subscription for wholesale accounts
+  useEffect(() => {
+    const channel = supabase
+      .channel('wholesale-accounts-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'wholesale_accounts'
+        },
+        (payload) => {
+          console.log('Wholesale account change:', payload);
+          queryClient.invalidateQueries({ queryKey: ["wholesale-accounts-shipping"] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient]);
 
   const updateStatus = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: string }) => {

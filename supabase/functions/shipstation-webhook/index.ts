@@ -48,7 +48,7 @@ Deno.serve(async (req) => {
     // Fetch the shipment details from ShipStation
     const shipmentResponse = await fetch(payload.resource_url, {
       headers: {
-        'Authorization': `Basic ${shipstationApiKey}`,
+        'Authorization': `Basic ${btoa(shipstationApiKey)}`,
       },
     });
 
@@ -64,7 +64,22 @@ Deno.serve(async (req) => {
     const shipmentData = await shipmentResponse.json();
     console.log('Shipment data:', JSON.stringify(shipmentData));
 
-    // Handle different webhook types
+    // Handle ORDER_NOTIFY (Sales Orders Imported) events
+    if (payload.resource_type === 'ORDER_NOTIFY') {
+      const orders = shipmentData.orders || [shipmentData];
+      console.log(`Received ${orders.length} imported orders`);
+      
+      return new Response(
+        JSON.stringify({ 
+          success: true,
+          type: 'ORDER_NOTIFY',
+          ordersReceived: orders.length
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Handle SHIP_NOTIFY (Shipment Shipped) events
     const shipments: ShipmentInfo[] = shipmentData.shipments || [shipmentData];
     
     const supabase = createClient(

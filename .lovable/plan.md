@@ -1,106 +1,85 @@
 
+# Fix: Clickable Order Rows in Admin Panel
 
-# Order Ready Text Notifications
+## Problem
+You cannot click on order rows to view details - you can only click the small Eye icon in the Actions column. This makes it difficult to quickly access orders.
 
-## Overview
-Send customers a text message (SMS) when their order is marked as "Ready" for pickup. Email notifications are excluded - text only.
-
----
-
-## What You'll Get
-
-- **Instant Text Alerts**: Customers receive an SMS the moment their order is ready
-- **Simple Admin Flow**: Notification sends automatically when status changes to "Ready"
-- **Manual Resend**: Option to resend notification if needed
+## Solution
+Make each order row clickable so tapping anywhere on the row opens the order details modal.
 
 ---
 
-## How It Will Work
+## Changes
 
-1. Staff updates order status to "Ready" in the admin panel
-2. Customer receives a text message:
-   > "Your Stonebridge Bagels order #SB-260206-0127 is ready for pickup! 🥯"
-3. Admin sees confirmation that the text was sent
+### 1. Make Order Rows Clickable
+**File:** `src/pages/Admin.tsx`
 
----
+Add click handling to each table row:
+- Add `onClick` handler to open the order detail modal when clicking anywhere on the row
+- Add `cursor-pointer` styling so it's clear rows are clickable  
+- Add `e.stopPropagation()` to buttons inside rows so they don't trigger the row click
 
-## Implementation Steps
+**Before:**
+```tsx
+<tr key={order.id} className="border-b border-border last:border-0 hover:bg-secondary/30">
+```
 
-### Step 1: Set Up Twilio Account
-Twilio is the industry standard for business SMS. You'll need:
-- Account SID (your account identifier)
-- Auth Token (your password)
-- A phone number to send from
+**After:**
+```tsx
+<tr 
+  key={order.id} 
+  className="border-b border-border last:border-0 hover:bg-secondary/30 cursor-pointer"
+  onClick={() => setSelectedOrder(order)}
+>
+```
 
-I'll guide you through getting these from twilio.com.
+Action buttons will stop event propagation:
+```tsx
+<Button
+  variant="ghost"
+  size="icon"
+  onClick={(e) => {
+    e.stopPropagation();
+    setSelectedOrder(order);
+  }}
+>
+```
 
-### Step 2: Create Notification Edge Function
-A backend function that:
-- Receives order ID when status changes
-- Looks up customer phone number
-- Sends SMS via Twilio API
-- Returns success/failure
+### 2. Fix Badge Console Warning
+**File:** `src/components/ui/badge.tsx`
 
-### Step 3: Update Admin Panel
-When order status changes to "Ready":
-- Automatically call the notification function
-- Show "Text sent" confirmation
-- Handle cases where customer has no phone number
+Wrap the Badge component with `React.forwardRef()` to properly handle refs and eliminate the console warning.
 
----
+**Before:**
+```tsx
+function Badge({ className, variant, ...props }: BadgeProps) {
+  return <div className={cn(badgeVariants({ variant }), className)} {...props} />;
+}
+```
 
-## Technical Details
-
-### New Files
-
-| File | Purpose |
-|------|---------|
-| `supabase/functions/send-order-notification/index.ts` | SMS sending logic |
-
-### Secrets Required
-
-| Secret | Purpose |
-|--------|---------|
-| `TWILIO_ACCOUNT_SID` | Twilio account identifier |
-| `TWILIO_AUTH_TOKEN` | Twilio authentication |
-| `TWILIO_PHONE_NUMBER` | The "from" phone number (e.g., +16095551234) |
-
-### Files to Modify
-
-| File | Changes |
-|------|---------|
-| `src/pages/Admin.tsx` | Trigger notification on status change to "Ready" |
-| `src/components/admin/OrderDetailModal.tsx` | Add notification status indicator |
-
-### SMS Message
-
-```text
-Your Stonebridge Bagels order #{order_number} is ready for pickup! 🥯
+**After:**
+```tsx
+const Badge = React.forwardRef<HTMLDivElement, BadgeProps>(
+  ({ className, variant, ...props }, ref) => {
+    return <div ref={ref} className={cn(badgeVariants({ variant }), className)} {...props} />;
+  }
+);
+Badge.displayName = "Badge";
 ```
 
 ---
 
-## Setup Steps
+## Files to Modify
 
-1. **Create Twilio Account**:
-   - Go to twilio.com and sign up (free trial available)
-   - From the Console Dashboard, copy your Account SID and Auth Token
-   - Buy a phone number ($1/month) or use trial number for testing
-
-2. **Add Credentials**:
-   - I'll request each credential securely when we implement
-
-3. **Test**:
-   - Place a test order with your phone number
-   - Mark it as "Ready"
-   - Verify you receive the text
+| File | Change |
+|------|--------|
+| `src/pages/Admin.tsx` | Add row click handler on line 351, add stopPropagation to action buttons |
+| `src/components/ui/badge.tsx` | Wrap with forwardRef to fix warning |
 
 ---
 
-## Notes
-
-- SMS costs ~$0.0079 per message with Twilio
-- Trial accounts can only text verified phone numbers (upgrade for production)
-- Orders without a phone number will skip notification (no error shown)
-- Phone numbers in database should include country code (e.g., +1 for US)
-
+## Result
+After these changes:
+- Click anywhere on an order row to open the order details modal
+- Action buttons (Eye, CheckCircle, Sync) still work independently without opening modal twice
+- Console warning about refs will be resolved

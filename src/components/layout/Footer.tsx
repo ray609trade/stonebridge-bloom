@@ -1,7 +1,9 @@
 import { Link } from "react-router-dom";
 import { MapPin, Phone, Mail, Clock, Instagram, Facebook, Twitter } from "lucide-react";
+import { getFormattedSchedule } from "@/lib/businessHours";
 
 export function Footer() {
+  const schedule = getFormattedSchedule();
   return (
     <footer className="bg-primary text-primary-foreground">
       <div className="container mx-auto px-4 py-16">
@@ -85,8 +87,9 @@ export function Footer() {
               <div className="flex items-start gap-3">
                 <Clock className="h-4 w-4 mt-0.5 shrink-0 text-accent" />
                 <div className="text-primary-foreground/80">
-                  <p>Mon–Fri: 6am – 3pm</p>
-                  <p>Sat–Sun: 7am – 4pm</p>
+                  {schedule.map((s) => (
+                    <p key={s.label}>{s.label}: {s.hours}</p>
+                  ))}
                 </div>
               </div>
             </div>

@@ -11,18 +11,19 @@ export function CartDrawer() {
   const { items, isOpen, closeCart, subtotal, updateQuantity, removeItem } = useCart();
   const isMobile = useIsMobile();
 
-  if (!isOpen) return null;
-
   return (
-    <AnimatePresence>
+    <AnimatePresence mode="wait">
       {isOpen && (
-        <>
+        <motion.div
+          key="cart-drawer-wrapper"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-50"
+        >
           {/* Backdrop */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-foreground/20 backdrop-blur-sm z-50"
+          <div
+            className="absolute inset-0 bg-foreground/20 backdrop-blur-sm"
             onClick={closeCart}
           />
 
@@ -164,7 +165,7 @@ export function CartDrawer() {
               </>
             )}
           </motion.div>
-        </>
+        </motion.div>
       )}
     </AnimatePresence>
   );

@@ -68,7 +68,7 @@ export const checkoutFormSchema = z.object({
     .trim()
     .regex(phoneRegex, "Please enter a valid phone number"),
   pickupType: z.enum(["pickup", "dine_in"]),
-  pickupTime: z.string().optional(),
+  pickupTime: z.string().min(1, "Please select a pickup time"),
   paymentMethod: z.enum(["pay_at_pickup", "card"]),
   notes: z
     .string()

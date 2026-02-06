@@ -85,13 +85,16 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
   const image = product.images?.[0] || "/placeholder.svg";
 
   return (
-    <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center">
+    <AnimatePresence mode="wait">
+      <motion.div
+        key="product-modal-wrapper"
+        className="fixed inset-0 z-50 flex items-end md:items-center justify-center"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+      >
         {/* Backdrop */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
+        <div
           className="absolute inset-0 bg-foreground/20 backdrop-blur-sm"
           onClick={onClose}
         />
@@ -294,7 +297,7 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
             </div>
           </div>
         </motion.div>
-      </div>
+      </motion.div>
     </AnimatePresence>
   );
 }

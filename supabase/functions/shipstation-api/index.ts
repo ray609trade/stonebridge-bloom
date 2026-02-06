@@ -14,12 +14,13 @@ async function makeShipStationRequest(
   endpoint: string,
   method: string = 'GET',
   body?: Record<string, unknown>
-): Promise<Response> {
+): Promise<Record<string, unknown>> {
   const apiKey = Deno.env.get('SHIPSTATION_API_KEY');
   if (!apiKey) {
     throw new Error('SHIPSTATION_API_KEY not configured');
   }
 
+  // ShipStation expects API_KEY:API_SECRET format for Basic auth
   const headers: Record<string, string> = {
     'Authorization': `Basic ${btoa(apiKey)}`,
     'Content-Type': 'application/json',
@@ -35,7 +36,33 @@ async function makeShipStationRequest(
   }
 
   const response = await fetch(`${SHIPSTATION_BASE_URL}${endpoint}`, options);
-  return response;
+  
+  // Check Content-Type before attempting to parse as JSON
+  const contentType = response.headers.get('content-type');
+  const responseText = await response.text();
+  
+  if (!response.ok) {
+    console.error(`ShipStation API error - Status: ${response.status}, Body: ${responseText.substring(0, 500)}`);
+    throw new Error(`ShipStation API error: ${response.status} - ${responseText.substring(0, 200)}`);
+  }
+  
+  if (!contentType?.includes('application/json')) {
+    console.error(`Expected JSON but got: ${contentType}`);
+    console.error(`Response preview: ${responseText.substring(0, 200)}`);
+    
+    // Check for common HTML patterns
+    if (responseText.trim().startsWith('<!') || responseText.includes('<html')) {
+      throw new Error(
+        `ShipStation returned HTML instead of JSON. This usually indicates: ` +
+        `auth issues, server error, or rate limiting. Status: ${response.status}`
+      );
+    }
+    
+    throw new Error(`Unexpected response format: ${contentType}`);
+  }
+  
+  // Parse the JSON from the text we already read
+  return JSON.parse(responseText);
 }
 
 Deno.serve(async (req) => {
@@ -51,38 +78,33 @@ Deno.serve(async (req) => {
     switch (action) {
       // Carriers
       case 'listCarriers': {
-        const response = await makeShipStationRequest('/carriers');
-        result = await response.json();
+        result = await makeShipStationRequest('/carriers');
         break;
       }
 
       case 'getCarrierServices': {
         const carrierId = data?.carrierId as string;
         if (!carrierId) throw new Error('carrierId required');
-        const response = await makeShipStationRequest(`/carriers/listservices?carrierCode=${carrierId}`);
-        result = await response.json();
+        result = await makeShipStationRequest(`/carriers/listservices?carrierCode=${carrierId}`);
         break;
       }
 
       // Rates
       case 'getRates': {
-        const response = await makeShipStationRequest('/shipments/getrates', 'POST', data as Record<string, unknown>);
-        result = await response.json();
+        result = await makeShipStationRequest('/shipments/getrates', 'POST', data as Record<string, unknown>);
         break;
       }
 
       // Labels
       case 'createLabel': {
-        const response = await makeShipStationRequest('/shipments/createlabel', 'POST', data as Record<string, unknown>);
-        result = await response.json();
+        result = await makeShipStationRequest('/shipments/createlabel', 'POST', data as Record<string, unknown>);
         break;
       }
 
       case 'voidLabel': {
         const shipmentId = data?.shipmentId as string;
         if (!shipmentId) throw new Error('shipmentId required');
-        const response = await makeShipStationRequest('/shipments/voidlabel', 'POST', { shipmentId });
-        result = await response.json();
+        result = await makeShipStationRequest('/shipments/voidlabel', 'POST', { shipmentId });
         break;
       }
 
@@ -95,16 +117,14 @@ Deno.serve(async (req) => {
         if (data?.pageSize) params.append('pageSize', String(data.pageSize || 100));
         
         const queryString = params.toString() ? `?${params.toString()}` : '';
-        const response = await makeShipStationRequest(`/shipments${queryString}`);
-        result = await response.json();
+        result = await makeShipStationRequest(`/shipments${queryString}`);
         break;
       }
 
       case 'getShipment': {
         const shipmentId = data?.shipmentId as string;
         if (!shipmentId) throw new Error('shipmentId required');
-        const response = await makeShipStationRequest(`/shipments/${shipmentId}`);
-        result = await response.json();
+        result = await makeShipStationRequest(`/shipments/${shipmentId}`);
         break;
       }
 
@@ -116,22 +136,19 @@ Deno.serve(async (req) => {
         if (data?.pageSize) params.append('pageSize', String(data.pageSize || 100));
         
         const queryString = params.toString() ? `?${params.toString()}` : '';
-        const response = await makeShipStationRequest(`/orders${queryString}`);
-        result = await response.json();
+        result = await makeShipStationRequest(`/orders${queryString}`);
         break;
       }
 
       // Warehouses (ship from locations)
       case 'listWarehouses': {
-        const response = await makeShipStationRequest('/warehouses');
-        result = await response.json();
+        result = await makeShipStationRequest('/warehouses');
         break;
       }
 
       // Stores
       case 'listStores': {
-        const response = await makeShipStationRequest('/stores');
-        result = await response.json();
+        result = await makeShipStationRequest('/stores');
         break;
       }
 
@@ -142,8 +159,7 @@ Deno.serve(async (req) => {
         if (data?.pageSize) params.append('pageSize', String(data.pageSize || 100));
         
         const queryString = params.toString() ? `?${params.toString()}` : '';
-        const response = await makeShipStationRequest(`/products${queryString}`);
-        result = await response.json();
+        result = await makeShipStationRequest(`/products${queryString}`);
         break;
       }
 
@@ -156,8 +172,7 @@ Deno.serve(async (req) => {
         if (data?.pageSize) params.append('pageSize', String(data.pageSize || 100));
         
         const queryString = params.toString() ? `?${params.toString()}` : '';
-        const response = await makeShipStationRequest(`/fulfillments${queryString}`);
-        result = await response.json();
+        result = await makeShipStationRequest(`/fulfillments${queryString}`);
         break;
       }
 
@@ -168,8 +183,7 @@ Deno.serve(async (req) => {
         if (data?.pageSize) params.append('pageSize', String(data.pageSize || 100));
         
         const queryString = params.toString() ? `?${params.toString()}` : '';
-        const response = await makeShipStationRequest(`/customers${queryString}`);
-        result = await response.json();
+        result = await makeShipStationRequest(`/customers${queryString}`);
         break;
       }
 

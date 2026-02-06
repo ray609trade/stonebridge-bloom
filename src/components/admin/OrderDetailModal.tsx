@@ -1,8 +1,11 @@
-import { X, Printer, Clock, User, Phone, Mail, MapPin, Truck, ExternalLink } from "lucide-react";
+import { useState } from "react";
+import { X, Printer, Clock, User, Phone, Mail, MapPin, Truck, ExternalLink, MessageSquare } from "lucide-react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface OrderItem {
   productId: string;
@@ -46,9 +49,53 @@ const statusColors: Record<string, string> = {
 
 export function OrderDetailModal({ order, onClose }: OrderDetailModalProps) {
   const items = Array.isArray(order.items) ? order.items : [];
+  const [isSendingText, setIsSendingText] = useState(false);
 
   const handlePrint = () => {
     window.print();
+  };
+
+  const handleSendText = async () => {
+    if (!order.customer_phone) {
+      toast.error("Customer has no phone number on file");
+      return;
+    }
+
+    setIsSendingText(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast.error("Not authenticated");
+        return;
+      }
+
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-order-notification`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({ orderId: order.id }),
+        }
+      );
+
+      const result = await response.json();
+
+      if (result.success) {
+        toast.success("Text message sent! 📱");
+      } else if (result.reason === 'no_phone') {
+        toast.error("Customer has no phone number on file");
+      } else {
+        toast.error(result.message || "Failed to send text");
+      }
+    } catch (error) {
+      console.error('Failed to send text:', error);
+      toast.error("Failed to send text notification");
+    } finally {
+      setIsSendingText(false);
+    }
   };
 
   return (
@@ -64,6 +111,17 @@ export function OrderDetailModal({ order, onClose }: OrderDetailModalProps) {
             Order {order.order_number}
           </h2>
           <div className="flex items-center gap-2">
+            {order.customer_phone && (
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={handleSendText}
+                disabled={isSendingText}
+              >
+                <MessageSquare className="mr-1 h-4 w-4" />
+                {isSendingText ? "Sending..." : "Send Text"}
+              </Button>
+            )}
             <Button variant="outline" size="sm" onClick={handlePrint}>
               <Printer className="mr-1 h-4 w-4" />
               Print

@@ -204,6 +204,7 @@ export default function Order() {
       {/* Product Detail Modal */}
       {selectedProduct && (
         <ProductModal
+          key={selectedProduct.id}
           product={selectedProduct}
           onClose={() => setSelectedProduct(null)}
         />

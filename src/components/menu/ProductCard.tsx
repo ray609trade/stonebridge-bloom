@@ -85,11 +85,11 @@ export function ProductCard({ product, className, onSelect }: ProductCardProps) 
           className={cn(
             "absolute bottom-3 right-3 rounded-full shadow-lg transition-all duration-300",
             "bg-accent hover:bg-amber-dark text-accent-foreground",
-            "h-12 w-12 md:h-10 md:w-10", // Larger on mobile
+            "h-12 w-12 md:h-10 md:w-10",
             "active:scale-90",
-            isMobile 
-              ? "opacity-100" 
-              : isHovered ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2",
+            // Always visible on all devices, slightly larger on hover (desktop)
+            "opacity-100",
+            !isMobile && isHovered && "scale-110",
             isAdding && "scale-110"
           )}
           onClick={handleQuickAdd}

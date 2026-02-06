@@ -1,84 +1,114 @@
 
+# Fix: Ordering Works on Mobile but Not on Web
 
-# Fix: Ordering Process Issues
+## Root Cause Analysis
 
-## Problems Identified
-Based on investigation and user feedback, there are three main issues with the ordering process:
+After investigating the codebase, I've identified why ordering works on mobile but not on web/desktop:
 
-1. **Checkout form errors** - Validation may fail silently or pickup time isn't being required properly
-2. **Cart not showing items** - Cart state can be lost on refresh since it's only stored in React state
-3. **Can't add items to cart** - Console warnings about refs may cause React rendering issues with the ProductModal
+### Problem 1: useIsMobile Hook Hydration Race Condition
+The `useIsMobile` hook initializes with `undefined` and only gets the correct value after mount. This causes:
+- Initial render: `!!undefined = false` (treats everything as desktop)
+- After mount: Correct value is set
+- This creates a flash where mobile UI shows desktop behavior or vice versa
 
----
+```typescript
+// Current - causes hydration issues
+const [isMobile, setIsMobile] = useState<boolean | undefined>(undefined);
+// ...
+return !!isMobile; // undefined becomes false on first render
+```
 
-## Root Causes
+### Problem 2: Desktop Quick-Add Button Visibility
+On desktop, the quick-add "+" button in `ProductCard` is **hidden by default** and only shows on hover:
 
-### 1. AnimatePresence Ref Warnings
-The console shows: "Function components cannot be given refs. Check the render method of `ProductModal`"
+```typescript
+isMobile 
+  ? "opacity-100"  // Mobile: always visible
+  : isHovered ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2" // Desktop: only on hover
+```
 
-This is caused by `AnimatePresence` wrapping content without a keyed `motion.div` child. While a warning, it can cause rendering instability.
+If the hover state doesn't register (due to touch events, certain browsers, or the hydration issue), the button stays invisible.
 
-### 2. Cart Not Persisting
-The cart uses `useState` in the CartProvider - data is lost on page refresh or navigation errors. Users expect cart items to persist.
-
-### 3. Pickup Time Validation Gap
-The checkout form doesn't require a pickup time selection, but orders may fail without one selected.
+### Problem 3: ProductModal Not Opening on Click
+When users click the product card on desktop (not the + button), it should open `ProductModal`. However:
+- The card click triggers `onSelect()` which sets `selectedProduct`
+- The `ProductModal` component uses `useIsMobile()` internally
+- If there's a render timing issue, the modal may not display correctly
 
 ---
 
 ## Solution
 
-### Fix 1: Update ProductModal with proper AnimatePresence usage
-**File:** `src/components/menu/ProductModal.tsx`
+### Fix 1: Improve useIsMobile Hook Initialization
+Change the hook to initialize with a safe default that matches SSR expectations and prevents the flash:
 
-Add a unique `key` prop to the child of `AnimatePresence` and ensure proper exit handling:
+**File:** `src/hooks/use-mobile.tsx`
 
 ```typescript
-return (
-  <AnimatePresence mode="wait">
-    {/* Wrap in a keyed fragment or motion element */}
-    <motion.div key="product-modal" ...>
+import * as React from "react";
+
+const MOBILE_BREAKPOINT = 768;
+
+export function useIsMobile() {
+  // Initialize with null to indicate "not yet determined"
+  // This prevents the flash of wrong content
+  const [isMobile, setIsMobile] = React.useState<boolean>(() => {
+    // Check if window is available (client-side)
+    if (typeof window !== 'undefined') {
+      return window.innerWidth < MOBILE_BREAKPOINT;
+    }
+    return false; // Default for SSR
+  });
+
+  React.useEffect(() => {
+    const mql = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`);
+    const onChange = () => {
+      setIsMobile(window.innerWidth < MOBILE_BREAKPOINT);
+    };
+    mql.addEventListener("change", onChange);
+    // Set initial value on mount to ensure accuracy
+    setIsMobile(window.innerWidth < MOBILE_BREAKPOINT);
+    return () => mql.removeEventListener("change", onChange);
+  }, []);
+
+  return isMobile;
+}
 ```
 
-### Fix 2: Update CartDrawer AnimatePresence
-**File:** `src/components/cart/CartDrawer.tsx`
+### Fix 2: Make Desktop Quick-Add Button More Accessible
+Ensure the + button is always visible on desktop, not just on hover. This improves usability and avoids relying on hover states that may not work correctly.
 
-Same pattern - ensure AnimatePresence children have unique keys.
+**File:** `src/components/menu/ProductCard.tsx`
 
-### Fix 3: Persist Cart to localStorage
-**File:** `src/hooks/useCart.tsx`
-
-Add localStorage persistence so cart survives page refreshes:
-- Load cart from localStorage on mount
-- Save cart to localStorage on every change
-- Clear localStorage when cart is cleared
-
+Change the button visibility logic:
 ```typescript
-// Initialize from localStorage
-const [items, setItems] = useState<CartItem[]>(() => {
-  const saved = localStorage.getItem('cart');
-  return saved ? JSON.parse(saved) : [];
-});
-
-// Sync to localStorage
-useEffect(() => {
-  localStorage.setItem('cart', JSON.stringify(items));
-}, [items]);
+// Instead of hiding on desktop, always show but with subtle styling
+className={cn(
+  "absolute bottom-3 right-3 rounded-full shadow-lg transition-all duration-300",
+  "bg-accent hover:bg-amber-dark text-accent-foreground",
+  "h-12 w-12 md:h-10 md:w-10",
+  "active:scale-90",
+  // Always visible, but slightly more prominent on hover (desktop only)
+  "opacity-100",
+  !isMobile && isHovered && "scale-110",
+  isAdding && "scale-110"
+)}
 ```
 
-### Fix 4: Require Pickup Time in Checkout
-**File:** `src/lib/validation.ts`
+### Fix 3: Add Defensive Check for ProductModal Rendering
+Ensure ProductModal always renders correctly regardless of timing:
 
-Change pickupTime from optional to required:
+**File:** `src/pages/Order.tsx`
+
+Add a key to force re-mount when product changes:
 ```typescript
-pickupTime: z.string().min(1, "Please select a pickup time"),
-```
-
-**File:** `src/pages/Checkout.tsx`
-
-Initialize pickupTime with the first available slot to avoid validation issues:
-```typescript
-pickupTime: "ASAP (15-20 min)", // Default value
+{selectedProduct && (
+  <ProductModal
+    key={selectedProduct.id}  // Force fresh mount
+    product={selectedProduct}
+    onClose={() => setSelectedProduct(null)}
+  />
+)}
 ```
 
 ---
@@ -87,51 +117,29 @@ pickupTime: "ASAP (15-20 min)", // Default value
 
 | File | Change |
 |------|--------|
-| `src/components/menu/ProductModal.tsx` | Fix AnimatePresence child keys |
-| `src/components/cart/CartDrawer.tsx` | Fix AnimatePresence child keys |
-| `src/hooks/useCart.tsx` | Add localStorage persistence |
-| `src/lib/validation.ts` | Make pickupTime required |
-| `src/pages/Checkout.tsx` | Set default pickup time value |
+| `src/hooks/use-mobile.tsx` | Initialize with immediate window check to prevent hydration mismatch |
+| `src/components/menu/ProductCard.tsx` | Make quick-add button always visible on all devices |
+| `src/pages/Order.tsx` | Add key prop to ProductModal for reliable rendering |
 
 ---
 
 ## Technical Details
 
-### localStorage Cart Structure
-```typescript
-// Stored as JSON array
-[{
-  "id": "product-123-{}",
-  "productId": "product-123",
-  "name": "Butter or Jelly",
-  "price": 2.58,
-  "quantity": 1,
-  "options": {},
-  "image": "/placeholder.svg"
-}]
-```
+### Why Mobile Works But Desktop Doesn't
+1. **Mobile path**: The "+" button is always visible via `opacity-100`, so users can always tap it
+2. **Desktop path**: The "+" button requires `isHovered === true`, which:
+   - May not trigger correctly if there's a hydration mismatch
+   - May not trigger if touch events are involved (touchscreen laptops)
+   - May have timing issues with the React state update
 
-### AnimatePresence Fix Pattern
-```typescript
-<AnimatePresence mode="wait">
-  {isOpen && (
-    <motion.div
-      key="modal-content"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-    >
-      {/* content */}
-    </motion.div>
-  )}
-</AnimatePresence>
-```
+### After These Fixes
+- The useIsMobile hook will correctly determine device type on first render
+- The quick-add button will be visible on all devices without relying on hover
+- ProductModal will reliably open when clicking products
+- Users will be able to add items to cart on both mobile and desktop
 
 ---
 
-## Result
-After these changes:
-- Cart items persist across page refreshes
-- Product modal and cart drawer render without console warnings
-- Checkout validation requires a pickup time selection
-- Improved reliability of the entire ordering flow
+## Additional Recommendation
+
+Consider adding a "fallback" add-to-cart mechanism inside the product card content itself (e.g., a text link "Add to Cart" in the card footer) so even if the floating button has issues, users have another way to add items.

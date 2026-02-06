@@ -52,7 +52,7 @@ export default function Checkout() {
     email: "",
     phone: "",
     pickupType: "pickup" as "pickup" | "dine_in",
-    pickupTime: "",
+    pickupTime: "ASAP (15-20 min)",
     paymentMethod: "pay_at_pickup" as "pay_at_pickup" | "card",
     notes: "",
   });

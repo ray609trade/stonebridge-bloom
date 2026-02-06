@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Plus, ShoppingBag } from "lucide-react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -25,12 +25,11 @@ interface ProductCardProps {
   onSelect?: () => void;
 }
 
-export const ProductCard = React.forwardRef<HTMLDivElement, ProductCardProps>(
-  ({ product, className, onSelect }, ref) => {
-    const { addItem } = useCart();
-    const [isHovered, setIsHovered] = useState(false);
-    const [isAdding, setIsAdding] = useState(false);
-    const isMobile = useIsMobile();
+export function ProductCard({ product, className, onSelect }: ProductCardProps) {
+  const { addItem } = useCart();
+  const [isHovered, setIsHovered] = useState(false);
+  const [isAdding, setIsAdding] = useState(false);
+  const isMobile = useIsMobile();
 
   // Check if product has options that need selection
   const hasOptions = Array.isArray(product.options) && (product.options as unknown[]).length > 0;
@@ -60,7 +59,6 @@ export const ProductCard = React.forwardRef<HTMLDivElement, ProductCardProps>(
 
   return (
     <motion.div
-      ref={ref}
       className={cn(
         "group relative rounded-xl overflow-hidden bg-card border border-border transition-all duration-300 cursor-pointer touch-manipulation",
         isHovered && !isMobile && "shadow-card-hover -translate-y-1",
@@ -147,6 +145,4 @@ export const ProductCard = React.forwardRef<HTMLDivElement, ProductCardProps>(
       </div>
     </motion.div>
   );
-});
-
-ProductCard.displayName = "ProductCard";
+}

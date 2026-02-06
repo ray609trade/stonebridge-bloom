@@ -15,6 +15,7 @@ interface Product {
   retail_price: number;
   images: string[] | null;
   dietary_tags: string[] | null;
+  options?: unknown;
   category?: { name: string } | null;
 }
 
@@ -30,8 +31,18 @@ export function ProductCard({ product, className, onSelect }: ProductCardProps) 
   const [isAdding, setIsAdding] = useState(false);
   const isMobile = useIsMobile();
 
+  // Check if product has options that need selection
+  const hasOptions = Array.isArray(product.options) && (product.options as unknown[]).length > 0;
+
   const handleQuickAdd = (e: React.MouseEvent) => {
     e.stopPropagation();
+    
+    // If product has options, open modal instead of quick-adding
+    if (hasOptions && onSelect) {
+      onSelect();
+      return;
+    }
+    
     setIsAdding(true);
     addItem({
       productId: product.id,

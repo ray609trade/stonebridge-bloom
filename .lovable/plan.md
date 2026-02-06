@@ -1,85 +1,108 @@
 
-# Fix: Clickable Order Rows in Admin Panel
+# Fix: Order Status Updates in Admin Panel
 
-## Problem
-You cannot click on order rows to view details - you can only click the small Eye icon in the Actions column. This makes it difficult to quickly access orders.
+## Problem Identified
+The `OrderDetailModal` component only displays order details - it has **no way to update order status**. Currently:
+- You can only update status via the small CheckCircle button in the table (which auto-advances to next status)
+- Once you open an order to see details, there's no way to change its status from within the modal
 
 ## Solution
-Make each order row clickable so tapping anywhere on the row opens the order details modal.
+Add status update buttons directly inside the `OrderDetailModal` so you can:
+1. See the current status
+2. Click to advance to the next status
+3. Manually select any valid status
 
 ---
 
 ## Changes
 
-### 1. Make Order Rows Clickable
+### 1. Add Status Update Controls to OrderDetailModal
+**File:** `src/components/admin/OrderDetailModal.tsx`
+
+Add:
+- Status update buttons showing the workflow: Pending → Confirmed → Preparing → Ready
+- An "Advance Status" button to move to the next status
+- Direct status selection buttons for flexibility
+- Integration with the parent component to trigger status updates
+
+### 2. Pass Status Update Handler to Modal
 **File:** `src/pages/Admin.tsx`
 
-Add click handling to each table row:
-- Add `onClick` handler to open the order detail modal when clicking anywhere on the row
-- Add `cursor-pointer` styling so it's clear rows are clickable  
-- Add `e.stopPropagation()` to buttons inside rows so they don't trigger the row click
+Pass the `updateOrderStatus` mutation to the modal so it can trigger status changes:
+- Add `onUpdateStatus` prop to `OrderDetailModal`
+- Handle query invalidation to refresh the orders list after update
+- Close or refresh modal after status change
 
-**Before:**
-```tsx
-<tr key={order.id} className="border-b border-border last:border-0 hover:bg-secondary/30">
-```
+---
 
-**After:**
-```tsx
-<tr 
-  key={order.id} 
-  className="border-b border-border last:border-0 hover:bg-secondary/30 cursor-pointer"
-  onClick={() => setSelectedOrder(order)}
->
-```
+## Implementation Details
 
-Action buttons will stop event propagation:
-```tsx
-<Button
-  variant="ghost"
-  size="icon"
-  onClick={(e) => {
-    e.stopPropagation();
-    setSelectedOrder(order);
-  }}
->
-```
+### OrderDetailModal Changes
 
-### 2. Fix Badge Console Warning
-**File:** `src/components/ui/badge.tsx`
-
-Wrap the Badge component with `React.forwardRef()` to properly handle refs and eliminate the console warning.
-
-**Before:**
-```tsx
-function Badge({ className, variant, ...props }: BadgeProps) {
-  return <div className={cn(badgeVariants({ variant }), className)} {...props} />;
+Add a new `onUpdateStatus` prop:
+```typescript
+interface OrderDetailModalProps {
+  order: Order;
+  onClose: () => void;
+  onUpdateStatus?: (orderId: string, status: string) => void;
 }
 ```
 
-**After:**
-```tsx
-const Badge = React.forwardRef<HTMLDivElement, BadgeProps>(
-  ({ className, variant, ...props }, ref) => {
-    return <div ref={ref} className={cn(badgeVariants({ variant }), className)} {...props} />;
-  }
-);
-Badge.displayName = "Badge";
+Add status control section with buttons:
+```typescript
+{/* Status Controls - show workflow buttons */}
+<div className="pt-4 border-t border-border space-y-3">
+  <h4 className="font-medium">Update Status</h4>
+  <div className="flex flex-wrap gap-2">
+    {["pending", "confirmed", "preparing", "ready", "completed"].map((status) => (
+      <Button
+        key={status}
+        variant={order.status === status ? "default" : "outline"}
+        size="sm"
+        onClick={() => onUpdateStatus?.(order.id, status)}
+        disabled={order.status === status}
+        className="capitalize"
+      >
+        {status}
+      </Button>
+    ))}
+  </div>
+</div>
 ```
+
+### Admin.tsx Changes
+
+Update the modal invocation to pass the status handler:
+```typescript
+{selectedOrder && (
+  <OrderDetailModal 
+    order={selectedOrder} 
+    onClose={() => setSelectedOrder(null)}
+    onUpdateStatus={(id, status) => {
+      updateOrderStatus.mutate({ id, status });
+    }}
+  />
+)}
+```
+
+Also update `selectedOrder` state after mutation success to reflect new status.
 
 ---
 
 ## Files to Modify
 
-| File | Change |
-|------|--------|
-| `src/pages/Admin.tsx` | Add row click handler on line 351, add stopPropagation to action buttons |
-| `src/components/ui/badge.tsx` | Wrap with forwardRef to fix warning |
+| File | Changes |
+|------|---------|
+| `src/components/admin/OrderDetailModal.tsx` | Add status update buttons and `onUpdateStatus` prop |
+| `src/pages/Admin.tsx` | Pass `onUpdateStatus` handler, update local state after mutation |
 
 ---
 
 ## Result
 After these changes:
-- Click anywhere on an order row to open the order details modal
-- Action buttons (Eye, CheckCircle, Sync) still work independently without opening modal twice
-- Console warning about refs will be resolved
+- Click any order row to open details
+- See clear status buttons: Pending, Confirmed, Preparing, Ready, Completed
+- Click any status to update the order immediately
+- Modal stays open and reflects the new status
+- List refreshes automatically
+- "Ready" status still triggers SMS notification as before

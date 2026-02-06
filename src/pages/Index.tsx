@@ -1,5 +1,6 @@
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
+import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import { Hero } from "@/components/home/Hero";
 import { FeaturedProducts } from "@/components/home/FeaturedProducts";
 import { HowItWorks } from "@/components/home/HowItWorks";
@@ -9,7 +10,7 @@ import { CartDrawer } from "@/components/cart/CartDrawer";
 
 const Index = () => {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen pb-16 md:pb-0">
       <Header />
       <CartDrawer />
       <main>
@@ -20,6 +21,7 @@ const Index = () => {
         <LocationSection />
       </main>
       <Footer />
+      <MobileBottomNav />
     </div>
   );
 };

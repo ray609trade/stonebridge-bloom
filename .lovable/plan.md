@@ -1,145 +1,124 @@
 
-# Fix: Ordering Works on Mobile but Not on Web
 
-## Root Cause Analysis
+# Wholesale Order System Implementation Plan
 
-After investigating the codebase, I've identified why ordering works on mobile but not on web/desktop:
+## Problem Summary
 
-### Problem 1: useIsMobile Hook Hydration Race Condition
-The `useIsMobile` hook initializes with `undefined` and only gets the correct value after mount. This causes:
-- Initial render: `!!undefined = false` (treats everything as desktop)
-- After mount: Correct value is set
-- This creates a flash where mobile UI shows desktop behavior or vice versa
+Currently, the system only supports **retail orders**. While businesses can request a wholesale account via the `/wholesale` page, there is no way for approved wholesale customers to actually **place wholesale orders**. All orders created through the checkout go to the `orders` table with `order_type: "retail"`.
 
-```typescript
-// Current - causes hydration issues
-const [isMobile, setIsMobile] = useState<boolean | undefined>(undefined);
-// ...
-return !!isMobile; // undefined becomes false on first render
-```
+## Solution Overview
 
-### Problem 2: Desktop Quick-Add Button Visibility
-On desktop, the quick-add "+" button in `ProductCard` is **hidden by default** and only shows on hover:
-
-```typescript
-isMobile 
-  ? "opacity-100"  // Mobile: always visible
-  : isHovered ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2" // Desktop: only on hover
-```
-
-If the hover state doesn't register (due to touch events, certain browsers, or the hydration issue), the button stays invisible.
-
-### Problem 3: ProductModal Not Opening on Click
-When users click the product card on desktop (not the + button), it should open `ProductModal`. However:
-- The card click triggers `onSelect()` which sets `selectedProduct`
-- The `ProductModal` component uses `useIsMobile()` internally
-- If there's a render timing issue, the modal may not display correctly
+Build a complete wholesale ordering experience that allows approved wholesale accounts to:
+1. Log in to their wholesale portal
+2. Browse wholesale-priced products
+3. Place orders that get marked as `order_type: "wholesale"`
+4. View their order history
 
 ---
 
-## Solution
+## Implementation Steps
 
-### Fix 1: Improve useIsMobile Hook Initialization
-Change the hook to initialize with a safe default that matches SSR expectations and prevents the flash:
+### Phase 1: Wholesale Authentication
 
-**File:** `src/hooks/use-mobile.tsx`
+**Create wholesale login page** (`/wholesale/login`)
+- Email/password authentication
+- Link wholesale accounts to auth users via `user_id` column
 
-```typescript
-import * as React from "react";
+**Create wholesale portal page** (`/wholesale/portal`)
+- Protected route requiring wholesale account with "approved" status
+- Dashboard showing order history and quick reorder
 
-const MOBILE_BREAKPOINT = 768;
+### Phase 2: Wholesale Menu & Cart
 
-export function useIsMobile() {
-  // Initialize with null to indicate "not yet determined"
-  // This prevents the flash of wrong content
-  const [isMobile, setIsMobile] = React.useState<boolean>(() => {
-    // Check if window is available (client-side)
-    if (typeof window !== 'undefined') {
-      return window.innerWidth < MOBILE_BREAKPOINT;
-    }
-    return false; // Default for SSR
-  });
+**Create wholesale menu component**
+- Display products with wholesale pricing (`wholesale_price` column)
+- Show wholesale minimum quantities
+- Filter categories by `visibility: "wholesale"` or `visibility: "both"`
 
-  React.useEffect(() => {
-    const mql = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`);
-    const onChange = () => {
-      setIsMobile(window.innerWidth < MOBILE_BREAKPOINT);
-    };
-    mql.addEventListener("change", onChange);
-    // Set initial value on mount to ensure accuracy
-    setIsMobile(window.innerWidth < MOBILE_BREAKPOINT);
-    return () => mql.removeEventListener("change", onChange);
-  }, []);
+**Create wholesale cart context**
+- Separate from retail cart
+- Enforce minimum order quantities
+- Calculate wholesale pricing
 
-  return isMobile;
-}
-```
+### Phase 3: Wholesale Checkout
 
-### Fix 2: Make Desktop Quick-Add Button More Accessible
-Ensure the + button is always visible on desktop, not just on hover. This improves usability and avoids relying on hover states that may not work correctly.
+**Create wholesale checkout page** (`/wholesale/checkout`)
+- Pre-populate from logged-in wholesale account
+- Shipping address form
+- Payment method: "Pay by Invoice"
+- Save orders with:
+  - `order_type: "wholesale"`
+  - `wholesale_account_id: [account_id]`
+  - `ship_to_address: { ... }`
 
-**File:** `src/components/menu/ProductCard.tsx`
+### Phase 4: Admin Integration
 
-Change the button visibility logic:
-```typescript
-// Instead of hiding on desktop, always show but with subtle styling
-className={cn(
-  "absolute bottom-3 right-3 rounded-full shadow-lg transition-all duration-300",
-  "bg-accent hover:bg-amber-dark text-accent-foreground",
-  "h-12 w-12 md:h-10 md:w-10",
-  "active:scale-90",
-  // Always visible, but slightly more prominent on hover (desktop only)
-  "opacity-100",
-  !isMobile && isHovered && "scale-110",
-  isAdding && "scale-110"
-)}
-```
+**Update Admin Orders tab**
+- Already shows `order_type` column
+- Orders will appear with "wholesale" badge
 
-### Fix 3: Add Defensive Check for ProductModal Rendering
-Ensure ProductModal always renders correctly regardless of timing:
-
-**File:** `src/pages/Order.tsx`
-
-Add a key to force re-mount when product changes:
-```typescript
-{selectedProduct && (
-  <ProductModal
-    key={selectedProduct.id}  // Force fresh mount
-    product={selectedProduct}
-    onClose={() => setSelectedProduct(null)}
-  />
-)}
-```
-
----
-
-## Files to Modify
-
-| File | Change |
-|------|--------|
-| `src/hooks/use-mobile.tsx` | Initialize with immediate window check to prevent hydration mismatch |
-| `src/components/menu/ProductCard.tsx` | Make quick-add button always visible on all devices |
-| `src/pages/Order.tsx` | Add key prop to ProductModal for reliable rendering |
+**Update Shipping tab** (`ShipmentsTab.tsx`)
+- Filter to show only `order_type: "wholesale"` orders
+- Enable ShipStation sync functionality
 
 ---
 
 ## Technical Details
 
-### Why Mobile Works But Desktop Doesn't
-1. **Mobile path**: The "+" button is always visible via `opacity-100`, so users can always tap it
-2. **Desktop path**: The "+" button requires `isHovered === true`, which:
-   - May not trigger correctly if there's a hydration mismatch
-   - May not trigger if touch events are involved (touchscreen laptops)
-   - May have timing issues with the React state update
+### Database Changes Required
 
-### After These Fixes
-- The useIsMobile hook will correctly determine device type on first render
-- The quick-add button will be visible on all devices without relying on hover
-- ProductModal will reliably open when clicking products
-- Users will be able to add items to cart on both mobile and desktop
+None - the schema already supports wholesale orders:
+- `orders.order_type` supports `"wholesale"`
+- `orders.wholesale_account_id` exists for linking
+- `orders.ship_to_address` (jsonb) exists for shipping info
+- `wholesale_accounts.user_id` exists for auth linking
+
+### New Files to Create
+
+```text
+src/pages/WholesaleLogin.tsx      - Login page for wholesale customers
+src/pages/WholesalePortal.tsx     - Dashboard for approved wholesale accounts
+src/pages/WholesaleCheckout.tsx   - Checkout flow for wholesale orders
+src/hooks/useWholesaleCart.tsx    - Cart context for wholesale orders
+src/components/wholesale/
+  WholesaleMenu.tsx               - Product listing with wholesale prices
+  WholesaleCartDrawer.tsx         - Cart drawer for wholesale
+```
+
+### Route Updates (App.tsx)
+
+```text
+/wholesale/login     - WholesaleLogin
+/wholesale/portal    - WholesalePortal (protected)
+/wholesale/checkout  - WholesaleCheckout (protected)
+```
+
+### RLS Policy Updates
+
+The existing policies should work:
+- `wholesale_accounts` allows users to view their own account
+- `orders` allows users to view orders where `user_id = auth.uid()`
+
+May need to add policy for wholesale users inserting orders with their `wholesale_account_id`.
 
 ---
 
-## Additional Recommendation
+## Estimated Effort
 
-Consider adding a "fallback" add-to-cart mechanism inside the product card content itself (e.g., a text link "Add to Cart" in the card footer) so even if the floating button has issues, users have another way to add items.
+| Phase | Description | Complexity |
+|-------|-------------|------------|
+| 1 | Authentication | Medium |
+| 2 | Menu & Cart | Medium |
+| 3 | Checkout | Medium |
+| 4 | Admin Integration | Low (mostly exists) |
+
+---
+
+## Alternative: Quick Fix
+
+If you need wholesale orders to appear quickly without building the full portal, I can:
+1. Add a "wholesale" toggle to the existing checkout
+2. Allow manual order creation in admin
+
+Would you like to proceed with the full wholesale portal implementation, or start with the quick fix?
+

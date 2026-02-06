@@ -1,96 +1,49 @@
 
 
-# Create Admin User Account
+# Switch to ShipStation Sandbox API
 
 ## Overview
-Create an admin user account with the credentials you specified so you can log into the admin dashboard.
+Configure the ShipStation integration to use the sandbox environment for testing. This allows you to test shipping functionality with mock data without affecting production.
 
-## Admin Credentials
-- **Email**: steven@stonebridgebagels.com
-- **Password**: makeamericagreat2026
+## Changes Required
 
-## How It Works
-The admin login uses a two-step verification:
-1. First, it authenticates with email/password
-2. Then, it checks the `user_roles` table to verify the user has the `admin` role
+### 1. Update Edge Function - Use Sandbox URL
+**File: `supabase/functions/shipstation-api/index.ts`**
 
-Currently, there is no admin user set up, so we need to create one.
+Change the base URL from production to sandbox:
 
-## Technical Implementation
+```typescript
+// Change from:
+const SHIPSTATION_BASE_URL = 'https://ssapi.shipstation.com';
 
-### Step 1: Create Admin User via Database Migration
-Use a database function to create the user and assign admin role:
-
-```sql
--- Create the admin user
-INSERT INTO auth.users (
-  id,
-  instance_id,
-  email,
-  encrypted_password,
-  email_confirmed_at,
-  created_at,
-  updated_at,
-  raw_app_meta_data,
-  raw_user_meta_data,
-  is_super_admin,
-  role,
-  aud,
-  confirmation_token
-)
-VALUES (
-  gen_random_uuid(),
-  '00000000-0000-0000-0000-000000000000',
-  'steven@stonebridgebagels.com',
-  crypt('makeamericagreat2026', gen_salt('bf')),
-  now(),
-  now(),
-  now(),
-  '{"provider":"email","providers":["email"]}',
-  '{}',
-  false,
-  'authenticated',
-  'authenticated',
-  ''
-);
-
--- Add admin role for this user
-INSERT INTO public.user_roles (user_id, role)
-SELECT id, 'admin'::app_role
-FROM auth.users
-WHERE email = 'steven@stonebridgebagels.com';
+// Change to:
+const SHIPSTATION_BASE_URL = 'https://ssapi-sandbox.shipstation.com';
 ```
 
-### Step 2: Create Identity Record
-Also create the identity record to link the user properly:
+### 2. Update the API Key Secret
+The sandbox API key you provided needs to be stored as the `SHIPSTATION_API_KEY` secret. 
 
-```sql
-INSERT INTO auth.identities (
-  id,
-  user_id,
-  identity_data,
-  provider,
-  provider_id,
-  created_at,
-  updated_at,
-  last_sign_in_at
-)
-SELECT 
-  gen_random_uuid(),
-  id,
-  jsonb_build_object('sub', id::text, 'email', email),
-  'email',
-  id::text,
-  now(),
-  now(),
-  now()
-FROM auth.users
-WHERE email = 'steven@stonebridgebagels.com';
-```
+**Your Sandbox API Key:** `TEST_wSe/SWk6ClWcO2fzcTEYcsJhJNDScHsN+nJdnufX4BE`
 
-## Security Note
-This creates a real user account in your authentication system. The password is stored securely using bcrypt encryption. After this is set up, you can log in using these credentials at `/admin/login`.
+I'll update the existing secret with this sandbox key.
 
-## Alternative: OAuth Login
-You can also sign in with Google or Apple OAuth. If you do that, I would then need to manually add the `admin` role to your OAuth user after your first login.
+## What Changes
+
+| Aspect | Before | After |
+|--------|--------|-------|
+| API Endpoint | `ssapi.shipstation.com` | `ssapi-sandbox.shipstation.com` |
+| API Key | Production key | Sandbox test key |
+| Data | Real shipments | Mock test data |
+
+## Testing After Implementation
+Once updated, the Shipping Dashboard will connect to ShipStation's sandbox and you can:
+- List test carriers and services
+- Create test shipment labels
+- View mock shipment data
+- Test rate shopping without real charges
+
+## Switching Back to Production
+When ready for production, we'll need to:
+1. Change the URL back to `https://ssapi.shipstation.com`
+2. Update the secret with your production API key
 

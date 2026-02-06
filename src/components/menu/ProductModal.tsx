@@ -8,11 +8,17 @@ import { useCart } from "@/hooks/useCart";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 
+interface ProductOptionChoice {
+  name?: string;
+  label?: string;
+  price?: number;
+}
+
 interface ProductOption {
   name: string;
   type: "single" | "multiple";
   required?: boolean;
-  choices: { label: string; price?: number }[];
+  choices: ProductOptionChoice[];
 }
 
 interface Product {
@@ -40,6 +46,9 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
 
   const options = Array.isArray(product.options) ? product.options as ProductOption[] : [];
 
+  // Helper to get the display label for a choice (supports both 'name' and 'label' fields)
+  const getChoiceLabel = (choice: ProductOptionChoice) => choice.label || choice.name || '';
+
   const handleOptionSelect = (optionName: string, choice: string) => {
     setSelectedOptions((prev) => ({
       ...prev,
@@ -52,7 +61,7 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
     options.forEach((option) => {
       const selected = selectedOptions[option.name];
       if (selected) {
-        const choice = option.choices.find((c) => c.label === selected);
+        const choice = option.choices.find((c) => getChoiceLabel(c) === selected);
         if (choice?.price) {
           total += choice.price;
         }
@@ -171,29 +180,32 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
                         )}
                       </h3>
                       <div className="flex flex-wrap gap-2">
-                        {option.choices.map((choice) => (
-                          <button
-                            key={choice.label}
-                            onClick={() => handleOptionSelect(option.name, choice.label)}
-                            className={cn(
-                              "flex items-center gap-2 px-4 py-3 md:py-2 rounded-xl md:rounded-lg border transition-all touch-target",
-                              "active:scale-95 touch-manipulation",
-                              selectedOptions[option.name] === choice.label
-                                ? "border-accent bg-accent/10 text-foreground"
-                                : "border-border bg-background text-muted-foreground hover:border-accent/50"
-                            )}
-                          >
-                            {selectedOptions[option.name] === choice.label && (
-                              <Check className="h-4 w-4 text-accent" />
-                            )}
-                            <span className="text-sm md:text-sm">{choice.label}</span>
-                            {choice.price && choice.price > 0 && (
-                              <span className="text-xs text-muted-foreground">
-                                +${choice.price.toFixed(2)}
-                              </span>
-                            )}
-                          </button>
-                        ))}
+                        {option.choices.map((choice) => {
+                          const choiceLabel = getChoiceLabel(choice);
+                          return (
+                            <button
+                              key={choiceLabel}
+                              onClick={() => handleOptionSelect(option.name, choiceLabel)}
+                              className={cn(
+                                "flex items-center gap-2 px-4 py-3 md:py-2 rounded-xl md:rounded-lg border transition-all touch-target",
+                                "active:scale-95 touch-manipulation",
+                                selectedOptions[option.name] === choiceLabel
+                                  ? "border-accent bg-accent/10 text-foreground"
+                                  : "border-border bg-background text-muted-foreground hover:border-accent/50"
+                              )}
+                            >
+                              {selectedOptions[option.name] === choiceLabel && (
+                                <Check className="h-4 w-4 text-accent" />
+                              )}
+                              <span className="text-sm md:text-sm">{choiceLabel}</span>
+                              {choice.price && choice.price > 0 && (
+                                <span className="text-xs text-muted-foreground">
+                                  +${choice.price.toFixed(2)}
+                                </span>
+                              )}
+                            </button>
+                          );
+                        })}
                       </div>
                     </div>
                   ))}

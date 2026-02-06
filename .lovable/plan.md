@@ -1,98 +1,106 @@
 
-# Add Product Options for Bagels
+
+# Order Ready Text Notifications
 
 ## Overview
-Currently when ordering a bagel, customers can't select add-ons like butter or cream cheese before adding to cart. This plan adds spread options to bagel products and ensures customers must select options before checkout.
+Send customers a text message (SMS) when their order is marked as "Ready" for pickup. Email notifications are excluded - text only.
 
 ---
 
 ## What You'll Get
 
-- **Spread Selection**: When ordering bagels, customers can choose from butter, cream cheese, jelly, and other spreads
-- **Smart Quick Add**: The "+" button will open the options modal if a product has options, instead of adding directly
-- **Clear Option Display**: Selected options shown in cart and checkout summary
-
----
-
-## Changes Required
-
-### 1. Update Bagel Products with Spread Options
-Add spread options to the bagel products in the database. Each bagel will have an optional "Spread" selection with choices including:
-- Plain (no spread)
-- Butter
-- Cream Cheese
-- Flavored Cream Cheese
-- Butter and Jelly
-- Peanut Butter
-- And other spreads from your menu
-
-These will be marked as optional (not required) so customers can still order plain bagels.
-
-### 2. Fix Quick Add Button Behavior
-Update the ProductCard component so that when a product has options:
-- The "+" button opens the product modal instead of adding directly
-- Products without options continue to quick-add as before
-
-This ensures customers always see the options before adding to cart.
-
-### 3. Show Options in Cart
-The cart drawer already displays selected options - we'll verify this works correctly with the new spread selections.
-
----
-
-## Technical Details
-
-### Database Migration
-Add spread options to bagel products using SQL update:
-
-```text
-Products to update:
-- One Bagel
-- 1/2 Dozen Bagels  
-- Dozen Bagels
-
-New options structure:
-- Name: "Spread"
-- Type: "single" 
-- Required: false
-- Choices: Plain, Butter, Cream Cheese, Flavored Cream Cheese, etc.
-```
-
-### Files to Modify
-
-| File | Changes |
-|------|---------|
-| `src/components/menu/ProductCard.tsx` | Check for options before quick-add; open modal if options exist |
-
-### ProductCard Logic Change
-
-```text
-Current behavior:
-  Quick Add -> Add to cart immediately
-
-New behavior:
-  If product has options -> Open ProductModal
-  If no options -> Add to cart immediately
-```
+- **Instant Text Alerts**: Customers receive an SMS the moment their order is ready
+- **Simple Admin Flow**: Notification sends automatically when status changes to "Ready"
+- **Manual Resend**: Option to resend notification if needed
 
 ---
 
 ## How It Will Work
 
-1. Customer clicks on "One Bagel" or the "+" button
-2. Product modal opens showing:
-   - Bagel image and price
-   - "Spread" section with options (Plain, Butter, Cream Cheese, etc.)
-   - Quantity selector
-   - "Add to Order" button
-3. Customer selects their preferred spread
-4. Item added to cart shows "One Bagel - Cream Cheese"
-5. At checkout, order summary shows the selected spread
+1. Staff updates order status to "Ready" in the admin panel
+2. Customer receives a text message:
+   > "Your Stonebridge Bagels order #SB-260206-0127 is ready for pickup! 🥯"
+3. Admin sees confirmation that the text was sent
+
+---
+
+## Implementation Steps
+
+### Step 1: Set Up Twilio Account
+Twilio is the industry standard for business SMS. You'll need:
+- Account SID (your account identifier)
+- Auth Token (your password)
+- A phone number to send from
+
+I'll guide you through getting these from twilio.com.
+
+### Step 2: Create Notification Edge Function
+A backend function that:
+- Receives order ID when status changes
+- Looks up customer phone number
+- Sends SMS via Twilio API
+- Returns success/failure
+
+### Step 3: Update Admin Panel
+When order status changes to "Ready":
+- Automatically call the notification function
+- Show "Text sent" confirmation
+- Handle cases where customer has no phone number
+
+---
+
+## Technical Details
+
+### New Files
+
+| File | Purpose |
+|------|---------|
+| `supabase/functions/send-order-notification/index.ts` | SMS sending logic |
+
+### Secrets Required
+
+| Secret | Purpose |
+|--------|---------|
+| `TWILIO_ACCOUNT_SID` | Twilio account identifier |
+| `TWILIO_AUTH_TOKEN` | Twilio authentication |
+| `TWILIO_PHONE_NUMBER` | The "from" phone number (e.g., +16095551234) |
+
+### Files to Modify
+
+| File | Changes |
+|------|---------|
+| `src/pages/Admin.tsx` | Trigger notification on status change to "Ready" |
+| `src/components/admin/OrderDetailModal.tsx` | Add notification status indicator |
+
+### SMS Message
+
+```text
+Your Stonebridge Bagels order #{order_number} is ready for pickup! 🥯
+```
+
+---
+
+## Setup Steps
+
+1. **Create Twilio Account**:
+   - Go to twilio.com and sign up (free trial available)
+   - From the Console Dashboard, copy your Account SID and Auth Token
+   - Buy a phone number ($1/month) or use trial number for testing
+
+2. **Add Credentials**:
+   - I'll request each credential securely when we implement
+
+3. **Test**:
+   - Place a test order with your phone number
+   - Mark it as "Ready"
+   - Verify you receive the text
 
 ---
 
 ## Notes
 
-- Spreads will be optional - customers can still order plain bagels
-- Spread prices will be built into the bagel+spread combo price (matching your current menu pricing)
-- This same pattern can be extended to other products that need customization options
+- SMS costs ~$0.0079 per message with Twilio
+- Trial accounts can only text verified phone numbers (upgrade for production)
+- Orders without a phone number will skip notification (no error shown)
+- Phone numbers in database should include country code (e.g., +1 for US)
+

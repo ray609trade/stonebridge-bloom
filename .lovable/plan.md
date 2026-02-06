@@ -1,154 +1,196 @@
 
-
-# Add Stonebridge Bagels Menu Items
+# Mobile-First Optimization Plan for Stonebridge Bagels
 
 ## Overview
-I'll add all the menu items from your January 2025 menu PDF to the database so customers can order them on the site. This involves creating new categories for menu sections and adding 40+ products with accurate pricing.
-
-## Menu Items Extracted
-
-### Bagels (existing category)
-| Item | Price |
-|------|-------|
-| One Bagel | $1.50 |
-| 1/2 Dozen | $8.00 |
-| Dozen | $17.00 |
-
-### Bagel Spreads (existing "Spreads" category)
-| Item | Price |
-|------|-------|
-| Butter or Jelly | $2.58 |
-| Butter and Jelly | $2.95 |
-| Cream Cheese | $3.05 |
-| Cream Cheese and Jelly | $3.55 |
-| Cream Cheese and Butter | $3.75 |
-| Peanut Butter | $3.75 |
-| Peanut Butter and Jelly | $4.25 |
-| Breakfast Spread | $3.25 |
-| Flavored Cream Cheese | $3.99 |
-| Lox Spread | $7.00 |
-| Sliced Lox and Cream Cheese | $10.50 |
-
-### Breakfast Sandwiches (new category)
-| Item | Price |
-|------|-------|
-| Two Eggs | $4.50 |
-| Two Eggs with Bacon/Pork Roll/Ham/Sausage | $6.07 |
-| Two Eggs with Turkey Bacon | $7.10 |
-| Pork Roll | $4.20 |
-| Two Meats | $7.75 |
-| Three Meats | $8.75 |
-
-### Breakfast Platters (new category)
-| Item | Price |
-|------|-------|
-| Two Eggs Platter | $7.75 |
-| Three Eggs Platter | $8.75 |
-| Cheese Omelet | $9.50 |
-| Classic Omelet | $10.50 |
-| Spanish Omelet | $9.50 |
-| Western Omelet | $10.50 |
-| Veggie Omelet | $10.00 |
-
-### Stonebridge Specialties
-| Item | Price |
-|------|-------|
-| The "A" Town | $8.00 |
-| The Turkey Pesto | $10.00 |
-
-### Wraps (new category)
-| Item | Price |
-|------|-------|
-| The Stonebridge Classic | $11.00 |
-| The Veggie Delight | $8.50 |
-| The Caesar | $9.00 |
-| The Buffalo | $9.00 |
-| The Rustic | $10.00 |
-
-### Soups (new category)
-| Item | Price |
-|------|-------|
-| Soup of the Day | $6.00 |
-
-### Salads (new category)
-| Item | Price |
-|------|-------|
-| Greek Salad | $10.00 |
-| Chicken Caesar Salad | $12.00 |
-| Spinach Avocado Salad | $12.00 |
-| Buffalo Chicken Salad | $11.00 |
-| Signature Salad | $12.00 |
-| Create Your Own Salad | $10.00 |
-
-### Grillers (new category)
-| Item | Price |
-|------|-------|
-| BLT | $7.00 |
-| Cheesesteak w/Onions & Peppers | $9.50 |
-| Panini Grilled Cheese | $6.00 |
-| Chicken Tenders w/Fries | $9.00 |
-
-### Sides (new category)
-| Item | Price |
-|------|-------|
-| French Fries | $4.00 |
-| Cheese Fries | $6.00 |
-| Mozzarella Sticks | $6.00 |
-| Onion Rings | $4.00 |
-
-## Implementation Steps
-
-### Step 1: Create New Categories
-Add 6 new categories to organize the full menu:
-- Breakfast Sandwiches (sort_order: 2)
-- Breakfast Platters (sort_order: 3)
-- Wraps (sort_order: 4)
-- Salads (sort_order: 6)
-- Grillers (sort_order: 7)
-- Sides (sort_order: 8)
-
-Update existing categories sort order for proper menu flow.
-
-### Step 2: Remove Sample Products
-Delete all current "(Sample)" products to replace with real menu items.
-
-### Step 3: Add Real Products
-Insert all menu items with:
-- Accurate pricing from the PDF
-- Proper category assignments
-- Descriptive text where appropriate
-- Appropriate `options` for items with choices (bread type, meat selection, etc.)
-
-### Step 4: Configure Product Options
-Add option configurations for items that have choices:
-- Breakfast items: bagel, roll, wrap, white, rye, or whole wheat bread
-- Breakfast sandwiches: meat selection (bacon, pork roll, ham, sausage)
-- Create Your Own Salad: greens, toppings, dressings
+Since 80%+ of customers will access the site on mobile devices, we need to ensure a truly mobile-first experience while maintaining an excellent desktop experience. This plan focuses on touch-friendly interactions, optimized layouts, improved tap targets, and streamlined mobile navigation.
 
 ---
 
-## Technical Details
+## 1. Header & Navigation Improvements
 
-### Database Operations
-1. **Categories table**: INSERT 6 new rows, UPDATE sort_order on existing
-2. **Products table**: DELETE sample products, INSERT ~45 new products
+### Mobile Enhancements
+- Increase header height on mobile for better tap targets (h-16 → h-14 with better padding)
+- Make the hamburger menu icon larger (5×5 → 6×6) for easier tapping
+- Add a sticky "Order Now" button in mobile header for quick access
+- Improve mobile menu drawer with full-screen overlay, larger touch targets, and smooth animations
+- Add bottom navigation bar for mobile with Home, Order, Cart, and Menu icons (common pattern for food ordering apps)
 
-### Files Modified
-No code changes needed - this is purely database population using SQL INSERT statements.
+### Desktop Preservation
+- Keep current horizontal navigation
+- Maintain logo sizing and positioning
 
-### Product Options Schema
-For items with choices, the `options` JSONB field will contain:
-```json
-[
-  {
-    "name": "Bread",
-    "required": true,
-    "choices": [
-      {"name": "Bagel", "price": 0},
-      {"name": "Roll", "price": 0},
-      {"name": "Wrap", "price": 0}
-    ]
-  }
-]
-```
+---
 
+## 2. Hero Section Mobile Optimization
+
+### Mobile Changes
+- Reduce hero height on mobile (`min-h-[85vh]` instead of `min-h-screen`) to show content "below the fold" hint
+- Increase text size hierarchy for mobile readability (`text-4xl` on mobile, scaling up)
+- Make CTA buttons full-width on mobile for easier tapping
+- Stack buttons vertically on mobile instead of side-by-side
+- Reduce animation intensity on mobile for better performance
+- Hide scroll indicator on mobile (takes up valuable space)
+
+### Desktop Preservation
+- Keep parallax effects and full animations
+- Maintain current sizing and layout
+
+---
+
+## 3. Product Cards & Menu Page
+
+### Mobile-First Cards
+- Single column layout on mobile (currently jumps to 2 cols too early)
+- Larger touch targets for the "Add to Cart" button
+- Make entire card tappable (not just the + button)
+- Add swipe gestures for quick add-to-cart on mobile
+- Reduce image aspect ratio on mobile (`aspect-[3/2]` → `aspect-[16/9]`) for more compact view
+- Show price more prominently on mobile
+
+### Order Page Improvements
+- Horizontal scrolling category pills with larger touch targets
+- Sticky search bar when scrolling on mobile
+- Add a floating cart button with item count (visible without scrolling)
+- Implement "pull to refresh" pattern for mobile
+
+---
+
+## 4. Product Modal Mobile Experience
+
+### Bottom Sheet Design (Mobile)
+- Convert modal to full bottom sheet on mobile (already partially implemented)
+- Make it draggable to dismiss
+- Larger option selection buttons with better spacing
+- Sticky "Add to Order" button at bottom
+- Simplify quantity controls with larger touch targets
+
+### Desktop
+- Keep current centered modal behavior
+
+---
+
+## 5. Cart Drawer Mobile Optimization
+
+### Mobile Changes
+- Full-screen cart on mobile instead of side drawer
+- Larger quantity adjustment buttons
+- Swipe-to-delete items
+- Sticky checkout button at bottom
+- Add haptic-style visual feedback on interactions
+
+---
+
+## 6. Checkout Page Mobile UX
+
+### Form Optimization
+- Single-column layout throughout on mobile
+- Larger form inputs (`h-12` → `h-14`) for easier tapping
+- Radio buttons converted to large tappable cards
+- Time slot picker as horizontal scrollable pills
+- Sticky order summary that expands on tap
+- Progress indicator at top showing checkout steps
+
+---
+
+## 7. Footer Mobile Layout
+
+### Compact Mobile Footer
+- Collapse sections into accordions on mobile
+- Prominent "Call" and "Directions" buttons at top
+- Reduce vertical spacing
+- Social icons in a horizontal row
+
+---
+
+## 8. Global Mobile Improvements
+
+### Touch Interactions
+- Increase all button min-heights to 44px (Apple's recommended minimum)
+- Add `active:scale-95` feedback on all interactive elements
+- Increase spacing between clickable elements
+- Add `-webkit-tap-highlight-color: transparent` and proper touch feedback
+
+### Performance
+- Reduce/simplify Framer Motion animations on mobile
+- Lazy load images with blur placeholders
+- Reduce parallax effects on mobile (or disable)
+
+### Typography
+- Slightly increase base font size on mobile (16px minimum)
+- Improve line heights for touch readability
+- Ensure adequate contrast ratios
+
+---
+
+## 9. New Mobile-Specific Components
+
+### Bottom Navigation Bar
+Create a fixed bottom navigation bar for mobile with:
+- Home icon
+- Order/Menu icon
+- Cart icon (with badge)
+- Account/More icon
+
+This is standard for food ordering apps and provides one-thumb navigation.
+
+### Floating Cart Button
+When not on Order page, show a floating cart button on mobile to encourage ordering.
+
+---
+
+## Technical Approach
+
+### Files to Modify
+
+| File | Changes |
+|------|---------|
+| `src/components/layout/Header.tsx` | Mobile nav improvements, sticky order button |
+| `src/components/layout/Footer.tsx` | Accordion collapse for mobile |
+| `src/components/home/Hero.tsx` | Mobile height, button stacking, reduced animations |
+| `src/components/home/FeaturedProducts.tsx` | Mobile grid tweaks |
+| `src/components/home/HowItWorks.tsx` | Mobile step layout |
+| `src/components/home/Testimonials.tsx` | Horizontal scroll on mobile |
+| `src/components/home/LocationSection.tsx` | Stacked layout, larger buttons |
+| `src/components/menu/ProductCard.tsx` | Larger touch targets, mobile sizing |
+| `src/components/menu/ProductModal.tsx` | Full bottom sheet, sticky add button |
+| `src/components/cart/CartDrawer.tsx` | Full screen on mobile, swipe gestures |
+| `src/pages/Order.tsx` | Sticky search, floating cart, category pills |
+| `src/pages/Checkout.tsx` | Single column forms, larger inputs |
+| `src/index.css` | Global mobile utilities, touch feedback |
+| `tailwind.config.ts` | Add safe-area utilities for notched phones |
+
+### New Files to Create
+
+| File | Purpose |
+|------|---------|
+| `src/components/layout/MobileBottomNav.tsx` | Bottom navigation bar component |
+| `src/components/ui/FloatingCartButton.tsx` | Floating cart indicator |
+
+---
+
+## Implementation Priority
+
+1. **Phase 1 - Critical Mobile UX** (highest impact)
+   - Bottom navigation bar
+   - Product card touch targets
+   - Cart drawer full-screen mode
+   - CTA button improvements
+
+2. **Phase 2 - Form Experience**
+   - Checkout form optimization
+   - Wholesale form mobile layout
+
+3. **Phase 3 - Visual Polish**
+   - Animation performance
+   - Footer accordions
+   - Testimonial carousel
+
+---
+
+## Expected Outcomes
+
+- Faster ordering flow on mobile (fewer taps to checkout)
+- Better touch ergonomics for one-handed use
+- Improved conversion rates for mobile visitors
+- Consistent premium feel across devices
+- Reduced accidental taps and frustration

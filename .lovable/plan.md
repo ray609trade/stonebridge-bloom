@@ -1,44 +1,67 @@
 
 
-# Configure ShipStation Sandbox for Stonebridge
+# Fix and Test ShipStation "Sales Orders Imported" Webhook
 
-## Overview
-Set up the ShipStation sandbox environment for the Stonebridge bakery project using your provided sandbox API key.
+## Issue Found
+
+The webhook is returning **401 Unauthorized** because of an authentication format mismatch:
+
+| Function | Auth Format |
+|----------|-------------|
+| `shipstation-api` | `Basic ${btoa(apiKey)}` (base64 encoded) |
+| `shipstation-webhook` | `Basic ${apiKey}` (raw, not encoded) |
+
+ShipStation requires the API credentials to be base64-encoded for Basic Authentication.
 
 ## Changes Required
 
-### 1. Update Edge Function to Use Sandbox URL
-**File: `supabase/functions/shipstation-api/index.ts`**
+### 1. Fix Authentication in Webhook
+**File: `supabase/functions/shipstation-webhook/index.ts`**
 
+Update line 51 to encode the API key:
 ```typescript
 // Change from:
-const SHIPSTATION_BASE_URL = 'https://ssapi.shipstation.com';
+'Authorization': `Basic ${shipstationApiKey}`,
 
 // Change to:
-const SHIPSTATION_BASE_URL = 'https://ssapi-sandbox.shipstation.com';
+'Authorization': `Basic ${btoa(shipstationApiKey)}`,
 ```
 
-### 2. Update API Key Secret
-Store your Stonebridge sandbox API key:
+### 2. Add Support for ORDER_NOTIFY Events
+The current webhook only handles shipment data. Add handling for imported orders:
 
-**Key:** `TEST_zJh6EW4FRpBC/aROFzo660+zPENbTBKa40V2R+/MiXk`
+```typescript
+// After fetching resource data, detect webhook type
+if (payload.resource_type === 'ORDER_NOTIFY') {
+  // Handle imported orders
+  const orders = shipmentData.orders || [shipmentData];
+  console.log(`Received ${orders.length} imported orders`);
+  
+  // For now, just log and acknowledge - 
+  // order sync would update shipstation_order_id on matching orders
+  return new Response(
+    JSON.stringify({ 
+      success: true,
+      type: 'ORDER_NOTIFY',
+      ordersReceived: orders.length
+    }),
+    { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+  );
+}
 
-### 3. Deploy and Test
-- Redeploy the edge function with sandbox configuration
-- Navigate to the Shipping tab in Admin
-- Verify carriers and test data load correctly
+// Existing shipment handling continues for SHIP_NOTIFY...
+```
 
-## Summary
+### 3. Deploy and Verify
+- Redeploy webhook function
+- Send test POST to verify 401 is resolved
+- Confirm order import acknowledgment works
 
-| Setting | Value |
-|---------|-------|
-| Environment | Sandbox |
-| API Endpoint | `ssapi-sandbox.shipstation.com` |
-| API Key | Stonebridge sandbox key |
+## Technical Summary
 
-## After Approval
-Once implemented, your Shipping Dashboard will connect to ShipStation's sandbox with test data for:
-- Carrier services
-- Rate shopping
-- Label creation (without real charges)
+| Step | Action |
+|------|--------|
+| 1 | Add `btoa()` encoding to fix 401 error |
+| 2 | Add ORDER_NOTIFY branch for order imports |
+| 3 | Deploy and test with simulated payload |
 

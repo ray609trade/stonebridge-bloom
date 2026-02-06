@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Building2, Truck, Clock, DollarSign, CheckCircle } from "lucide-react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
+import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import { CartDrawer } from "@/components/cart/CartDrawer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,6 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { wholesaleAccountSchema, validateForm } from "@/lib/validation";
 import { logError, getUserFriendlyError } from "@/lib/errorUtils";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const benefits = [
   {
@@ -43,6 +45,7 @@ export default function Wholesale() {
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   // Honeypot field for bot detection
   const [honeypot, setHoneypot] = useState("");
+  const isMobile = useIsMobile();
 
   const [formData, setFormData] = useState({
     businessName: "",
@@ -109,17 +112,19 @@ export default function Wholesale() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-16 md:pb-0">
       <Header />
       <CartDrawer />
 
-      <main className="pt-20">
+      <main className="pt-14 md:pt-20">
         {/* Hero */}
-        <section className="relative py-24 overflow-hidden">
+        <section className="relative py-16 md:py-24 overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary/90 to-espresso-dark" />
-          <div className="absolute inset-0 overflow-hidden">
-            <div className="absolute top-1/3 -left-1/4 w-[500px] h-[500px] rounded-full bg-accent/10 blur-3xl animate-float" />
-          </div>
+          {!isMobile && (
+            <div className="absolute inset-0 overflow-hidden">
+              <div className="absolute top-1/3 -left-1/4 w-[500px] h-[500px] rounded-full bg-accent/10 blur-3xl animate-float" />
+            </div>
+          )}
 
           <div className="relative z-10 container mx-auto px-4">
             <motion.div
@@ -128,10 +133,10 @@ export default function Wholesale() {
               transition={{ duration: 0.6 }}
               className="max-w-3xl"
             >
-              <h1 className="font-serif text-5xl md:text-6xl font-semibold text-primary-foreground mb-6">
+              <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl font-semibold text-primary-foreground mb-4 md:mb-6">
                 Wholesale Partnership
               </h1>
-              <p className="text-xl text-primary-foreground/80 leading-relaxed">
+              <p className="text-lg md:text-xl text-primary-foreground/80 leading-relaxed">
                 Partner with Stonebridge to bring fresh, handcrafted bagels to your cafe, 
                 restaurant, or business. Quality products with reliable service.
               </p>
@@ -140,9 +145,9 @@ export default function Wholesale() {
         </section>
 
         {/* Benefits */}
-        <section className="py-20 bg-secondary/50">
+        <section className="py-12 md:py-20 bg-secondary/50">
           <div className="container mx-auto px-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
+            <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8 max-w-6xl mx-auto">
               {benefits.map((benefit, index) => (
                 <motion.div
                   key={benefit.title}
@@ -150,15 +155,15 @@ export default function Wholesale() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: index * 0.1 }}
-                  className="text-center p-6 rounded-xl bg-card border border-border"
+                  className="text-center p-4 md:p-6 rounded-xl bg-card border border-border"
                 >
-                  <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-accent/10 mb-4">
-                    <benefit.icon className="h-7 w-7 text-accent" />
+                  <div className="inline-flex items-center justify-center w-12 h-12 md:w-14 md:h-14 rounded-full bg-accent/10 mb-3 md:mb-4">
+                    <benefit.icon className="h-6 w-6 md:h-7 md:w-7 text-accent" />
                   </div>
-                  <h3 className="font-serif text-lg font-semibold text-foreground mb-2">
+                  <h3 className="font-serif text-base md:text-lg font-semibold text-foreground mb-1 md:mb-2">
                     {benefit.title}
                   </h3>
-                  <p className="text-muted-foreground text-sm">{benefit.description}</p>
+                  <p className="text-muted-foreground text-xs md:text-sm">{benefit.description}</p>
                 </motion.div>
               ))}
             </div>
@@ -166,7 +171,7 @@ export default function Wholesale() {
         </section>
 
         {/* Application Form */}
-        <section className="py-20 bg-background">
+        <section className="py-12 md:py-20 bg-background">
           <div className="container mx-auto px-4">
             <div className="max-w-2xl mx-auto">
               <motion.div
@@ -174,12 +179,12 @@ export default function Wholesale() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5 }}
-                className="text-center mb-12"
+                className="text-center mb-8 md:mb-12"
               >
-                <h2 className="font-serif text-4xl font-semibold text-foreground mb-4">
+                <h2 className="font-serif text-3xl md:text-4xl font-semibold text-foreground mb-3 md:mb-4">
                   Request a Wholesale Account
                 </h2>
-                <p className="text-muted-foreground text-lg">
+                <p className="text-muted-foreground text-base md:text-lg">
                   Fill out the form below and we'll be in touch within 1-2 business days.
                 </p>
               </motion.div>
@@ -188,15 +193,15 @@ export default function Wholesale() {
                 <motion.div
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className="text-center p-12 rounded-xl bg-card border border-border"
+                  className="text-center p-8 md:p-12 rounded-xl bg-card border border-border"
                 >
                   <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 text-green-600 mb-6">
                     <CheckCircle className="h-8 w-8" />
                   </div>
-                  <h3 className="font-serif text-2xl font-semibold text-foreground mb-2">
+                  <h3 className="font-serif text-xl md:text-2xl font-semibold text-foreground mb-2">
                     Application Received!
                   </h3>
-                  <p className="text-muted-foreground">
+                  <p className="text-muted-foreground text-sm md:text-base">
                     Thank you for your interest. Our team will review your application and 
                     contact you within 1-2 business days.
                   </p>
@@ -208,7 +213,7 @@ export default function Wholesale() {
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: 0.1 }}
                   onSubmit={handleSubmit}
-                  className="space-y-6 p-8 rounded-xl bg-card border border-border"
+                  className="space-y-5 md:space-y-6 p-5 md:p-8 rounded-xl bg-card border border-border"
                 >
                   {/* Honeypot field - hidden from users, bots will fill it */}
                   <input
@@ -222,7 +227,7 @@ export default function Wholesale() {
                     aria-hidden="true"
                   />
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-4">
                     <div className="space-y-2">
                       <Label htmlFor="businessName">Business Name *</Label>
                       <Input
@@ -231,7 +236,7 @@ export default function Wholesale() {
                         maxLength={100}
                         value={formData.businessName}
                         onChange={(e) => setFormData({ ...formData, businessName: e.target.value })}
-                        className={fieldErrors.businessName ? "border-red-500" : ""}
+                        className={`h-12 ${fieldErrors.businessName ? "border-red-500" : ""}`}
                       />
                       {fieldErrors.businessName && (
                         <p className="text-sm text-red-500">{fieldErrors.businessName}</p>
@@ -245,7 +250,7 @@ export default function Wholesale() {
                         maxLength={100}
                         value={formData.contactName}
                         onChange={(e) => setFormData({ ...formData, contactName: e.target.value })}
-                        className={fieldErrors.contactName ? "border-red-500" : ""}
+                        className={`h-12 ${fieldErrors.contactName ? "border-red-500" : ""}`}
                       />
                       {fieldErrors.contactName && (
                         <p className="text-sm text-red-500">{fieldErrors.contactName}</p>
@@ -263,7 +268,7 @@ export default function Wholesale() {
                         maxLength={255}
                         value={formData.email}
                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                        className={fieldErrors.email ? "border-red-500" : ""}
+                        className={`h-12 ${fieldErrors.email ? "border-red-500" : ""}`}
                       />
                       {fieldErrors.email && (
                         <p className="text-sm text-red-500">{fieldErrors.email}</p>
@@ -278,7 +283,7 @@ export default function Wholesale() {
                         maxLength={20}
                         value={formData.phone}
                         onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                        className={fieldErrors.phone ? "border-red-500" : ""}
+                        className={`h-12 ${fieldErrors.phone ? "border-red-500" : ""}`}
                       />
                       {fieldErrors.phone && (
                         <p className="text-sm text-red-500">{fieldErrors.phone}</p>
@@ -293,7 +298,7 @@ export default function Wholesale() {
                       maxLength={500}
                       value={formData.address}
                       onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                      className={fieldErrors.address ? "border-red-500" : ""}
+                      className={`h-12 ${fieldErrors.address ? "border-red-500" : ""}`}
                     />
                     {fieldErrors.address && (
                       <p className="text-sm text-red-500">{fieldErrors.address}</p>
@@ -307,7 +312,7 @@ export default function Wholesale() {
                         value={formData.volume}
                         onValueChange={(v) => setFormData({ ...formData, volume: v })}
                       >
-                        <SelectTrigger>
+                        <SelectTrigger className="h-12">
                           <SelectValue placeholder="Select volume" />
                         </SelectTrigger>
                         <SelectContent>
@@ -324,7 +329,7 @@ export default function Wholesale() {
                         value={formData.preference}
                         onValueChange={(v) => setFormData({ ...formData, preference: v })}
                       >
-                        <SelectTrigger>
+                        <SelectTrigger className="h-12">
                           <SelectValue placeholder="Select preference" />
                         </SelectTrigger>
                         <SelectContent>
@@ -345,7 +350,7 @@ export default function Wholesale() {
                       value={formData.notes}
                       onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                       rows={4}
-                      className={fieldErrors.notes ? "border-red-500" : ""}
+                      className={`min-h-[100px] ${fieldErrors.notes ? "border-red-500" : ""}`}
                     />
                     {fieldErrors.notes && (
                       <p className="text-sm text-red-500">{fieldErrors.notes}</p>
@@ -356,7 +361,7 @@ export default function Wholesale() {
                   <Button
                     type="submit"
                     size="lg"
-                    className="w-full bg-accent hover:bg-amber-dark text-accent-foreground font-semibold"
+                    className="w-full bg-accent hover:bg-amber-dark text-accent-foreground font-semibold h-14 text-base active:scale-[0.98] transition-transform touch-manipulation"
                     disabled={isSubmitting}
                   >
                     {isSubmitting ? "Submitting..." : "Submit Application"}
@@ -369,6 +374,7 @@ export default function Wholesale() {
       </main>
 
       <Footer />
+      <MobileBottomNav />
     </div>
   );
 }

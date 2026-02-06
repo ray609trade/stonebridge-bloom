@@ -114,16 +114,41 @@
 
   html {
     scroll-behavior: smooth;
+    -webkit-tap-highlight-color: transparent;
   }
 
   body {
     @apply bg-background text-foreground antialiased;
     font-family: 'DM Sans', system-ui, sans-serif;
+    /* Prevent font scaling on mobile */
+    -webkit-text-size-adjust: 100%;
+    /* Add padding for mobile bottom nav */
+    padding-bottom: env(safe-area-inset-bottom, 0);
   }
 
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Playfair Display', Georgia, serif;
     @apply font-medium tracking-tight;
+  }
+
+  /* Mobile touch feedback */
+  .touch-manipulation {
+    touch-action: manipulation;
+  }
+
+  /* Safe area utilities for notched phones */
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+
+  .safe-area-top {
+    padding-top: env(safe-area-inset-top, 0);
+  }
+
+  /* Minimum touch target (44px as per Apple guidelines) */
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
   }
 }
 
@@ -194,5 +219,24 @@
       opacity: 1;
       transform: scale(1);
     }
+  }
+
+  /* Hide scrollbar for horizontal scroll areas */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Snap scroll utilities */
+  .snap-x {
+    scroll-snap-type: x mandatory;
+  }
+
+  .snap-center {
+    scroll-snap-align: center;
   }
 }

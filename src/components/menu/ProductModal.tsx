@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { useCart } from "@/hooks/useCart";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { cn } from "@/lib/utils";
 
 interface ProductOption {
   name: string;
@@ -34,6 +36,7 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
   const [quantity, setQuantity] = useState(1);
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
   const [specialInstructions, setSpecialInstructions] = useState("");
+  const isMobile = useIsMobile();
 
   const options = Array.isArray(product.options) ? product.options as ProductOption[] : [];
 
@@ -84,27 +87,37 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
           onClick={onClose}
         />
 
-        {/* Modal */}
+        {/* Modal - Full height bottom sheet on mobile */}
         <motion.div
-          initial={{ opacity: 0, y: 100 }}
+          initial={{ opacity: 0, y: isMobile ? "100%" : 50 }}
           animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: 100 }}
-          transition={{ type: "spring", damping: 25 }}
-          className="relative w-full max-w-2xl max-h-[90vh] bg-background rounded-t-2xl md:rounded-2xl overflow-hidden shadow-2xl"
+          exit={{ opacity: 0, y: isMobile ? "100%" : 50 }}
+          transition={{ type: "spring", damping: 25, stiffness: 300 }}
+          className={cn(
+            "relative w-full bg-background overflow-hidden shadow-2xl",
+            isMobile 
+              ? "h-[95vh] rounded-t-3xl" 
+              : "max-w-2xl max-h-[90vh] rounded-2xl"
+          )}
         >
+          {/* Drag indicator for mobile */}
+          {isMobile && (
+            <div className="absolute top-2 left-1/2 -translate-x-1/2 w-12 h-1.5 bg-muted-foreground/30 rounded-full z-20" />
+          )}
+
           {/* Close Button */}
           <Button
             variant="ghost"
             size="icon"
-            className="absolute top-4 right-4 z-10 bg-background/80 backdrop-blur-sm"
+            className="absolute top-4 right-4 z-10 bg-background/80 backdrop-blur-sm h-10 w-10 touch-target"
             onClick={onClose}
           >
             <X className="h-5 w-5" />
           </Button>
 
-          <div className="overflow-y-auto max-h-[90vh]">
+          <div className="overflow-y-auto h-full pb-24 md:pb-0">
             {/* Image */}
-            <div className="relative aspect-video bg-secondary">
+            <div className="relative aspect-[16/10] md:aspect-video bg-secondary">
               <img
                 src={image}
                 alt={product.name}
@@ -113,7 +126,7 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
             </div>
 
             {/* Content */}
-            <div className="p-6">
+            <div className="p-5 md:p-6">
               {/* Header */}
               <div className="mb-6">
                 {product.category?.name && (
@@ -121,11 +134,11 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
                     {product.category.name}
                   </Badge>
                 )}
-                <h2 className="font-serif text-2xl font-semibold text-foreground mb-2">
+                <h2 className="font-serif text-2xl md:text-2xl font-semibold text-foreground mb-2">
                   {product.name}
                 </h2>
                 {product.description && (
-                  <p className="text-muted-foreground">{product.description}</p>
+                  <p className="text-muted-foreground text-sm md:text-base">{product.description}</p>
                 )}
                 <p className="text-xl font-semibold text-foreground mt-2">
                   ${product.retail_price.toFixed(2)}
@@ -138,7 +151,7 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
                   {product.dietary_tags.map((tag) => (
                     <span
                       key={tag}
-                      className="text-xs px-3 py-1 rounded-full bg-secondary text-secondary-foreground"
+                      className="text-xs px-3 py-1.5 rounded-full bg-secondary text-secondary-foreground"
                     >
                       {tag}
                     </span>
@@ -162,16 +175,18 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
                           <button
                             key={choice.label}
                             onClick={() => handleOptionSelect(option.name, choice.label)}
-                            className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-all ${
+                            className={cn(
+                              "flex items-center gap-2 px-4 py-3 md:py-2 rounded-xl md:rounded-lg border transition-all touch-target",
+                              "active:scale-95 touch-manipulation",
                               selectedOptions[option.name] === choice.label
                                 ? "border-accent bg-accent/10 text-foreground"
                                 : "border-border bg-background text-muted-foreground hover:border-accent/50"
-                            }`}
+                            )}
                           >
                             {selectedOptions[option.name] === choice.label && (
                               <Check className="h-4 w-4 text-accent" />
                             )}
-                            <span>{choice.label}</span>
+                            <span className="text-sm md:text-sm">{choice.label}</span>
                             {choice.price && choice.price > 0 && (
                               <span className="text-xs text-muted-foreground">
                                 +${choice.price.toFixed(2)}
@@ -194,13 +209,13 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
                   placeholder="Any allergies or special requests?"
                   value={specialInstructions}
                   onChange={(e) => setSpecialInstructions(e.target.value)}
-                  className="resize-none"
+                  className="resize-none min-h-[80px]"
                   rows={2}
                 />
               </div>
 
-              {/* Quantity & Add to Cart */}
-              <div className="flex items-center gap-4 pt-4 border-t border-border">
+              {/* Desktop: Quantity & Add to Cart */}
+              <div className="hidden md:flex items-center gap-4 pt-4 border-t border-border">
                 <div className="flex items-center gap-3 bg-secondary rounded-lg p-1">
                   <Button
                     variant="ghost"
@@ -229,6 +244,41 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
                   Add to Order · ${calculateTotal().toFixed(2)}
                 </Button>
               </div>
+            </div>
+          </div>
+
+          {/* Mobile: Sticky footer */}
+          <div className="md:hidden fixed bottom-0 left-0 right-0 p-4 bg-background border-t border-border safe-area-bottom">
+            <div className="flex items-center gap-3">
+              {/* Quantity Controls */}
+              <div className="flex items-center gap-2 bg-secondary rounded-xl p-1">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-12 w-12 touch-target active:scale-95"
+                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                  disabled={quantity <= 1}
+                >
+                  <Minus className="h-5 w-5" />
+                </Button>
+                <span className="w-8 text-center font-semibold text-lg">{quantity}</span>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-12 w-12 touch-target active:scale-95"
+                  onClick={() => setQuantity(quantity + 1)}
+                >
+                  <Plus className="h-5 w-5" />
+                </Button>
+              </div>
+
+              {/* Add to Cart Button */}
+              <Button
+                className="flex-1 h-14 bg-accent hover:bg-amber-dark text-accent-foreground font-semibold text-base active:scale-[0.98] transition-transform touch-manipulation"
+                onClick={handleAddToCart}
+              >
+                Add · ${calculateTotal().toFixed(2)}
+              </Button>
             </div>
           </div>
         </motion.div>

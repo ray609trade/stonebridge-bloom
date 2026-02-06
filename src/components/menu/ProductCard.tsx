@@ -1,9 +1,12 @@
 import { useState } from "react";
-import { Plus } from "lucide-react";
+import { Plus, ShoppingBag } from "lucide-react";
+import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useCart } from "@/hooks/useCart";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 interface Product {
   id: string;
@@ -24,9 +27,12 @@ interface ProductCardProps {
 export function ProductCard({ product, className, onSelect }: ProductCardProps) {
   const { addItem } = useCart();
   const [isHovered, setIsHovered] = useState(false);
+  const [isAdding, setIsAdding] = useState(false);
+  const isMobile = useIsMobile();
 
   const handleQuickAdd = (e: React.MouseEvent) => {
     e.stopPropagation();
+    setIsAdding(true);
     addItem({
       productId: product.id,
       name: product.name,
@@ -34,47 +40,61 @@ export function ProductCard({ product, className, onSelect }: ProductCardProps) 
       quantity: 1,
       image: product.images?.[0],
     });
+    toast.success(`${product.name} added to cart`);
+    setTimeout(() => setIsAdding(false), 300);
   };
 
   const image = product.images?.[0] || "/placeholder.svg";
 
   return (
-    <div
+    <motion.div
       className={cn(
-        "group relative rounded-xl overflow-hidden bg-card border border-border transition-all duration-300 cursor-pointer",
-        isHovered && "shadow-card-hover -translate-y-1",
+        "group relative rounded-xl overflow-hidden bg-card border border-border transition-all duration-300 cursor-pointer touch-manipulation",
+        isHovered && !isMobile && "shadow-card-hover -translate-y-1",
+        "active:scale-[0.98]",
         className
       )}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onClick={onSelect}
+      whileTap={{ scale: 0.98 }}
     >
       {/* Image */}
-      <div className="relative aspect-[4/3] overflow-hidden bg-secondary">
+      <div className="relative aspect-[4/3] md:aspect-[4/3] overflow-hidden bg-secondary">
         <img
           src={image}
           alt={product.name}
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+          loading="lazy"
         />
         
-        {/* Quick Add Button */}
+        {/* Quick Add Button - Always visible on mobile */}
         <Button
           size="icon"
           className={cn(
             "absolute bottom-3 right-3 rounded-full shadow-lg transition-all duration-300",
             "bg-accent hover:bg-amber-dark text-accent-foreground",
-            isHovered ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
+            "h-12 w-12 md:h-10 md:w-10", // Larger on mobile
+            "active:scale-90",
+            isMobile 
+              ? "opacity-100" 
+              : isHovered ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2",
+            isAdding && "scale-110"
           )}
           onClick={handleQuickAdd}
         >
-          <Plus className="h-5 w-5" />
+          {isAdding ? (
+            <ShoppingBag className="h-5 w-5 md:h-5 md:w-5" />
+          ) : (
+            <Plus className="h-6 w-6 md:h-5 md:w-5" />
+          )}
         </Button>
 
         {/* Category Badge */}
         {product.category?.name && (
           <Badge
             variant="secondary"
-            className="absolute top-3 left-3 bg-background/90 backdrop-blur-sm"
+            className="absolute top-3 left-3 bg-background/90 backdrop-blur-sm text-xs"
           >
             {product.category.name}
           </Badge>
@@ -84,10 +104,10 @@ export function ProductCard({ product, className, onSelect }: ProductCardProps) 
       {/* Content */}
       <div className="p-4">
         <div className="flex items-start justify-between gap-2 mb-2">
-          <h3 className="font-serif text-lg font-medium text-foreground line-clamp-1">
+          <h3 className="font-serif text-base md:text-lg font-medium text-foreground line-clamp-1">
             {product.name}
           </h3>
-          <span className="font-semibold text-foreground whitespace-nowrap">
+          <span className="font-semibold text-base md:text-base text-foreground whitespace-nowrap bg-accent/10 px-2 py-0.5 rounded-md">
             ${product.retail_price.toFixed(2)}
           </span>
         </div>
@@ -112,6 +132,6 @@ export function ProductCard({ product, className, onSelect }: ProductCardProps) 
           </div>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 }

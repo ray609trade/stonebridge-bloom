@@ -210,6 +210,48 @@ export type Database = {
           },
         ]
       }
+      shipping_analytics: {
+        Row: {
+          by_carrier: Json | null
+          by_city: Json | null
+          by_state: Json | null
+          created_at: string | null
+          id: string
+          late_count: number | null
+          on_time_count: number | null
+          period_end: string
+          period_start: string
+          total_cost: number | null
+          total_shipments: number | null
+        }
+        Insert: {
+          by_carrier?: Json | null
+          by_city?: Json | null
+          by_state?: Json | null
+          created_at?: string | null
+          id?: string
+          late_count?: number | null
+          on_time_count?: number | null
+          period_end: string
+          period_start: string
+          total_cost?: number | null
+          total_shipments?: number | null
+        }
+        Update: {
+          by_carrier?: Json | null
+          by_city?: Json | null
+          by_state?: Json | null
+          created_at?: string | null
+          id?: string
+          late_count?: number | null
+          on_time_count?: number | null
+          period_end?: string
+          period_start?: string
+          total_cost?: number | null
+          total_shipments?: number | null
+        }
+        Relationships: []
+      }
       site_settings: {
         Row: {
           id: string

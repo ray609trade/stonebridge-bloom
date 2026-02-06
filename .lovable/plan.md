@@ -1,16 +1,14 @@
 
 
-# Switch to ShipStation Sandbox API
+# Configure ShipStation Sandbox for Stonebridge
 
 ## Overview
-Configure the ShipStation integration to use the sandbox environment for testing. This allows you to test shipping functionality with mock data without affecting production.
+Set up the ShipStation sandbox environment for the Stonebridge bakery project using your provided sandbox API key.
 
 ## Changes Required
 
-### 1. Update Edge Function - Use Sandbox URL
+### 1. Update Edge Function to Use Sandbox URL
 **File: `supabase/functions/shipstation-api/index.ts`**
-
-Change the base URL from production to sandbox:
 
 ```typescript
 // Change from:
@@ -20,30 +18,27 @@ const SHIPSTATION_BASE_URL = 'https://ssapi.shipstation.com';
 const SHIPSTATION_BASE_URL = 'https://ssapi-sandbox.shipstation.com';
 ```
 
-### 2. Update the API Key Secret
-The sandbox API key you provided needs to be stored as the `SHIPSTATION_API_KEY` secret. 
+### 2. Update API Key Secret
+Store your Stonebridge sandbox API key:
 
-**Your Sandbox API Key:** `TEST_wSe/SWk6ClWcO2fzcTEYcsJhJNDScHsN+nJdnufX4BE`
+**Key:** `TEST_zJh6EW4FRpBC/aROFzo660+zPENbTBKa40V2R+/MiXk`
 
-I'll update the existing secret with this sandbox key.
+### 3. Deploy and Test
+- Redeploy the edge function with sandbox configuration
+- Navigate to the Shipping tab in Admin
+- Verify carriers and test data load correctly
 
-## What Changes
+## Summary
 
-| Aspect | Before | After |
-|--------|--------|-------|
-| API Endpoint | `ssapi.shipstation.com` | `ssapi-sandbox.shipstation.com` |
-| API Key | Production key | Sandbox test key |
-| Data | Real shipments | Mock test data |
+| Setting | Value |
+|---------|-------|
+| Environment | Sandbox |
+| API Endpoint | `ssapi-sandbox.shipstation.com` |
+| API Key | Stonebridge sandbox key |
 
-## Testing After Implementation
-Once updated, the Shipping Dashboard will connect to ShipStation's sandbox and you can:
-- List test carriers and services
-- Create test shipment labels
-- View mock shipment data
-- Test rate shopping without real charges
-
-## Switching Back to Production
-When ready for production, we'll need to:
-1. Change the URL back to `https://ssapi.shipstation.com`
-2. Update the secret with your production API key
+## After Approval
+Once implemented, your Shipping Dashboard will connect to ShipStation's sandbox with test data for:
+- Carrier services
+- Rate shopping
+- Label creation (without real charges)
 

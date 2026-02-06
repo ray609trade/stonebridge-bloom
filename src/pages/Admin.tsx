@@ -184,12 +184,17 @@ export default function Admin() {
       // Send SMS notification when status changes to "ready"
       if (status === 'ready') {
         const result = await sendOrderNotification(id);
-        return { status, notificationResult: result };
+        return { id, status, notificationResult: result };
       }
-      return { status, notificationResult: null };
+      return { id, status, notificationResult: null };
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["admin-orders"] });
+      
+      // Update selectedOrder if it's the one being updated
+      if (selectedOrder && data?.id === selectedOrder.id) {
+        setSelectedOrder({ ...selectedOrder, status: data.status });
+      }
       
       if (data?.status === 'ready' && data?.notificationResult) {
         if (data.notificationResult.success) {
@@ -682,6 +687,9 @@ export default function Admin() {
         <OrderDetailModal
           order={selectedOrder}
           onClose={() => setSelectedOrder(null)}
+          onUpdateStatus={(id, status) => {
+            updateOrderStatus.mutate({ id, status });
+          }}
         />
       )}
     </div>

@@ -149,6 +149,30 @@ export default function Admin() {
     enabled: isAuthenticated,
   });
 
+  const sendOrderNotification = async (orderId: string) => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return { success: false, reason: 'not_authenticated' };
+
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-order-notification`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({ orderId }),
+        }
+      );
+
+      return await response.json();
+    } catch (error) {
+      console.error('Failed to send notification:', error);
+      return { success: false, reason: 'error' };
+    }
+  };
+
   const updateOrderStatus = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: string }) => {
       const { error } = await supabase
@@ -156,10 +180,28 @@ export default function Admin() {
         .update({ status: status as any })
         .eq("id", id);
       if (error) throw error;
+      
+      // Send SMS notification when status changes to "ready"
+      if (status === 'ready') {
+        const result = await sendOrderNotification(id);
+        return { status, notificationResult: result };
+      }
+      return { status, notificationResult: null };
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["admin-orders"] });
-      toast.success("Order status updated");
+      
+      if (data?.status === 'ready' && data?.notificationResult) {
+        if (data.notificationResult.success) {
+          toast.success("Order ready! Text sent to customer 📱");
+        } else if (data.notificationResult.reason === 'no_phone') {
+          toast.info("Order ready! (No phone number on file)");
+        } else {
+          toast.warning("Order ready, but text notification failed");
+        }
+      } else {
+        toast.success("Order status updated");
+      }
     },
     onError: () => {
       toast.error("Failed to update order status");

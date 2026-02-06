@@ -8,7 +8,7 @@ interface ShipStationRequest {
   data?: Record<string, unknown>;
 }
 
-const SHIPSTATION_BASE_URL = 'https://ssapi.shipstation.com';
+const SHIPSTATION_BASE_URL = 'https://ssapi-sandbox.shipstation.com';
 
 async function makeShipStationRequest(
   endpoint: string,

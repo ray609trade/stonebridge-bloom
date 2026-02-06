@@ -15,7 +15,8 @@ import {
   CheckCircle,
   Eye,
   Truck,
-  ExternalLink
+  ExternalLink,
+  Ship
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -25,6 +26,7 @@ import { toast } from "sonner";
 import { ProductForm } from "@/components/admin/ProductForm";
 import { CategoryForm } from "@/components/admin/CategoryForm";
 import { OrderDetailModal } from "@/components/admin/OrderDetailModal";
+import { ShippingDashboard } from "@/components/admin/shipping/ShippingDashboard";
 import { cn } from "@/lib/utils";
 
 interface Order {
@@ -229,6 +231,7 @@ export default function Admin() {
             { id: "products", label: "Products", icon: Package },
             { id: "categories", label: "Categories", icon: LayoutDashboard },
             { id: "wholesale", label: "Wholesale", icon: Building2 },
+            { id: "shipping", label: "Shipping", icon: Ship },
             { id: "settings", label: "Settings", icon: Settings },
           ].map((item) => (
             <button
@@ -558,6 +561,11 @@ export default function Admin() {
               )}
             </div>
           </div>
+        )}
+
+        {/* Shipping Tab */}
+        {activeTab === "shipping" && (
+          <ShippingDashboard />
         )}
 
         {/* Settings Tab */}

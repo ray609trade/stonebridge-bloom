@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.shipstation-webhook]
 verify_jwt = false
+
+[functions.shipstation-api]
+verify_jwt = false

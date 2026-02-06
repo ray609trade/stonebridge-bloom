@@ -12,6 +12,7 @@ const navLinks = [
   { href: "/about", label: "About" },
   { href: "/order", label: "Order" },
   { href: "/wholesale", label: "Wholesale" },
+  { href: "/admin/login", label: "Admin" },
 ];
 
 export function Header() {

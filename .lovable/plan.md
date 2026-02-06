@@ -1,67 +1,27 @@
 
+# Add Navigation Link to Landing Page
 
-# Fix and Test ShipStation "Sales Orders Imported" Webhook
-
-## Issue Found
-
-The webhook is returning **401 Unauthorized** because of an authentication format mismatch:
-
-| Function | Auth Format |
-|----------|-------------|
-| `shipstation-api` | `Basic ${btoa(apiKey)}` (base64 encoded) |
-| `shipstation-webhook` | `Basic ${apiKey}` (raw, not encoded) |
-
-ShipStation requires the API credentials to be base64-encoded for Basic Authentication.
+## Overview
+Add a new navigation item in the admin sidebar that allows users to quickly navigate back to the public-facing landing page.
 
 ## Changes Required
 
-### 1. Fix Authentication in Webhook
-**File: `supabase/functions/shipstation-webhook/index.ts`**
+### File: `src/pages/Admin.tsx`
 
-Update line 51 to encode the API key:
+**1. Add Home icon import** (line 4-20)
+- Add `Home` to the lucide-react imports
+
+**2. Add navigation item to sidebar** (lines 229-250)
+- Insert a new navigation item at the top of the nav array:
 ```typescript
-// Change from:
-'Authorization': `Basic ${shipstationApiKey}`,
-
-// Change to:
-'Authorization': `Basic ${btoa(shipstationApiKey)}`,
+{ id: "home", label: "View Site", icon: Home, href: "/" }
 ```
 
-### 2. Add Support for ORDER_NOTIFY Events
-The current webhook only handles shipment data. Add handling for imported orders:
+**3. Update navigation button logic**
+- Modify the navigation button to handle external navigation (using `navigate("/")`) for the "home" item while keeping the current tab-switching behavior for other items
 
-```typescript
-// After fetching resource data, detect webhook type
-if (payload.resource_type === 'ORDER_NOTIFY') {
-  // Handle imported orders
-  const orders = shipmentData.orders || [shipmentData];
-  console.log(`Received ${orders.length} imported orders`);
-  
-  // For now, just log and acknowledge - 
-  // order sync would update shipstation_order_id on matching orders
-  return new Response(
-    JSON.stringify({ 
-      success: true,
-      type: 'ORDER_NOTIFY',
-      ordersReceived: orders.length
-    }),
-    { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-  );
-}
+## Visual Result
+The sidebar will display a "View Site" option at the top with a Home icon. Clicking it will navigate the user back to the public landing page, making it easy to preview the customer-facing site without manually changing the URL.
 
-// Existing shipment handling continues for SHIP_NOTIFY...
-```
-
-### 3. Deploy and Verify
-- Redeploy webhook function
-- Send test POST to verify 401 is resolved
-- Confirm order import acknowledgment works
-
-## Technical Summary
-
-| Step | Action |
-|------|--------|
-| 1 | Add `btoa()` encoding to fix 401 error |
-| 2 | Add ORDER_NOTIFY branch for order imports |
-| 3 | Deploy and test with simulated payload |
-
+## Alternative Considered
+Instead of adding it in the main navigation, it could be placed in the header area or near the logout button - but adding it to the main nav keeps all navigation actions in one consistent location.

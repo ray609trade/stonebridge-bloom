@@ -20,27 +20,72 @@ interface ShipmentInfo {
   shipmentId: number;
 }
 
+/**
+ * Validates the webhook request using a secret token.
+ * The token should be configured in ShipStation's webhook URL as a query parameter.
+ */
+function validateWebhookToken(req: Request): boolean {
+  const webhookToken = Deno.env.get('SHIPSTATION_WEBHOOK_TOKEN');
+  
+  // If no token is configured, log a warning but allow the request
+  // This maintains backward compatibility during migration
+  if (!webhookToken) {
+    console.warn('SHIPSTATION_WEBHOOK_TOKEN not configured - webhook authentication disabled');
+    return true;
+  }
+  
+  const url = new URL(req.url);
+  const providedToken = url.searchParams.get('token');
+  
+  if (!providedToken) {
+    console.warn('Webhook request missing token parameter');
+    return false;
+  }
+  
+  // Use timing-safe comparison to prevent timing attacks
+  if (providedToken.length !== webhookToken.length) {
+    return false;
+  }
+  
+  let result = 0;
+  for (let i = 0; i < providedToken.length; i++) {
+    result |= providedToken.charCodeAt(i) ^ webhookToken.charCodeAt(i);
+  }
+  
+  return result === 0;
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
+    // Validate webhook authentication token
+    if (!validateWebhookToken(req)) {
+      console.error('Unauthorized webhook request - invalid or missing token');
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     const shipstationApiKey = Deno.env.get('SHIPSTATION_API_KEY');
     if (!shipstationApiKey) {
+      console.error('SHIPSTATION_API_KEY not configured');
       return new Response(
-        JSON.stringify({ error: 'ShipStation API key not configured' }),
+        JSON.stringify({ error: 'Configuration error' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
     const payload: ShipStationWebhookPayload = await req.json();
-    console.log('Received ShipStation webhook:', JSON.stringify(payload));
+    console.log('Received authenticated ShipStation webhook:', payload.resource_type);
 
     // ShipStation sends a resource_url that we need to fetch
     if (!payload.resource_url) {
       return new Response(
-        JSON.stringify({ error: 'No resource URL in webhook payload' }),
+        JSON.stringify({ error: 'Invalid payload' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -128,8 +173,9 @@ Deno.serve(async (req) => {
 
   } catch (error) {
     console.error('Webhook processing error:', error);
+    // Return generic error message to avoid leaking internal details
     return new Response(
-      JSON.stringify({ error: 'Internal server error', details: String(error) }),
+      JSON.stringify({ error: 'Processing error' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }

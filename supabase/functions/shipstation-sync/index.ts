@@ -204,10 +204,7 @@ Deno.serve(async (req) => {
       const errorText = await shipstationResponse.text();
       console.error('ShipStation API error:', errorText);
       return new Response(
-        JSON.stringify({ 
-          error: 'Failed to create order in ShipStation',
-          details: errorText 
-        }),
+        JSON.stringify({ error: 'Failed to create order in ShipStation' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -244,7 +241,7 @@ Deno.serve(async (req) => {
   } catch (error) {
     console.error('Error syncing order:', error);
     return new Response(
-      JSON.stringify({ error: 'Internal server error', details: String(error) }),
+      JSON.stringify({ error: 'Failed to sync order' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }

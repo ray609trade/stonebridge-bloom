@@ -1,7 +1,7 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Building2, Truck, Clock, DollarSign, CheckCircle, LogIn } from "lucide-react";
+import { Building2, Truck, Clock, DollarSign, CheckCircle, LogIn, UserPlus } from "lucide-react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
@@ -16,6 +16,7 @@ import { toast } from "sonner";
 import { wholesaleAccountSchema, validateForm } from "@/lib/validation";
 import { logError, getUserFriendlyError } from "@/lib/errorUtils";
 import { useIsMobile } from "@/hooks/use-mobile";
+import type { User } from "@supabase/supabase-js";
 
 const benefits = [
   {
@@ -46,7 +47,25 @@ export default function Wholesale() {
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   // Honeypot field for bot detection
   const [honeypot, setHoneypot] = useState("");
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Check current session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+      setIsLoading(false);
+    });
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const [formData, setFormData] = useState({
     businessName: "",
@@ -98,6 +117,7 @@ export default function Wholesale() {
         address: validatedData.address || null,
         notes: notesContent || null,
         status: "pending",
+        user_id: user?.id,
       });
 
       if (error) throw error;
@@ -196,7 +216,35 @@ export default function Wholesale() {
                 </p>
               </motion.div>
 
-              {isSubmitted ? (
+              {isLoading ? (
+                <div className="text-center p-8 md:p-12 rounded-xl bg-card border border-border">
+                  <p className="text-muted-foreground">Loading...</p>
+                </div>
+              ) : !user ? (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="text-center p-8 md:p-12 rounded-xl bg-card border border-border"
+                >
+                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 text-primary mb-6">
+                    <UserPlus className="h-8 w-8" />
+                  </div>
+                  <h3 className="font-serif text-xl md:text-2xl font-semibold text-foreground mb-2">
+                    Sign In Required
+                  </h3>
+                  <p className="text-muted-foreground text-sm md:text-base mb-6">
+                    Please sign in or create an account to submit a wholesale application.
+                  </p>
+                  <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                    <Button asChild variant="default" size="lg">
+                      <Link to="/wholesale/login">
+                        <LogIn className="mr-2 h-5 w-5" />
+                        Sign In
+                      </Link>
+                    </Button>
+                  </div>
+                </motion.div>
+              ) : isSubmitted ? (
                 <motion.div
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}

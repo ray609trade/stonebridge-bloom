@@ -23,15 +23,16 @@ interface ShipmentInfo {
 /**
  * Validates the webhook request using a secret token.
  * The token should be configured in ShipStation's webhook URL as a query parameter.
+ * SECURITY: Token validation is MANDATORY - requests are rejected if token is not configured.
  */
 function validateWebhookToken(req: Request): boolean {
   const webhookToken = Deno.env.get('SHIPSTATION_WEBHOOK_TOKEN');
   
-  // If no token is configured, log a warning but allow the request
-  // This maintains backward compatibility during migration
+  // SECURITY: Reject all requests if token is not configured
+  // This prevents unauthenticated access to the webhook endpoint
   if (!webhookToken) {
-    console.warn('SHIPSTATION_WEBHOOK_TOKEN not configured - webhook authentication disabled');
-    return true;
+    console.error('SHIPSTATION_WEBHOOK_TOKEN not configured - rejecting webhook request');
+    return false;
   }
   
   const url = new URL(req.url);

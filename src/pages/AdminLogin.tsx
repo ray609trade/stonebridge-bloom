@@ -16,6 +16,8 @@ export default function AdminLogin() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [resetEmail, setResetEmail] = useState("");
 
   useEffect(() => {
     // Check if already logged in
@@ -67,6 +69,27 @@ export default function AdminLogin() {
       navigate("/admin");
     } catch (error: any) {
       logError("AdminLogin.handleSubmit", error);
+      toast.error(getUserFriendlyError(error));
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleForgotPassword = async () => {
+    if (!resetEmail) {
+      toast.error("Please enter your email address");
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
+        redirectTo: window.location.origin + "/admin/reset-password",
+      });
+      if (error) throw error;
+      toast.success("Password reset link sent! Check your email.");
+      setShowForgotPassword(false);
+    } catch (error: any) {
+      logError("AdminLogin.handleForgotPassword", error);
       toast.error(getUserFriendlyError(error));
     } finally {
       setIsLoading(false);
@@ -147,7 +170,19 @@ export default function AdminLogin() {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="password">Password</Label>
+              <button
+                type="button"
+                className="text-xs text-accent hover:underline"
+                onClick={() => {
+                  setShowForgotPassword(true);
+                  setResetEmail(email);
+                }}
+              >
+                Forgot Password?
+              </button>
+            </div>
             <Input
               id="password"
               type="password"
@@ -213,6 +248,36 @@ export default function AdminLogin() {
             Continue with Apple
           </Button>
         </form>
+
+        {showForgotPassword && (
+          <div className="mt-4 p-6 rounded-xl bg-background space-y-4">
+            <h2 className="font-serif text-lg font-semibold">Reset Password</h2>
+            <p className="text-sm text-muted-foreground">
+              Enter your email and we'll send you a reset link.
+            </p>
+            <Input
+              type="email"
+              value={resetEmail}
+              onChange={(e) => setResetEmail(e.target.value)}
+              placeholder="your@email.com"
+            />
+            <div className="flex gap-2">
+              <Button
+                className="flex-1 bg-accent hover:bg-amber-dark text-accent-foreground"
+                disabled={isLoading}
+                onClick={handleForgotPassword}
+              >
+                {isLoading ? "Sending..." : "Send Reset Link"}
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => setShowForgotPassword(false)}
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        )}
 
         <p className="text-center text-primary-foreground/60 text-sm mt-6">
           Need access? Contact your administrator.

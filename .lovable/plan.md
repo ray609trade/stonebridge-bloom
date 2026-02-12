@@ -1,77 +1,41 @@
 
-# Add Real-Time Updates to Leads Tab
+
+# Secure Password Reset Flow for Admin Users
 
 ## Overview
+Add a "Forgot Password?" link on the admin login page that lets admin users request a password reset email. When they click the link in the email, they'll be taken to a page where they can set a new password.
 
-Add Supabase Realtime subscription to the Leads tab so new wholesale applications appear automatically without requiring a page refresh.
+## Changes
 
-## Implementation Steps
+### 1. New Page: Reset Password (`src/pages/ResetPassword.tsx`)
+- A form with two fields: new password and confirm password
+- Listens for the `PASSWORD_RECOVERY` auth event on mount
+- Calls `supabase.auth.updateUser({ password })` to set the new password
+- On success, redirects to `/admin/login` with a success toast
+- Validates passwords match and meet minimum length
 
-### Step 1: Enable Realtime on the Table
+### 2. Update Admin Login Page (`src/pages/AdminLogin.tsx`)
+- Add a "Forgot Password?" link below the password field
+- Clicking it shows an inline email input with a "Send Reset Link" button (or navigates to a small forgot-password view)
+- Calls `supabase.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin + '/admin/reset-password' })`
+- Shows a toast confirming the email was sent
 
-Create a database migration to add `wholesale_accounts` to the Supabase realtime publication:
+### 3. New Route in App.tsx
+- Add route: `/admin/reset-password` pointing to the new `ResetPassword` page
 
-```text
-ALTER PUBLICATION supabase_realtime ADD TABLE public.wholesale_accounts;
-```
+## Technical Details
 
-### Step 2: Add Realtime Subscription in LeadsTab
+- Uses built-in `supabase.auth.resetPasswordForEmail()` -- no edge function needed
+- The redirect URL points to `/admin/reset-password` where the recovery token is automatically handled by Supabase's JS client via the URL hash fragment
+- The `ResetPassword` page uses `supabase.auth.onAuthStateChange` to detect the `PASSWORD_RECOVERY` event, which confirms the token is valid before allowing password update
+- No database changes required
 
-Update `src/components/admin/shipping/LeadsTab.tsx` to:
+## Flow
 
-1. Import `useEffect` from React
-2. Add a `useEffect` hook that:
-   - Creates a Supabase realtime channel subscribed to `wholesale_accounts` table changes
-   - Listens for INSERT, UPDATE, and DELETE events
-   - Calls `queryClient.invalidateQueries` when any change occurs
-   - Cleans up the subscription on unmount
+1. User clicks "Forgot Password?" on admin login
+2. Enters email, clicks send
+3. Receives email with reset link
+4. Link opens `/admin/reset-password` with recovery token
+5. User enters new password
+6. Password is updated, user is redirected to login
 
-### Code Changes
-
-**File: `src/components/admin/shipping/LeadsTab.tsx`**
-
-Add import:
-```text
-import { useState, useEffect } from "react";
-```
-
-Add `useEffect` hook after the existing query hooks:
-```text
-// Real-time subscription for wholesale accounts
-useEffect(() => {
-  const channel = supabase
-    .channel('wholesale-accounts-changes')
-    .on(
-      'postgres_changes',
-      {
-        event: '*',
-        schema: 'public',
-        table: 'wholesale_accounts'
-      },
-      (payload) => {
-        console.log('Wholesale account change:', payload);
-        queryClient.invalidateQueries({ queryKey: ["wholesale-accounts-shipping"] });
-      }
-    )
-    .subscribe();
-
-  return () => {
-    supabase.removeChannel(channel);
-  };
-}, [queryClient]);
-```
-
-## How It Works
-
-1. When the LeadsTab component mounts, it subscribes to the `wholesale_accounts` table changes
-2. When a new wholesale application is submitted (INSERT), the subscription triggers
-3. The React Query cache is invalidated, causing an automatic refetch
-4. The new lead appears in the table without manual refresh
-5. Same applies for status updates (UPDATE) and deletions (DELETE)
-
-## Testing
-
-After implementation:
-1. Open the Admin → Shipping → Leads tab
-2. In a separate browser/tab, submit a new wholesale application at `/wholesale`
-3. The new application should appear automatically in the Leads table within seconds

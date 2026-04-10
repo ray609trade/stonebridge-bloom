@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { ArrowLeft, Building2, Truck, FileText, ChevronDown, ChevronUp } from "lucide-react";
+import { ArrowLeft, Building2, Truck, FileText, ChevronDown, ChevronUp, CheckCircle2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
@@ -145,6 +146,12 @@ function WholesaleCheckoutContent() {
     }
   };
 
+  const STEPS = [
+    { key: "account", label: "Account", icon: Building2 },
+    { key: "shipping", label: "Shipping", icon: Truck },
+    { key: "review", label: "Review", icon: FileText },
+  ];
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -214,13 +221,31 @@ function WholesaleCheckoutContent() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
               >
-                <h1 className="font-serif text-2xl md:text-3xl font-semibold text-foreground mb-6 md:mb-8">
+                <h1 className="font-serif text-2xl md:text-3xl font-semibold text-foreground mb-4">
                   Wholesale Checkout
                 </h1>
 
+                {/* Step Indicators */}
+                <div className="flex items-center gap-2 mb-8">
+                  {STEPS.map((step, i) => (
+                    <div key={step.key} className="flex items-center gap-2 flex-1">
+                      <div className={cn(
+                        "flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium flex-1 justify-center transition-colors",
+                        "bg-accent/10 text-accent border border-accent/20"
+                      )}>
+                        <step.icon className="h-4 w-4" />
+                        <span className="hidden sm:inline">{step.label}</span>
+                      </div>
+                      {i < STEPS.length - 1 && (
+                        <div className="w-4 h-px bg-border shrink-0" />
+                      )}
+                    </div>
+                  ))}
+                </div>
+
                 <form onSubmit={handleSubmit} className="space-y-6 md:space-y-8">
                   {/* Account Info */}
-                  <div className="p-4 rounded-xl border border-border bg-card">
+                  <div className="p-5 rounded-2xl border border-border bg-card shadow-[var(--card-shadow)]">
                     <div className="flex items-center gap-3 mb-3">
                       <Building2 className="h-5 w-5 text-accent" />
                       <h2 className="font-serif text-lg font-semibold">Account</h2>
@@ -301,7 +326,7 @@ function WholesaleCheckoutContent() {
                       <FileText className="h-5 w-5 text-accent" />
                       <h2 className="font-serif text-lg md:text-xl font-semibold">Payment</h2>
                     </div>
-                    <div className="p-4 rounded-xl border-2 border-accent bg-accent/10">
+                    <div className="p-5 rounded-2xl border-2 border-accent bg-accent/10 shadow-[var(--card-shadow)]">
                       <p className="font-medium">Pay by Invoice</p>
                       <p className="text-sm text-muted-foreground mt-1">
                         Net 30 terms. Invoice will be sent to your email after order confirmation.

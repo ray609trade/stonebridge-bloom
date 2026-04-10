@@ -82,7 +82,7 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
     onClose();
   };
 
-  const image = product.images?.[0] || "/placeholder.svg";
+  
 
   return (
     <AnimatePresence mode="wait">
@@ -108,7 +108,7 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
           className={cn(
             "relative w-full bg-background overflow-hidden shadow-2xl",
             isMobile 
-              ? "h-[95vh] rounded-t-3xl" 
+              ? "h-auto max-h-[85vh] rounded-t-3xl" 
               : "max-w-2xl max-h-[90vh] rounded-2xl"
           )}
         >
@@ -128,17 +128,8 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
           </Button>
 
           <div className="overflow-y-auto h-full pb-24 md:pb-0">
-            {/* Image */}
-            <div className="relative aspect-[16/10] md:aspect-video bg-secondary">
-              <img
-                src={image}
-                alt={product.name}
-                className="w-full h-full object-cover"
-              />
-            </div>
-
             {/* Content */}
-            <div className="p-5 md:p-6">
+            <div className="p-5 pt-10 md:p-6 md:pt-14">
               {/* Header */}
               <div className="mb-6">
                 {product.category?.name && (

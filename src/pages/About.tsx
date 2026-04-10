@@ -95,24 +95,11 @@ export default function About() {
                 transition={{ duration: 0.6 }}
               >
                 <h2 className="font-serif text-3xl md:text-4xl font-semibold text-foreground mb-4 md:mb-6">
-                  A Tradition of Excellence
+                  About Stonebridge Bagels &amp; Deli
                 </h2>
                 <div className="space-y-4 text-muted-foreground leading-relaxed text-sm md:text-base">
                   <p>
-                    Stonebridge Bagels began with a simple belief: great bagels require patience, 
-                    quality ingredients, and respect for tradition. Our founder learned the craft 
-                    from master bakers in New York, bringing those time-honored techniques to our 
-                    community.
-                  </p>
-                  <p>
-                    Every morning before dawn, our bakers arrive to begin the ritual. The dough 
-                    is mixed, shaped by hand, and left to rise slowly. Then comes the boiling—the 
-                    step that gives our bagels their signature chewy texture and glossy exterior.
-                  </p>
-                  <p>
-                    Finally, into the oven they go, emerging golden brown and ready to be topped 
-                    with everything from classic sesame to our signature house blend. It's a labor 
-                    of love that we're proud to share with you every day.
+                    At Stonebridge Bagels &amp; Deli, we believe great food starts with great ingredients. As a family-owned business proudly serving the Allentown, NJ community since 2013, we handcraft New York-style boiled bagels fresh on the premises every single day — crispy on the outside, perfectly fluffy on the inside. From classic spreads and made-to-order sandwiches to fresh salads, homemade cookies, and our one-of-a-kind Chorizo Bagel, there's something on our menu for everyone. Whether you're stopping in for a quick breakfast, grabbing lunch, or planning your next event, our catering team is ready to make it memorable. At Stonebridge, quality meets tradition — one bagel at a time.
                   </p>
                 </div>
               </motion.div>

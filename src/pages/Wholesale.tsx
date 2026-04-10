@@ -216,35 +216,7 @@ export default function Wholesale() {
                 </p>
               </motion.div>
 
-              {isLoading ? (
-                <div className="text-center p-8 md:p-12 rounded-xl bg-card border border-border">
-                  <p className="text-muted-foreground">Loading...</p>
-                </div>
-              ) : !user ? (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="text-center p-8 md:p-12 rounded-xl bg-card border border-border"
-                >
-                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 text-primary mb-6">
-                    <UserPlus className="h-8 w-8" />
-                  </div>
-                  <h3 className="font-serif text-xl md:text-2xl font-semibold text-foreground mb-2">
-                    Sign In Required
-                  </h3>
-                  <p className="text-muted-foreground text-sm md:text-base mb-6">
-                    Please sign in or create an account to submit a wholesale application.
-                  </p>
-                  <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                    <Button asChild variant="default" size="lg">
-                      <Link to="/wholesale/login">
-                        <LogIn className="mr-2 h-5 w-5" />
-                        Sign In
-                      </Link>
-                    </Button>
-                  </div>
-                </motion.div>
-              ) : isSubmitted ? (
+              {isSubmitted ? (
                 <motion.div
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}

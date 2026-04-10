@@ -150,13 +150,13 @@ export default function Order() {
 
             {/* Products Grid - Single column on mobile */}
             {isLoading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
                 {[...Array(8)].map((_, i) => (
-                  <div key={i} className="h-72 md:h-80 rounded-xl bg-secondary animate-pulse" />
+                  <div key={i} className="h-24 rounded-xl bg-secondary animate-pulse" />
                 ))}
               </div>
             ) : filteredProducts && filteredProducts.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
                 {filteredProducts.map((product, index) => (
                   <motion.div
                     key={product.id}

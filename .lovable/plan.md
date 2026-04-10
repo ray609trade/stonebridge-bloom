@@ -1,47 +1,33 @@
 
 
-# Wholesale Portal Premium Enhancement
+# Fix Wholesale Application Access
 
-## Overview
-Upgrade the wholesale portal's order history with itemized product details, tracking info, and delivery status. Enhance the overall wholesale UI/UX to feel premium and polished.
+## Problem
+The wholesale application form on `/wholesale` requires authentication before submission, but the login page requires an approved application before account creation. New potential wholesale partners have no way to apply.
+
+## Solution
+Remove the authentication gate from the wholesale application form. Allow unauthenticated visitors to submit wholesale applications directly — the form already collects all necessary business info (name, email, phone, etc.). If a user happens to be logged in, still attach their `user_id`.
 
 ## Changes
 
-### 1. Enhanced Order History with Expandable Order Details (`src/pages/WholesalePortal.tsx`)
-- Replace the flat order list with expandable order cards that reveal:
-  - **Itemized products**: parse the `items` JSONB to show each product name, quantity, unit price, and line total
-  - **Tracking info**: show `tracking_number` and `carrier_code` when available, with a "Track Package" link
-  - **Delivery status**: show `shipped_at` date, shipping address, and a visual status timeline (Pending → Confirmed → Preparing → Shipped → Completed)
-- Add order status filter pills (All, Pending, In Transit, Completed)
-- Add a summary stats bar at the top: total orders, total spent, last order date
+### 1. `src/pages/Wholesale.tsx`
+- Remove the `!user` conditional block that shows "Sign In Required" with a redirect to login
+- Always render the application form regardless of auth state
+- Keep the existing `user_id: user?.id` in the insert (will be `null` for anonymous visitors, which is fine since the column is nullable)
+- Remove the loading state gate (no need to wait for auth check to show the form)
 
-### 2. Premium UI Polish Across Wholesale Pages
-- **WholesalePortal.tsx**: Upgrade the account header with a subtle gradient background, refined typography hierarchy, and better spacing. Add a skeleton loading state instead of plain "Loading..." text.
-- **WholesaleMenu.tsx**: Add hover elevation transitions on product cards, subtle gradient overlays on images, and smoother quantity stepper animations. Improve the empty state illustration.
-- **WholesaleCartDrawer.tsx**: Add a subtle progress indicator, improve spacing and typography, polish the footer with a more prominent CTA.
-- **WholesaleLogin.tsx**: Add a branded illustration/icon in the header area, refine form field styling with focus ring animations.
-- **WholesaleCheckout.tsx**: Add step indicators (Account → Shipping → Review), improve card styling with subtle shadows.
+### 2. RLS Policy Update
+The `wholesale_accounts` table already has an INSERT policy: `(auth.uid() IS NOT NULL)` — this blocks unauthenticated inserts. We need to update this to allow anonymous inserts for applications.
 
-### 3. New Component: Order Detail Accordion (`src/components/wholesale/OrderHistoryCard.tsx`)
-- Reusable expandable card component showing:
-  - Collapsed: order number, date, total, status badge, item count
-  - Expanded: full item list table, shipping address, tracking link, status timeline, notes
-- Uses Framer Motion for smooth expand/collapse
-- Responsive: stacks vertically on mobile with touch-friendly tap targets
+**Database migration:**
+```sql
+DROP POLICY "Authenticated users can request a wholesale account" ON public.wholesale_accounts;
+CREATE POLICY "Anyone can submit a wholesale application"
+  ON public.wholesale_accounts
+  FOR INSERT
+  TO public
+  WITH CHECK (status = 'pending');
+```
 
-## Technical Details
-
-**Files modified:**
-- `src/pages/WholesalePortal.tsx` — order history section rewrite, premium header, stats bar
-- `src/components/wholesale/WholesaleMenu.tsx` — card hover effects, polish
-- `src/components/wholesale/WholesaleCartDrawer.tsx` — UI refinements
-- `src/pages/WholesaleLogin.tsx` — premium form styling
-- `src/pages/WholesaleCheckout.tsx` — step indicators, card shadows
-
-**Files created:**
-- `src/components/wholesale/OrderHistoryCard.tsx` — expandable order detail component
-
-**No database changes required.** All data (`items`, `tracking_number`, `carrier_code`, `shipped_at`, `ship_to_address`, `status`) already exists in the `orders` table.
-
-**Design tokens used:** Existing warm cream/espresso/amber palette from `index.css`. Card shadows use `--card-shadow` and `--card-shadow-hover` custom properties already defined.
+This ensures anyone can submit an application (with `pending` status only), while still protecting against unauthorized status manipulation.
 

@@ -37,7 +37,6 @@ export function WholesaleMenu({ searchQuery }: WholesaleMenuProps) {
   const [quantities, setQuantities] = useState<Record<string, number>>({});
   const { addItem } = useWholesaleCart();
 
-  // Fetch categories visible to wholesale
   const { data: categories } = useQuery({
     queryKey: ["wholesale-categories"],
     queryFn: async () => {
@@ -52,7 +51,6 @@ export function WholesaleMenu({ searchQuery }: WholesaleMenuProps) {
     },
   });
 
-  // Fetch products with wholesale pricing
   const { data: products, isLoading } = useQuery({
     queryKey: ["wholesale-products", selectedCategory],
     queryFn: async () => {
@@ -70,7 +68,6 @@ export function WholesaleMenu({ searchQuery }: WholesaleMenuProps) {
       const { data, error } = await query;
       if (error) throw error;
 
-      // Filter to only products in wholesale-visible categories
       return (data as Product[]).filter(
         (p) => p.category?.visibility === "wholesale" || p.category?.visibility === "both"
       );
@@ -114,31 +111,42 @@ export function WholesaleMenu({ searchQuery }: WholesaleMenuProps) {
     });
 
     toast.success(`Added ${quantity}x ${product.name} to cart`);
-    
-    // Reset quantity to minimum after adding
     setQuantities((prev) => ({ ...prev, [product.id]: minimum }));
+  };
+
+  const savings = (retail: number, wholesale: number | null) => {
+    if (!wholesale || wholesale >= retail) return null;
+    return Math.round(((retail - wholesale) / retail) * 100);
   };
 
   return (
     <div>
       {/* Category Pills */}
       <div className="flex items-center gap-2 overflow-x-auto pb-4 mb-6 scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0">
-        <Button
-          variant={selectedCategory === null ? "default" : "outline"}
+        <button
           onClick={() => setSelectedCategory(null)}
-          className="shrink-0 h-10 px-4 rounded-full text-sm"
+          className={cn(
+            "shrink-0 h-10 px-5 rounded-full text-sm font-medium transition-all",
+            selectedCategory === null
+              ? "bg-accent text-accent-foreground shadow-sm"
+              : "bg-secondary text-muted-foreground hover:text-foreground"
+          )}
         >
           All Products
-        </Button>
+        </button>
         {categories?.map((cat) => (
-          <Button
+          <button
             key={cat.id}
-            variant={selectedCategory === cat.id ? "default" : "outline"}
             onClick={() => setSelectedCategory(cat.id)}
-            className="shrink-0 h-10 px-4 rounded-full text-sm"
+            className={cn(
+              "shrink-0 h-10 px-5 rounded-full text-sm font-medium transition-all",
+              selectedCategory === cat.id
+                ? "bg-accent text-accent-foreground shadow-sm"
+                : "bg-secondary text-muted-foreground hover:text-foreground"
+            )}
           >
             {cat.name}
-          </Button>
+          </button>
         ))}
       </div>
 
@@ -146,7 +154,7 @@ export function WholesaleMenu({ searchQuery }: WholesaleMenuProps) {
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {[...Array(6)].map((_, i) => (
-            <div key={i} className="h-48 rounded-xl bg-secondary animate-pulse" />
+            <div key={i} className="h-52 rounded-2xl bg-secondary animate-pulse" />
           ))}
         </div>
       ) : filteredProducts && filteredProducts.length > 0 ? (
@@ -154,86 +162,100 @@ export function WholesaleMenu({ searchQuery }: WholesaleMenuProps) {
           {filteredProducts.map((product, index) => {
             const minimum = product.wholesale_minimum || 1;
             const quantity = getQuantity(product.id, minimum);
+            const pctOff = savings(product.retail_price, product.wholesale_price);
 
             return (
               <motion.div
                 key={product.id}
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3, delay: index * 0.02 }}
-                className="p-4 rounded-xl border border-border bg-card hover:border-accent/50 transition-colors"
+                className="group rounded-2xl border border-border bg-card shadow-[var(--card-shadow)] hover:shadow-[var(--card-shadow-hover)] hover:border-accent/25 transition-all duration-300"
               >
-                <div className="flex gap-4">
-                  {/* Product Image */}
-                  {product.images?.[0] ? (
-                    <img
-                      src={product.images[0]}
-                      alt={product.name}
-                      className="w-20 h-20 rounded-lg object-cover shrink-0"
-                    />
-                  ) : (
-                    <div className="w-20 h-20 rounded-lg bg-secondary shrink-0 flex items-center justify-center">
-                      <ShoppingBag className="h-8 w-8 text-muted-foreground/50" />
-                    </div>
-                  )}
+                <div className="p-4">
+                  <div className="flex gap-4">
+                    {/* Product Image */}
+                    {product.images?.[0] ? (
+                      <div className="relative w-20 h-20 rounded-xl overflow-hidden shrink-0">
+                        <img
+                          src={product.images[0]}
+                          alt={product.name}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                        {pctOff && (
+                          <div className="absolute top-1 right-1 bg-accent text-accent-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-md">
+                            -{pctOff}%
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="w-20 h-20 rounded-xl bg-secondary shrink-0 flex items-center justify-center">
+                        <ShoppingBag className="h-8 w-8 text-muted-foreground/30" />
+                      </div>
+                    )}
 
-                  {/* Product Info */}
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-medium text-foreground truncate">{product.name}</h3>
-                    <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
-                      {product.description}
-                    </p>
-                    <div className="flex items-center gap-2 mt-2">
-                      <span className="font-semibold text-accent">
-                        ${product.wholesale_price?.toFixed(2)}
-                      </span>
-                      <span className="text-xs text-muted-foreground line-through">
-                        ${product.retail_price.toFixed(2)}
-                      </span>
-                      <Badge variant="secondary" className="text-xs">
-                        Min: {minimum}
-                      </Badge>
+                    {/* Product Info */}
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold text-foreground truncate">{product.name}</h3>
+                      <p className="text-sm text-muted-foreground line-clamp-2 mt-0.5 leading-relaxed">
+                        {product.description}
+                      </p>
+                      <div className="flex items-center gap-2 mt-2">
+                        <span className="font-bold text-accent text-lg leading-none">
+                          ${product.wholesale_price?.toFixed(2)}
+                        </span>
+                        <span className="text-xs text-muted-foreground line-through">
+                          ${product.retail_price.toFixed(2)}
+                        </span>
+                        <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-5">
+                          Min {minimum}
+                        </Badge>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                {/* Quantity & Add */}
-                <div className="flex items-center gap-3 mt-4">
-                  <div className="flex items-center gap-2 bg-secondary rounded-lg p-1">
+                  {/* Quantity & Add */}
+                  <div className="flex items-center gap-3 mt-4">
+                    <div className="flex items-center gap-1 bg-secondary rounded-xl p-1">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-9 w-9 rounded-lg"
+                        onClick={() => updateQuantity(product.id, -1, minimum)}
+                        disabled={quantity <= minimum}
+                      >
+                        <Minus className="h-4 w-4" />
+                      </Button>
+                      <span className="w-10 text-center font-semibold tabular-nums">{quantity}</span>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-9 w-9 rounded-lg"
+                        onClick={() => updateQuantity(product.id, 1, minimum)}
+                      >
+                        <Plus className="h-4 w-4" />
+                      </Button>
+                    </div>
                     <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8"
-                      onClick={() => updateQuantity(product.id, -1, minimum)}
-                      disabled={quantity <= minimum}
+                      onClick={() => handleAddToCart(product)}
+                      className="flex-1 h-10 bg-accent hover:bg-amber-dark text-accent-foreground font-semibold rounded-xl transition-all"
                     >
-                      <Minus className="h-4 w-4" />
-                    </Button>
-                    <span className="w-8 text-center font-medium">{quantity}</span>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8"
-                      onClick={() => updateQuantity(product.id, 1, minimum)}
-                    >
-                      <Plus className="h-4 w-4" />
+                      Add to Cart
                     </Button>
                   </div>
-                  <Button
-                    onClick={() => handleAddToCart(product)}
-                    className="flex-1 bg-accent hover:bg-amber-dark text-accent-foreground"
-                  >
-                    Add to Cart
-                  </Button>
                 </div>
               </motion.div>
             );
           })}
         </div>
       ) : (
-        <div className="text-center py-16 text-muted-foreground">
-          <ShoppingBag className="h-12 w-12 mx-auto mb-4 opacity-50" />
-          <p>{searchQuery ? "No products match your search" : "No wholesale products available"}</p>
+        <div className="text-center py-20">
+          <div className="h-20 w-20 rounded-3xl bg-secondary mx-auto mb-5 flex items-center justify-center">
+            <ShoppingBag className="h-10 w-10 text-muted-foreground/25" />
+          </div>
+          <p className="font-medium text-muted-foreground">
+            {searchQuery ? "No products match your search" : "No wholesale products available"}
+          </p>
         </div>
       )}
     </div>

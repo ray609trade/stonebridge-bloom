@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, LogIn, UserPlus } from "lucide-react";
+import { ArrowLeft, LogIn, UserPlus, ShieldCheck } from "lucide-react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
@@ -36,7 +36,6 @@ export default function WholesaleLogin() {
 
       if (error) throw error;
 
-      // Check if user has an approved wholesale account
       const { data: account, error: accountError } = await supabase
         .from("wholesale_accounts")
         .select("id, status")
@@ -80,7 +79,6 @@ export default function WholesaleLogin() {
     setIsLoading(true);
 
     try {
-      // Check if wholesale account exists for this email
       const { data: existingAccount } = await supabase
         .from("wholesale_accounts")
         .select("id, status, user_id")
@@ -108,7 +106,6 @@ export default function WholesaleLogin() {
         return;
       }
 
-      // Create auth account
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: signupData.email,
         password: signupData.password,
@@ -120,7 +117,6 @@ export default function WholesaleLogin() {
       if (authError) throw authError;
 
       if (authData.user) {
-        // Link auth user to wholesale account
         const { error: updateError } = await supabase
           .from("wholesale_accounts")
           .update({ user_id: authData.user.id })
@@ -128,7 +124,6 @@ export default function WholesaleLogin() {
 
         if (updateError) throw updateError;
 
-        // Add wholesale_customer role
         await supabase.from("user_roles").insert({
           user_id: authData.user.id,
           role: "wholesale_customer",
@@ -161,113 +156,126 @@ export default function WholesaleLogin() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <h1 className="font-serif text-3xl font-semibold text-foreground mb-2">
-              Wholesale Portal
-            </h1>
-            <p className="text-muted-foreground mb-8">
-              Sign in to access your wholesale account
-            </p>
+            {/* Branded Header */}
+            <div className="text-center mb-8">
+              <div className="h-16 w-16 rounded-2xl bg-accent/15 border border-accent/20 mx-auto mb-5 flex items-center justify-center">
+                <ShieldCheck className="h-8 w-8 text-accent" />
+              </div>
+              <h1 className="font-serif text-3xl font-semibold text-foreground">
+                Wholesale Portal
+              </h1>
+              <p className="text-muted-foreground mt-2">
+                Sign in to access exclusive wholesale pricing
+              </p>
+            </div>
 
-            <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "login" | "signup")}>
-              <TabsList className="grid w-full grid-cols-2 mb-6">
-                <TabsTrigger value="login" className="flex items-center gap-2">
-                  <LogIn className="h-4 w-4" />
-                  Login
-                </TabsTrigger>
-                <TabsTrigger value="signup" className="flex items-center gap-2">
-                  <UserPlus className="h-4 w-4" />
-                  Create Account
-                </TabsTrigger>
-              </TabsList>
+            <div className="rounded-2xl border border-border bg-card shadow-[var(--card-shadow)] p-6">
+              <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "login" | "signup")}>
+                <TabsList className="grid w-full grid-cols-2 mb-6 h-12 rounded-xl">
+                  <TabsTrigger value="login" className="flex items-center gap-2 rounded-lg text-sm">
+                    <LogIn className="h-4 w-4" />
+                    Login
+                  </TabsTrigger>
+                  <TabsTrigger value="signup" className="flex items-center gap-2 rounded-lg text-sm">
+                    <UserPlus className="h-4 w-4" />
+                    Create Account
+                  </TabsTrigger>
+                </TabsList>
 
-              <TabsContent value="login">
-                <form onSubmit={handleLogin} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="login-email">Email</Label>
-                    <Input
-                      id="login-email"
-                      type="email"
-                      required
-                      value={loginData.email}
-                      onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
-                      className="h-12"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="login-password">Password</Label>
-                    <Input
-                      id="login-password"
-                      type="password"
-                      required
-                      value={loginData.password}
-                      onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
-                      className="h-12"
-                    />
-                  </div>
-                  <Button
-                    type="submit"
-                    className="w-full h-12 bg-accent hover:bg-amber-dark text-accent-foreground"
-                    disabled={isLoading}
-                  >
-                    {isLoading ? "Signing in..." : "Sign In"}
-                  </Button>
-                </form>
-              </TabsContent>
+                <TabsContent value="login">
+                  <form onSubmit={handleLogin} className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="login-email" className="text-sm font-medium">Email</Label>
+                      <Input
+                        id="login-email"
+                        type="email"
+                        required
+                        placeholder="you@business.com"
+                        value={loginData.email}
+                        onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
+                        className="h-12 rounded-xl"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="login-password" className="text-sm font-medium">Password</Label>
+                      <Input
+                        id="login-password"
+                        type="password"
+                        required
+                        placeholder="••••••••"
+                        value={loginData.password}
+                        onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
+                        className="h-12 rounded-xl"
+                      />
+                    </div>
+                    <Button
+                      type="submit"
+                      className="w-full h-12 bg-accent hover:bg-amber-dark text-accent-foreground font-semibold rounded-xl shadow-[var(--amber-glow)] transition-all"
+                      disabled={isLoading}
+                    >
+                      {isLoading ? "Signing in..." : "Sign In"}
+                    </Button>
+                  </form>
+                </TabsContent>
 
-              <TabsContent value="signup">
-                <div className="bg-secondary/50 rounded-lg p-4 mb-6">
-                  <p className="text-sm text-muted-foreground">
-                    <strong>Note:</strong> You must have an approved wholesale application before creating an account.{" "}
-                    <Link to="/wholesale" className="text-accent hover:underline">
-                      Apply here
-                    </Link>
-                  </p>
-                </div>
+                <TabsContent value="signup">
+                  <div className="bg-secondary/60 rounded-xl p-4 mb-6 border border-border/50">
+                    <p className="text-sm text-muted-foreground">
+                      <strong className="text-foreground">Note:</strong> You must have an approved wholesale application before creating an account.{" "}
+                      <Link to="/wholesale" className="text-accent font-medium hover:underline">
+                        Apply here
+                      </Link>
+                    </p>
+                  </div>
 
-                <form onSubmit={handleSignup} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-email">Email (from your application)</Label>
-                    <Input
-                      id="signup-email"
-                      type="email"
-                      required
-                      value={signupData.email}
-                      onChange={(e) => setSignupData({ ...signupData, email: e.target.value })}
-                      className="h-12"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-password">Password</Label>
-                    <Input
-                      id="signup-password"
-                      type="password"
-                      required
-                      value={signupData.password}
-                      onChange={(e) => setSignupData({ ...signupData, password: e.target.value })}
-                      className="h-12"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-confirm">Confirm Password</Label>
-                    <Input
-                      id="signup-confirm"
-                      type="password"
-                      required
-                      value={signupData.confirmPassword}
-                      onChange={(e) => setSignupData({ ...signupData, confirmPassword: e.target.value })}
-                      className="h-12"
-                    />
-                  </div>
-                  <Button
-                    type="submit"
-                    className="w-full h-12 bg-accent hover:bg-amber-dark text-accent-foreground"
-                    disabled={isLoading}
-                  >
-                    {isLoading ? "Creating Account..." : "Create Account"}
-                  </Button>
-                </form>
-              </TabsContent>
-            </Tabs>
+                  <form onSubmit={handleSignup} className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="signup-email" className="text-sm font-medium">Email (from your application)</Label>
+                      <Input
+                        id="signup-email"
+                        type="email"
+                        required
+                        placeholder="you@business.com"
+                        value={signupData.email}
+                        onChange={(e) => setSignupData({ ...signupData, email: e.target.value })}
+                        className="h-12 rounded-xl"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="signup-password" className="text-sm font-medium">Password</Label>
+                      <Input
+                        id="signup-password"
+                        type="password"
+                        required
+                        placeholder="Min. 6 characters"
+                        value={signupData.password}
+                        onChange={(e) => setSignupData({ ...signupData, password: e.target.value })}
+                        className="h-12 rounded-xl"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="signup-confirm" className="text-sm font-medium">Confirm Password</Label>
+                      <Input
+                        id="signup-confirm"
+                        type="password"
+                        required
+                        placeholder="••••••••"
+                        value={signupData.confirmPassword}
+                        onChange={(e) => setSignupData({ ...signupData, confirmPassword: e.target.value })}
+                        className="h-12 rounded-xl"
+                      />
+                    </div>
+                    <Button
+                      type="submit"
+                      className="w-full h-12 bg-accent hover:bg-amber-dark text-accent-foreground font-semibold rounded-xl shadow-[var(--amber-glow)] transition-all"
+                      disabled={isLoading}
+                    >
+                      {isLoading ? "Creating Account..." : "Create Account"}
+                    </Button>
+                  </form>
+                </TabsContent>
+              </Tabs>
+            </div>
           </motion.div>
         </div>
       </main>

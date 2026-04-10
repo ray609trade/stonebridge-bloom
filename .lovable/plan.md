@@ -1,33 +1,24 @@
 
 
-# Fix Wholesale Application Access
+# Remove Product Images from Order Page
 
-## Problem
-The wholesale application form on `/wholesale` requires authentication before submission, but the login page requires an approved application before account creation. New potential wholesale partners have no way to apply.
-
-## Solution
-Remove the authentication gate from the wholesale application form. Allow unauthenticated visitors to submit wholesale applications directly — the form already collects all necessary business info (name, email, phone, etc.). If a user happens to be logged in, still attach their `user_id`.
+## Overview
+Redesign the ProductCard to remove the image section entirely, creating a clean list-style card layout that doesn't depend on product photos.
 
 ## Changes
 
-### 1. `src/pages/Wholesale.tsx`
-- Remove the `!user` conditional block that shows "Sign In Required" with a redirect to login
-- Always render the application form regardless of auth state
-- Keep the existing `user_id: user?.id` in the insert (will be `null` for anonymous visitors, which is fine since the column is nullable)
-- Remove the loading state gate (no need to wait for auth check to show the form)
+### `src/components/menu/ProductCard.tsx` — Full redesign
+- Remove the entire image container (`aspect-[4/3]` div with `<img>`, category badge overlay)
+- Restructure as a horizontal card: product name, description, dietary tags, and price on the left; quick-add button on the right
+- Move the category badge inline as a small text label above the product name
+- Keep the quick-add button prominently placed on the right side of the card
+- Maintain hover/tap animations and all existing functionality (options detection, quick add, onSelect)
 
-### 2. RLS Policy Update
-The `wholesale_accounts` table already has an INSERT policy: `(auth.uid() IS NOT NULL)` — this blocks unauthenticated inserts. We need to update this to allow anonymous inserts for applications.
+### `src/pages/Order.tsx` — Grid adjustment
+- Change the grid from image-card layout (`grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4`) to a tighter layout better suited for text-only cards: `grid-cols-1 md:grid-cols-2 lg:grid-cols-3` with reduced gap
+- Update skeleton loaders to match the new shorter card height (no image = shorter cards)
 
-**Database migration:**
-```sql
-DROP POLICY "Authenticated users can request a wholesale account" ON public.wholesale_accounts;
-CREATE POLICY "Anyone can submit a wholesale application"
-  ON public.wholesale_accounts
-  FOR INSERT
-  TO public
-  WITH CHECK (status = 'pending');
-```
-
-This ensures anyone can submit an application (with `pending` status only), while still protecting against unauthorized status manipulation.
+### Design approach
+- Cards become compact horizontal rows: name + price on one line, description below, dietary tags at bottom, add button on far right
+- Feels like a clean restaurant menu — scannable, fast, premium typography-driven
 

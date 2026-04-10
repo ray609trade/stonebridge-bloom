@@ -1,13 +1,15 @@
 
-# Remove Image from Product Modal
+
+# Update About Page Content
 
 ## Overview
-Remove the image section from the ProductModal popup that appears when a product is clicked on the order page, and adjust spacing so the modal still looks clean.
+Replace the three paragraphs under "A Tradition of Excellence" with the new "About Stonebridge Bagels & Deli" copy, and update the heading to match.
 
 ## Changes
 
-### `src/components/menu/ProductModal.tsx`
-- Remove lines 131–138 (the image `<div>` with `aspect-[16/10]` and `<img>`)
-- Remove line 85 (the `image` variable declaration, since it's no longer used)
-- Add top padding to the content area so the header text doesn't collide with the close button and drag indicator
-- Reduce the modal height on mobile from `h-[95vh]` to `h-auto max-h-[85vh]` since there's no image taking up space
+### `src/pages/About.tsx`
+- **Line 97-98**: Change heading from "A Tradition of Excellence" to "About Stonebridge Bagels & Deli"
+- **Lines 100-117**: Replace the three `<p>` paragraphs inside the `<div className="space-y-4 ...">` with a single paragraph containing the provided text:
+
+> At Stonebridge Bagels & Deli, we believe great food starts with great ingredients. As a family-owned business proudly serving the Allentown, NJ community since 2013, we handcraft New York-style boiled bagels fresh on the premises every single day — crispy on the outside, perfectly fluffy on the inside. From classic spreads and made-to-order sandwiches to fresh salads, homemade cookies, and our one-of-a-kind Chorizo Bagel, there's something on our menu for everyone. Whether you're stopping in for a quick breakfast, grabbing lunch, or planning your next event, our catering team is ready to make it memorable. At Stonebridge, quality meets tradition — one bagel at a time.
+

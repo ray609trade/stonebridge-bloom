@@ -30,12 +30,6 @@ const values = [
   },
 ];
 
-const team = [
-  { name: "Team Member 1 (Sample)", role: "Head Baker", image: "/placeholder.svg" },
-  { name: "Team Member 2 (Sample)", role: "Owner", image: "/placeholder.svg" },
-  { name: "Team Member 3 (Sample)", role: "General Manager", image: "/placeholder.svg" },
-];
-
 export default function About() {
   const containerRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
@@ -163,49 +157,6 @@ export default function About() {
           </div>
         </section>
 
-        {/* Team Section */}
-        <section className="py-16 md:py-24 bg-background">
-          <div className="container mx-auto px-4">
-            <motion.div
-              initial={shouldAnimate ? { opacity: 0, y: 20 } : undefined}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5 }}
-              className="text-center mb-10 md:mb-16"
-            >
-              <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl font-semibold text-foreground mb-3 md:mb-4">
-                Meet the Team
-              </h2>
-              <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto">
-                The passionate people behind your favorite bagels
-              </p>
-            </motion.div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 max-w-4xl mx-auto">
-              {team.map((member, index) => (
-                <motion.div
-                  key={member.name}
-                  initial={shouldAnimate ? { opacity: 0, y: 20 } : undefined}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
-                  className="text-center"
-                >
-                  <div className="aspect-square rounded-2xl bg-secondary mb-3 md:mb-4 overflow-hidden">
-                    <img
-                      src={member.image}
-                      alt={member.name}
-                      className="w-full h-full object-cover"
-                      loading="lazy"
-                    />
-                  </div>
-                  <h3 className="font-serif text-base md:text-lg font-semibold text-foreground">{member.name}</h3>
-                  <p className="text-muted-foreground text-sm">{member.role}</p>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        </section>
       </main>
 
       <Footer />

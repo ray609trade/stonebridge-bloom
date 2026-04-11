@@ -47,7 +47,7 @@ export function Footer() {
 
   return (
     <footer className="bg-primary text-primary-foreground pb-20 md:pb-0">
-      <div className="container mx-auto px-4 py-10 md:py-16">
+      <div className="container mx-auto px-4 py-10 md:py-16 border-primary-foreground">
         {/* Mobile: Quick Action Buttons */}
         {isMobile && (
           <div className="flex gap-3 mb-8">

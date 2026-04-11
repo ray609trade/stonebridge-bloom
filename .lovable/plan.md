@@ -1,14 +1,28 @@
 
 
-# Remove "Meet the Team" Section from About Page
+# Add Photos to About Page with Quality Check
 
 ## Overview
-Remove the entire "Meet the Team" section (lines 166–215) from the About page, along with the `team` data array that feeds it.
+Copy the four uploaded images into the project assets, replace the placeholder divs with real `<img>` tags, and verify the visual quality on the live page.
 
 ## Changes
 
-### `src/pages/About.tsx`
-- Delete the `team` array constant (likely defined earlier in the file with team member names, roles, and images)
-- Delete the entire Team Section block (lines 166 through the end of that section, approximately line 213)
-- Keep the Values/Quality & Freshness section and closing tags intact
+### 1. Copy images to project
+Copy all four uploads into `src/assets/`:
+- `bagels_outside.jpg` → top-left (aspect-[4/5] slot)
+- `bagelshop_potos.jpg` → bottom-left (aspect-square slot)
+- `bagels_2.jpg` → top-right (aspect-square slot)
+- `baels_shop.jpg` → bottom-right (aspect-[4/5] slot)
+
+### 2. Update `src/pages/About.tsx`
+- Import all four images at top of file
+- Replace each placeholder `<div className="aspect-... rounded-xl bg-secondary" />` with an `<img>` tag using `object-cover w-full h-full rounded-xl` to maintain the grid layout and ensure crisp rendering
+- Add `loading="eager"` so they load immediately (above-the-fold content)
+
+### 3. Quality verification
+- Navigate to `/about` in the browser and take a screenshot to confirm:
+  - Images render at full resolution without blurriness
+  - Aspect ratios and cropping look natural
+  - No layout shifts or broken grid
+- Check on mobile viewport as well to ensure quality holds on smaller screens
 

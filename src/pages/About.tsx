@@ -6,6 +6,10 @@ import { Footer } from "@/components/layout/Footer";
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import { CartDrawer } from "@/components/cart/CartDrawer";
 import { useIsMobile } from "@/hooks/use-mobile";
+import bagelsOutside from "@/assets/bagels_outside.jpg";
+import bagelshopPhotos from "@/assets/bagelshop_potos.jpg";
+import bagels2 from "@/assets/bagels_2.jpg";
+import baelsShop from "@/assets/baels_shop.jpg";
 
 const values = [
   {

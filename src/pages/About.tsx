@@ -6,6 +6,10 @@ import { Footer } from "@/components/layout/Footer";
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import { CartDrawer } from "@/components/cart/CartDrawer";
 import { useIsMobile } from "@/hooks/use-mobile";
+import bagelsOutside from "@/assets/bagels_outside.jpg";
+import bagelshopPhotos from "@/assets/bagelshop_potos.jpg";
+import bagels2 from "@/assets/bagels_2.jpg";
+import baelsShop from "@/assets/baels_shop.jpg";
 
 const values = [
   {
@@ -106,12 +110,20 @@ export default function About() {
                 className="grid grid-cols-2 gap-3 md:gap-4"
               >
                 <div className="space-y-3 md:space-y-4">
-                  <div className="aspect-[4/5] rounded-xl bg-secondary" />
-                  <div className="aspect-square rounded-xl bg-secondary" />
+                  <div className="aspect-[4/5] rounded-xl overflow-hidden">
+                    <img src={bagelsOutside} alt="Stonebridge Bagels storefront" className="w-full h-full object-cover" loading="eager" />
+                  </div>
+                  <div className="aspect-square rounded-xl overflow-hidden">
+                    <img src={bagelshopPhotos} alt="Inside Stonebridge Bagels" className="w-full h-full object-cover" loading="eager" />
+                  </div>
                 </div>
                 <div className="space-y-3 md:space-y-4 pt-6 md:pt-8">
-                  <div className="aspect-square rounded-xl bg-secondary" />
-                  <div className="aspect-[4/5] rounded-xl bg-secondary" />
+                  <div className="aspect-square rounded-xl overflow-hidden">
+                    <img src={bagels2} alt="Fresh bagels on display" className="w-full h-full object-cover" loading="eager" />
+                  </div>
+                  <div className="aspect-[4/5] rounded-xl overflow-hidden">
+                    <img src={baelsShop} alt="Stonebridge Bagels bakery case" className="w-full h-full object-cover" loading="eager" />
+                  </div>
                 </div>
               </motion.div>
             </div>

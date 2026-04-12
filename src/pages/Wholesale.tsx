@@ -124,6 +124,17 @@ export default function Wholesale() {
 
       setIsSubmitted(true);
       toast.success("Application submitted successfully!");
+
+      // Notify admins (non-blocking)
+      supabase.functions.invoke('send-wholesale-application-notification', {
+        body: {
+          businessName: validatedData.businessName,
+          contactName: validatedData.contactName,
+          email: validatedData.email,
+          phone: validatedData.phone,
+          address: validatedData.address || null,
+        },
+      }).catch((err) => console.error('Failed to send admin notification:', err));
     } catch (error: any) {
       logError("Wholesale.handleSubmit", error);
       toast.error(getUserFriendlyError(error));

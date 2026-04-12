@@ -78,17 +78,38 @@ export function LeadsTab() {
   }, [queryClient]);
 
   const updateStatus = useMutation({
-    mutationFn: async ({ id, status }: { id: string; status: string }) => {
+    mutationFn: async ({ id, status, email, contactName, businessName }: { id: string; status: string; email: string; contactName: string; businessName: string }) => {
       const { error } = await supabase
         .from("wholesale_accounts")
         .update({ status: status as any })
         .eq("id", id);
       if (error) throw error;
+      return { status, email, contactName, businessName };
     },
-    onSuccess: () => {
+    onSuccess: async (data) => {
       queryClient.invalidateQueries({ queryKey: ["wholesale-accounts-shipping"] });
       toast.success("Account status updated");
       setSelectedAccount(null);
+
+      if (data.status === "approved" || data.status === "rejected") {
+        try {
+          const { data: result, error } = await supabase.functions.invoke('send-wholesale-status-email', {
+            body: {
+              email: data.email,
+              contactName: data.contactName,
+              businessName: data.businessName,
+              status: data.status,
+            },
+          });
+          if (error) throw error;
+          if (result?.success) {
+            toast.success("Notification email sent");
+          }
+        } catch (emailError) {
+          console.error("Failed to send status email:", emailError);
+          toast.error("Status updated but failed to send notification email");
+        }
+      }
     },
     onError: () => {
       toast.error("Failed to update status");

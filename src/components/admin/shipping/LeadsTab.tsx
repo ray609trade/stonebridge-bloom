@@ -78,17 +78,38 @@ export function LeadsTab() {
   }, [queryClient]);
 
   const updateStatus = useMutation({
-    mutationFn: async ({ id, status }: { id: string; status: string }) => {
+    mutationFn: async ({ id, status, email, contactName, businessName }: { id: string; status: string; email: string; contactName: string; businessName: string }) => {
       const { error } = await supabase
         .from("wholesale_accounts")
         .update({ status: status as any })
         .eq("id", id);
       if (error) throw error;
+      return { status, email, contactName, businessName };
     },
-    onSuccess: () => {
+    onSuccess: async (data) => {
       queryClient.invalidateQueries({ queryKey: ["wholesale-accounts-shipping"] });
       toast.success("Account status updated");
       setSelectedAccount(null);
+
+      if (data.status === "approved" || data.status === "rejected") {
+        try {
+          const { data: result, error } = await supabase.functions.invoke('send-wholesale-status-email', {
+            body: {
+              email: data.email,
+              contactName: data.contactName,
+              businessName: data.businessName,
+              status: data.status,
+            },
+          });
+          if (error) throw error;
+          if (result?.success) {
+            toast.success("Notification email sent");
+          }
+        } catch (emailError) {
+          console.error("Failed to send status email:", emailError);
+          toast.error("Status updated but failed to send notification email");
+        }
+      }
     },
     onError: () => {
       toast.error("Failed to update status");
@@ -195,7 +216,7 @@ export function LeadsTab() {
                             variant="ghost"
                             size="icon"
                             className="text-green-600 hover:text-green-700"
-                            onClick={() => updateStatus.mutate({ id: account.id, status: "approved" })}
+                            onClick={() => updateStatus.mutate({ id: account.id, status: "approved", email: account.email, contactName: account.contact_name, businessName: account.business_name })}
                           >
                             <CheckCircle className="h-4 w-4" />
                           </Button>
@@ -203,7 +224,7 @@ export function LeadsTab() {
                             variant="ghost"
                             size="icon"
                             className="text-red-600 hover:text-red-700"
-                            onClick={() => updateStatus.mutate({ id: account.id, status: "rejected" })}
+                            onClick={() => updateStatus.mutate({ id: account.id, status: "rejected", email: account.email, contactName: account.contact_name, businessName: account.business_name })}
                           >
                             <XCircle className="h-4 w-4" />
                           </Button>
@@ -289,7 +310,7 @@ export function LeadsTab() {
                 <div className="flex gap-3 pt-4 border-t">
                   <Button
                     className="flex-1"
-                    onClick={() => updateStatus.mutate({ id: selectedAccount.id, status: "approved" })}
+                    onClick={() => updateStatus.mutate({ id: selectedAccount.id, status: "approved", email: selectedAccount.email, contactName: selectedAccount.contact_name, businessName: selectedAccount.business_name })}
                   >
                     <CheckCircle className="mr-2 h-4 w-4" />
                     Approve
@@ -297,7 +318,7 @@ export function LeadsTab() {
                   <Button
                     variant="outline"
                     className="flex-1"
-                    onClick={() => updateStatus.mutate({ id: selectedAccount.id, status: "rejected" })}
+                    onClick={() => updateStatus.mutate({ id: selectedAccount.id, status: "rejected", email: selectedAccount.email, contactName: selectedAccount.contact_name, businessName: selectedAccount.business_name })}
                   >
                     <XCircle className="mr-2 h-4 w-4" />
                     Reject

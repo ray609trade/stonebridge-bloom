@@ -87,6 +87,47 @@ export default function WholesaleLogin() {
     }
   };
 
+  const handleOAuthSignIn = async (provider: "google" | "apple") => {
+    setIsLoading(true);
+    try {
+      const result = await lovable.auth.signInWithOAuth(provider, {
+        redirect_uri: window.location.origin,
+      });
+
+      if (result.redirected) return;
+      if (result.error) throw result.error;
+
+      // Check wholesale account access
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        const { data: account } = await supabase
+          .from("wholesale_accounts")
+          .select("id, status")
+          .eq("user_id", session.user.id)
+          .single();
+
+        if (!account) {
+          await supabase.auth.signOut();
+          toast.error("No wholesale account found for this email");
+          return;
+        }
+
+        if (account.status !== "approved") {
+          await supabase.auth.signOut();
+          toast.error("Your wholesale account is pending approval");
+          return;
+        }
+
+        toast.success("Welcome back!");
+        navigate("/wholesale/portal");
+      }
+    } catch (error: any) {
+      toast.error(error.message || "Failed to sign in");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
 

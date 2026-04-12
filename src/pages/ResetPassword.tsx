@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import { KeyRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -10,10 +10,15 @@ import { toast } from "sonner";
 
 export default function ResetPassword() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isRecoveryMode, setIsRecoveryMode] = useState(false);
+
+  // Determine which login page to redirect back to
+  const isWholesale = location.pathname.startsWith("/wholesale");
+  const loginPath = isWholesale ? "/wholesale/login" : "/admin/login";
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -47,7 +52,7 @@ export default function ResetPassword() {
 
       toast.success("Password updated successfully! Please sign in.");
       await supabase.auth.signOut();
-      navigate("/admin/login");
+      navigate(loginPath);
     } catch (error: any) {
       toast.error(error.message || "Failed to update password");
     } finally {
@@ -117,7 +122,7 @@ export default function ResetPassword() {
               If you arrived here from a reset email, your link is being verified. 
               If nothing happens, the link may have expired.
             </p>
-            <Button variant="outline" onClick={() => navigate("/admin/login")}>
+            <Button variant="outline" onClick={() => navigate(loginPath)}>
               Back to Login
             </Button>
           </div>

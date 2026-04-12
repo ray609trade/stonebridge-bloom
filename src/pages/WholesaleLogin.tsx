@@ -16,6 +16,28 @@ export default function WholesaleLogin() {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<"login" | "signup">("login");
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [resetEmail, setResetEmail] = useState("");
+
+  const handleForgotPassword = async () => {
+    if (!resetEmail) {
+      toast.error("Please enter your email address");
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
+        redirectTo: window.location.origin + "/wholesale/reset-password",
+      });
+      if (error) throw error;
+      toast.success("Password reset link sent! Check your email.");
+      setShowForgotPassword(false);
+    } catch (error: any) {
+      toast.error(error.message || "Failed to send reset link");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const [loginData, setLoginData] = useState({ email: "", password: "" });
   const [signupData, setSignupData] = useState({
@@ -197,7 +219,19 @@ export default function WholesaleLogin() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="login-password" className="text-sm font-medium">Password</Label>
+                      <div className="flex items-center justify-between">
+                        <Label htmlFor="login-password" className="text-sm font-medium">Password</Label>
+                        <button
+                          type="button"
+                          className="text-xs text-accent hover:underline"
+                          onClick={() => {
+                            setShowForgotPassword(true);
+                            setResetEmail(loginData.email);
+                          }}
+                        >
+                          Forgot Password?
+                        </button>
+                      </div>
                       <Input
                         id="login-password"
                         type="password"
@@ -276,6 +310,37 @@ export default function WholesaleLogin() {
                 </TabsContent>
               </Tabs>
             </div>
+            {showForgotPassword && (
+              <div className="mt-4 p-6 rounded-2xl border border-border bg-card shadow-[var(--card-shadow)] space-y-4">
+                <h2 className="font-serif text-lg font-semibold">Reset Password</h2>
+                <p className="text-sm text-muted-foreground">
+                  Enter your email and we'll send you a reset link.
+                </p>
+                <Input
+                  type="email"
+                  value={resetEmail}
+                  onChange={(e) => setResetEmail(e.target.value)}
+                  placeholder="you@business.com"
+                  className="h-12 rounded-xl"
+                />
+                <div className="flex gap-2">
+                  <Button
+                    className="flex-1 h-12 bg-accent hover:bg-amber-dark text-accent-foreground font-semibold rounded-xl"
+                    disabled={isLoading}
+                    onClick={handleForgotPassword}
+                  >
+                    {isLoading ? "Sending..." : "Send Reset Link"}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="h-12 rounded-xl"
+                    onClick={() => setShowForgotPassword(false)}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            )}
           </motion.div>
         </div>
       </main>

@@ -107,6 +107,24 @@ export default function Checkout() {
 
       if (error) throw error;
 
+      // Send order confirmation email via GHL (fire-and-forget)
+      supabase.functions.invoke('send-order-email', {
+        body: {
+          orderId: data.id,
+          customerEmail: validatedData.email,
+          customerName: validatedData.name,
+          orderNumber: data.order_number,
+          items: orderItems,
+          subtotal,
+          tax,
+          total,
+          pickupTime: validatedData.pickupTime,
+          pickupType: validatedData.pickupType,
+        },
+      }).catch((emailErr) => {
+        console.error('Failed to send order confirmation email:', emailErr);
+      });
+
       clearCart();
       navigate(`/order/confirmation/${data.order_number}`);
     } catch (error: any) {

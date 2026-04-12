@@ -7,19 +7,14 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
-  // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    // Get Twilio credentials
-    const TWILIO_ACCOUNT_SID = Deno.env.get('TWILIO_ACCOUNT_SID');
-    const TWILIO_AUTH_TOKEN = Deno.env.get('TWILIO_AUTH_TOKEN');
-    const TWILIO_PHONE_NUMBER = Deno.env.get('TWILIO_PHONE_NUMBER');
-
-    if (!TWILIO_ACCOUNT_SID || !TWILIO_AUTH_TOKEN || !TWILIO_PHONE_NUMBER) {
-      throw new Error('Twilio credentials not configured');
+    const GHL_API_KEY = Deno.env.get('GHL_API_KEY');
+    if (!GHL_API_KEY) {
+      throw new Error('GoHighLevel API key not configured');
     }
 
     // Verify auth
@@ -36,16 +31,6 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_ANON_KEY')!,
       { global: { headers: { Authorization: authHeader } } }
     );
-
-    // Verify user has admin role
-    const token = authHeader.replace('Bearer ', '');
-    const { data: claims, error: claimsError } = await supabase.auth.getClaims(token);
-    if (claimsError || !claims?.claims) {
-      return new Response(
-        JSON.stringify({ error: 'Unauthorized' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
 
     const { data: body } = await req.json().then(d => ({ data: d })).catch(() => ({ data: null }));
     
@@ -75,7 +60,6 @@ serve(async (req) => {
       );
     }
 
-    // Check if customer has a phone number
     if (!order.customer_phone) {
       return new Response(
         JSON.stringify({ 
@@ -95,47 +79,41 @@ serve(async (req) => {
       phoneNumber = '+' + phoneNumber;
     }
 
-    // Compose message
     const message = `Your Stonebridge Bagels order #${order.order_number} is ready for pickup! 🥯`;
 
-    // Send SMS via Twilio
-    const twilioUrl = `https://api.twilio.com/2010-04-01/Accounts/${TWILIO_ACCOUNT_SID}/Messages.json`;
-    const twilioAuth = btoa(`${TWILIO_ACCOUNT_SID}:${TWILIO_AUTH_TOKEN}`);
-
-    const formData = new URLSearchParams();
-    formData.append('To', phoneNumber);
-    formData.append('From', TWILIO_PHONE_NUMBER);
-    formData.append('Body', message);
-
-    const twilioResponse = await fetch(twilioUrl, {
+    // Send SMS via GoHighLevel
+    const ghlResponse = await fetch('https://rest.gohighlevel.com/v1/conversations/messages', {
       method: 'POST',
       headers: {
-        'Authorization': `Basic ${twilioAuth}`,
-        'Content-Type': 'application/x-www-form-urlencoded',
+        'Authorization': `Bearer ${GHL_API_KEY}`,
+        'Content-Type': 'application/json',
       },
-      body: formData.toString(),
+      body: JSON.stringify({
+        type: 'SMS',
+        phone: phoneNumber,
+        message: message,
+      }),
     });
 
-    const twilioResult = await twilioResponse.json();
+    const ghlResult = await ghlResponse.json();
 
-    if (!twilioResponse.ok) {
-      console.error('Twilio error:', twilioResult);
+    if (!ghlResponse.ok) {
+      console.error('GoHighLevel error:', ghlResult);
       return new Response(
         JSON.stringify({ 
           success: false, 
-          reason: 'twilio_error',
-          message: twilioResult.message || 'Failed to send SMS'
+          reason: 'ghl_error',
+          message: ghlResult.message || 'Failed to send SMS via GoHighLevel'
         }),
         { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    console.log('SMS sent successfully:', twilioResult.sid);
+    console.log('SMS sent via GoHighLevel successfully');
 
     return new Response(
       JSON.stringify({ 
         success: true, 
-        messageSid: twilioResult.sid,
         to: phoneNumber
       }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

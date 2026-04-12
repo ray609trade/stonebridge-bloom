@@ -1,24 +1,32 @@
 
 
-## Add Google & Apple OAuth to Wholesale Login
+## Send Email on Wholesale Application Approval/Rejection
 
-**Current state**: Admin login already has Google and Apple OAuth buttons. Wholesale login only has email/password.
+### Overview
+When an admin approves or rejects a wholesale application in the Leads tab, send an email notification to the applicant via GoHighLevel (matching the existing email pattern used for order confirmations).
 
-### Plan
+### Changes
 
-**File: `src/pages/WholesaleLogin.tsx`**
+**1. New Edge Function: `supabase/functions/send-wholesale-status-email/index.ts`**
+- Accepts `email`, `contactName`, `businessName`, and `status` (approved/rejected)
+- Sends email via GHL API (same pattern as `send-order-email`)
+- Approved email: congratulates them, tells them they can now log in at the wholesale portal
+- Rejected email: politely informs them the application was not approved at this time
+- Set `verify_jwt = false` in `supabase/config.toml`
 
-1. Import `lovable` from `@/integrations/lovable` and `Separator` from UI components
-2. Add an `handleOAuthSignIn` function that:
-   - Calls `lovable.auth.signInWithOAuth(provider, { redirect_uri: window.location.origin })`
-   - After successful auth, checks the `wholesale_accounts` table for an approved account linked to the user
-   - Signs out and shows error if no approved wholesale account exists
-   - Navigates to `/wholesale/portal` on success
-3. Add Google and Apple buttons below the Sign In button in the login tab, separated by an "or" divider (matching the admin login style)
-4. Add the same OAuth buttons below the Create Account button in the signup tab
+**2. Update `src/components/admin/shipping/LeadsTab.tsx`**
+- After the `updateStatus` mutation succeeds, call `supabase.functions.invoke('send-wholesale-status-email', ...)` with the account's email, contact name, business name, and new status
+- Show a toast on email success/failure (non-blocking — status update still succeeds even if email fails)
 
-### Technical Details
-- Reuses the same `lovable.auth.signInWithOAuth` pattern from `AdminLogin.tsx`
-- After OAuth callback, checks `wholesale_accounts` by `user_id` for approved status — same guard as the existing email login
-- Styling will match the existing rounded-xl, h-12 button style used throughout the wholesale login page
+### Email Content
+
+**Approved:**
+> Subject: Your Wholesale Application Has Been Approved! | Stonebridge Bagels
+>
+> Hi [Contact Name], Great news! Your wholesale application for [Business Name] has been approved. You can now log in to our wholesale portal to browse products and place orders. — Stonebridge Bagels
+
+**Rejected:**
+> Subject: Wholesale Application Update | Stonebridge Bagels
+>
+> Hi [Contact Name], Thank you for your interest in partnering with Stonebridge Bagels. Unfortunately, we're unable to approve your wholesale application for [Business Name] at this time. If you have questions, please reach out to us. — Stonebridge Bagels
 

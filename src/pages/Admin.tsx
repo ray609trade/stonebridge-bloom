@@ -282,27 +282,38 @@ export default function Admin() {
             { id: "wholesale", label: "Wholesale", icon: Building2 },
             { id: "shipping", label: "Shipping", icon: Ship },
             { id: "settings", label: "Settings", icon: Settings },
-          ].map((item) => (
-            <button
-              key={item.id}
-              onClick={() => {
-                if (item.href) {
-                  navigate(item.href);
-                } else {
-                  setActiveTab(item.id);
-                }
-              }}
-              className={cn(
-                "w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors",
-                activeTab === item.id
-                  ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                  : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50"
-              )}
-            >
-              <item.icon className="h-5 w-5" />
-              {item.label}
-            </button>
-          ))}
+          ].map((item) => {
+            const pendingCount = item.id === "wholesale"
+              ? wholesaleAccounts?.filter((a) => a.status === "pending").length || 0
+              : 0;
+
+            return (
+              <button
+                key={item.id}
+                onClick={() => {
+                  if (item.href) {
+                    navigate(item.href);
+                  } else {
+                    setActiveTab(item.id);
+                  }
+                }}
+                className={cn(
+                  "w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors",
+                  activeTab === item.id
+                    ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                    : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50"
+                )}
+              >
+                <item.icon className="h-5 w-5" />
+                <span className="flex-1">{item.label}</span>
+                {pendingCount > 0 && (
+                  <Badge className="bg-destructive text-destructive-foreground text-xs h-5 min-w-5 flex items-center justify-center rounded-full px-1.5">
+                    {pendingCount}
+                  </Badge>
+                )}
+              </button>
+            );
+          })}
         </nav>
 
         <div className="absolute bottom-4 left-4 right-4">

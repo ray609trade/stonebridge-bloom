@@ -16,6 +16,28 @@ export default function WholesaleLogin() {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<"login" | "signup">("login");
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [resetEmail, setResetEmail] = useState("");
+
+  const handleForgotPassword = async () => {
+    if (!resetEmail) {
+      toast.error("Please enter your email address");
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
+        redirectTo: window.location.origin + "/wholesale/reset-password",
+      });
+      if (error) throw error;
+      toast.success("Password reset link sent! Check your email.");
+      setShowForgotPassword(false);
+    } catch (error: any) {
+      toast.error(error.message || "Failed to send reset link");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const [loginData, setLoginData] = useState({ email: "", password: "" });
   const [signupData, setSignupData] = useState({

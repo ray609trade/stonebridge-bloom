@@ -310,6 +310,37 @@ export default function WholesaleLogin() {
                 </TabsContent>
               </Tabs>
             </div>
+            {showForgotPassword && (
+              <div className="mt-4 p-6 rounded-2xl border border-border bg-card shadow-[var(--card-shadow)] space-y-4">
+                <h2 className="font-serif text-lg font-semibold">Reset Password</h2>
+                <p className="text-sm text-muted-foreground">
+                  Enter your email and we'll send you a reset link.
+                </p>
+                <Input
+                  type="email"
+                  value={resetEmail}
+                  onChange={(e) => setResetEmail(e.target.value)}
+                  placeholder="you@business.com"
+                  className="h-12 rounded-xl"
+                />
+                <div className="flex gap-2">
+                  <Button
+                    className="flex-1 h-12 bg-accent hover:bg-amber-dark text-accent-foreground font-semibold rounded-xl"
+                    disabled={isLoading}
+                    onClick={handleForgotPassword}
+                  >
+                    {isLoading ? "Sending..." : "Send Reset Link"}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="h-12 rounded-xl"
+                    onClick={() => setShowForgotPassword(false)}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            )}
           </motion.div>
         </div>
       </main>

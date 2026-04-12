@@ -216,7 +216,7 @@ export function LeadsTab() {
                             variant="ghost"
                             size="icon"
                             className="text-green-600 hover:text-green-700"
-                            onClick={() => updateStatus.mutate({ id: account.id, status: "approved" })}
+                            onClick={() => updateStatus.mutate({ id: account.id, status: "approved", email: account.email, contactName: account.contact_name, businessName: account.business_name })}
                           >
                             <CheckCircle className="h-4 w-4" />
                           </Button>
@@ -224,7 +224,7 @@ export function LeadsTab() {
                             variant="ghost"
                             size="icon"
                             className="text-red-600 hover:text-red-700"
-                            onClick={() => updateStatus.mutate({ id: account.id, status: "rejected" })}
+                            onClick={() => updateStatus.mutate({ id: account.id, status: "rejected", email: account.email, contactName: account.contact_name, businessName: account.business_name })}
                           >
                             <XCircle className="h-4 w-4" />
                           </Button>
@@ -310,7 +310,7 @@ export function LeadsTab() {
                 <div className="flex gap-3 pt-4 border-t">
                   <Button
                     className="flex-1"
-                    onClick={() => updateStatus.mutate({ id: selectedAccount.id, status: "approved" })}
+                    onClick={() => updateStatus.mutate({ id: selectedAccount.id, status: "approved", email: selectedAccount.email, contactName: selectedAccount.contact_name, businessName: selectedAccount.business_name })}
                   >
                     <CheckCircle className="mr-2 h-4 w-4" />
                     Approve
@@ -318,7 +318,7 @@ export function LeadsTab() {
                   <Button
                     variant="outline"
                     className="flex-1"
-                    onClick={() => updateStatus.mutate({ id: selectedAccount.id, status: "rejected" })}
+                    onClick={() => updateStatus.mutate({ id: selectedAccount.id, status: "rejected", email: selectedAccount.email, contactName: selectedAccount.contact_name, businessName: selectedAccount.business_name })}
                   >
                     <XCircle className="mr-2 h-4 w-4" />
                     Reject

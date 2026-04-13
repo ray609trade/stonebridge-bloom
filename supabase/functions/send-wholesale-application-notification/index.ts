@@ -6,6 +6,42 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+async function findOrCreateContact(apiKey: string, email: string, name?: string): Promise<string | null> {
+  // Try to find existing contact
+  const lookupRes = await fetch(`https://rest.gohighlevel.com/v1/contacts/lookup?email=${encodeURIComponent(email)}`, {
+    headers: { 'Authorization': `Bearer ${apiKey}` },
+  });
+  
+  if (lookupRes.ok) {
+    const data = await lookupRes.json();
+    if (data?.contacts?.[0]?.id) {
+      return data.contacts[0].id;
+    }
+  }
+
+  // Create contact if not found
+  const createRes = await fetch('https://rest.gohighlevel.com/v1/contacts/', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      email,
+      name: name || email,
+      source: 'Stonebridge Bagels Admin',
+    }),
+  });
+
+  if (createRes.ok) {
+    const data = await createRes.json();
+    return data?.contact?.id || null;
+  }
+
+  console.error('Failed to create GHL contact:', await createRes.text());
+  return null;
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -62,10 +98,17 @@ Log in to the admin dashboard to review and approve or reject this application.
 — Stonebridge Bagels System
 `.trim();
 
-    // Send to each admin
     const results = [];
     for (const adminEmail of adminEmails) {
       try {
+        // Ensure admin exists as a GHL contact before sending
+        const contactId = await findOrCreateContact(GHL_API_KEY, adminEmail, 'Stonebridge Admin');
+        if (!contactId) {
+          console.error(`Could not find/create GHL contact for ${adminEmail}`);
+          results.push({ email: adminEmail, success: false, error: 'contact_not_created' });
+          continue;
+        }
+
         const ghlResponse = await fetch('https://rest.gohighlevel.com/v1/conversations/messages', {
           method: 'POST',
           headers: {
@@ -74,7 +117,7 @@ Log in to the admin dashboard to review and approve or reject this application.
           },
           body: JSON.stringify({
             type: 'Email',
-            email: adminEmail,
+            contactId,
             subject: `New Wholesale Application: ${businessName} | Stonebridge Bagels`,
             message: emailBody,
           }),

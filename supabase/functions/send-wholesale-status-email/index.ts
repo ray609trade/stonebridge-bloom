@@ -5,6 +5,42 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+async function findOrCreateContact(apiKey: string, email: string, name?: string): Promise<string | null> {
+  // Try to find existing contact
+  const lookupRes = await fetch(`https://rest.gohighlevel.com/v1/contacts/lookup?email=${encodeURIComponent(email)}`, {
+    headers: { 'Authorization': `Bearer ${apiKey}` },
+  });
+  
+  if (lookupRes.ok) {
+    const data = await lookupRes.json();
+    if (data?.contacts?.[0]?.id) {
+      return data.contacts[0].id;
+    }
+  }
+
+  // Create contact if not found
+  const createRes = await fetch('https://rest.gohighlevel.com/v1/contacts/', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      email,
+      name: name || email,
+      source: 'Stonebridge Bagels Wholesale',
+    }),
+  });
+
+  if (createRes.ok) {
+    const data = await createRes.json();
+    return data?.contact?.id || null;
+  }
+
+  console.error('Failed to create GHL contact:', await createRes.text());
+  return null;
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -22,6 +58,15 @@ serve(async (req) => {
       return new Response(
         JSON.stringify({ error: 'email and status are required' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Ensure recipient exists as a GHL contact
+    const contactId = await findOrCreateContact(GHL_API_KEY, email, contactName || businessName);
+    if (!contactId) {
+      return new Response(
+        JSON.stringify({ success: false, reason: 'contact_not_created', message: 'Could not find or create GHL contact' }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
@@ -64,7 +109,7 @@ If you have any questions or would like to discuss further, please don't hesitat
       },
       body: JSON.stringify({
         type: 'Email',
-        email,
+        contactId,
         subject,
         message: emailBody,
       }),

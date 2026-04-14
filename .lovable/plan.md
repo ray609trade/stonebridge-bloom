@@ -1,19 +1,23 @@
 
 
-## Option A: Update GHL API Key and Re-test
+## Rebrand Wholesale Page to "Bulk Orders"
 
-### Steps
+### What Changes
 
-1. **Update the `GHL_API_KEY` secret** with the correct Location API key from your GHL sub-account (Settings → Business Profile → API Key)
-2. **Test the wholesale application notification** by invoking the `send-wholesale-application-notification` Edge Function with a test payload
-3. **Verify logs** to confirm the GHL API accepts the new key and emails are delivered
+1. **Navigation label**: Change "Wholesale" → "Bulk Orders" in the Header nav links and MobileBottomNav
+2. **Page hero heading**: Change "Wholesale Partnership" → **"Fresh by the Dozen"**
+3. **Hero subheading**: Replace current description with: *"Ordering for your business, event, or team? We ship nationwide and offer local pickup starting at just 1 dozen. Set up a one-time or recurring order and we'll handle the rest."*
+4. **Page title/meta**: Update any references to "wholesale" in user-facing text throughout the page (benefits section titles, form heading, button labels, etc.) to use "bulk order" language where appropriate
 
-### Important: Getting the Right Key
-- Log into your GoHighLevel **sub-account** (not the agency account)
-- Go to **Settings → Business Profile**
-- Copy the **API Key** shown there — this is the Location API key
-- Do NOT use an OAuth token or agency-level key
+### Files to Edit
 
-### No Code Changes Needed
-The existing Edge Functions are already correctly coded for GHL v1 API. We just need a valid Location API key.
+- `src/components/layout/Header.tsx` — nav link label "Wholesale" → "Bulk Orders"
+- `src/components/layout/MobileBottomNav.tsx` — if wholesale link exists there
+- `src/pages/Wholesale.tsx` — hero heading, subheading, and relevant user-facing copy
+
+### What Stays the Same
+
+- URL routes remain `/wholesale` (no breaking changes)
+- All backend logic, form fields, and database tables unchanged
+- Internal code variable names stay as-is (wholesale terminology in code only)
 

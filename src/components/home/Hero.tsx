@@ -126,7 +126,7 @@ export function Hero() {
               className="w-full md:w-auto border-primary-foreground/50 bg-primary-foreground/10 text-primary-foreground hover:bg-primary-foreground/20 px-8 h-14 md:h-12 text-base active:scale-95 transition-transform touch-manipulation"
               asChild
             >
-              <Link to="/wholesale">Wholesale Portal</Link>
+              <Link to="/wholesale">Buy by the Dozen</Link>
             </Button>
           </motion.div>
         </div>

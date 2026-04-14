@@ -150,7 +150,7 @@ export function ProductForm({ product, categories, onClose, onSuccess }: Product
         if (error) throw error;
         toast.success("Product updated");
       } else {
-        const { error } = await supabase.from("products").insert(data);
+        const { error } = await supabase.from("products").insert(data as any);
         if (error) throw error;
         toast.success("Product created");
       }

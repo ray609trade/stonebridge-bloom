@@ -21,7 +21,7 @@ import type { User } from "@supabase/supabase-js";
 const benefits = [
   {
     icon: DollarSign,
-    title: "Wholesale Pricing",
+    title: "Bulk Pricing",
     description: "Competitive tiered pricing based on order volume.",
   },
   {
@@ -31,12 +31,12 @@ const benefits = [
   },
   {
     icon: Truck,
-    title: "Reliable Delivery",
-    description: "Fresh delivery to your location on your schedule.",
+    title: "Nationwide Shipping",
+    description: "We ship fresh to your door or offer local pickup.",
   },
   {
     icon: Building2,
-    title: "Net Terms",
+    title: "Flexible Payment",
     description: "Invoice-based payment options for approved accounts.",
   },
 ];
@@ -166,16 +166,17 @@ export default function Wholesale() {
               className="max-w-3xl"
             >
               <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl font-semibold text-primary-foreground mb-4 md:mb-6">
-                Wholesale Partnership
+                Fresh by the Dozen
               </h1>
               <p className="text-lg md:text-xl text-primary-foreground/80 leading-relaxed mb-6">
-                Partner with Stonebridge to bring fresh, handcrafted bagels to your cafe, 
-                restaurant, or business. Quality products with reliable service.
+                Ordering for your business, event, or team? We ship nationwide and offer 
+                local pickup starting at just 1 dozen. Set up a one-time or recurring order 
+                and we'll handle the rest.
               </p>
               <Button asChild variant="secondary" size="lg" className="font-semibold">
                 <Link to="/wholesale/login">
                   <LogIn className="mr-2 h-5 w-5" />
-                  Existing Partner? Login Here
+                  Existing Account? Login Here
                 </Link>
               </Button>
             </motion.div>
@@ -220,7 +221,7 @@ export default function Wholesale() {
                 className="text-center mb-8 md:mb-12"
               >
                 <h2 className="font-serif text-3xl md:text-4xl font-semibold text-foreground mb-3 md:mb-4">
-                  Request a Wholesale Account
+                  Set Up Your Bulk Order Account
                 </h2>
                 <p className="text-muted-foreground text-base md:text-lg">
                   Fill out the form below and we'll be in touch within 1-2 business days.

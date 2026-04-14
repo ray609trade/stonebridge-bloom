@@ -125,7 +125,7 @@ export function ProductForm({ product, categories, onClose, onSuccess }: Product
         }))
         .filter(g => g.choices.length > 0);
 
-      const data = {
+      const data: Record<string, any> = {
         name: validatedData.name,
         slug: validatedData.slug || validatedData.name.toLowerCase().replace(/\s+/g, "-"),
         description: validatedData.description || null,

@@ -1,32 +1,19 @@
 
 
-## Send Email on Wholesale Application Approval/Rejection
+## Option A: Update GHL API Key and Re-test
 
-### Overview
-When an admin approves or rejects a wholesale application in the Leads tab, send an email notification to the applicant via GoHighLevel (matching the existing email pattern used for order confirmations).
+### Steps
 
-### Changes
+1. **Update the `GHL_API_KEY` secret** with the correct Location API key from your GHL sub-account (Settings → Business Profile → API Key)
+2. **Test the wholesale application notification** by invoking the `send-wholesale-application-notification` Edge Function with a test payload
+3. **Verify logs** to confirm the GHL API accepts the new key and emails are delivered
 
-**1. New Edge Function: `supabase/functions/send-wholesale-status-email/index.ts`**
-- Accepts `email`, `contactName`, `businessName`, and `status` (approved/rejected)
-- Sends email via GHL API (same pattern as `send-order-email`)
-- Approved email: congratulates them, tells them they can now log in at the wholesale portal
-- Rejected email: politely informs them the application was not approved at this time
-- Set `verify_jwt = false` in `supabase/config.toml`
+### Important: Getting the Right Key
+- Log into your GoHighLevel **sub-account** (not the agency account)
+- Go to **Settings → Business Profile**
+- Copy the **API Key** shown there — this is the Location API key
+- Do NOT use an OAuth token or agency-level key
 
-**2. Update `src/components/admin/shipping/LeadsTab.tsx`**
-- After the `updateStatus` mutation succeeds, call `supabase.functions.invoke('send-wholesale-status-email', ...)` with the account's email, contact name, business name, and new status
-- Show a toast on email success/failure (non-blocking — status update still succeeds even if email fails)
-
-### Email Content
-
-**Approved:**
-> Subject: Your Wholesale Application Has Been Approved! | Stonebridge Bagels
->
-> Hi [Contact Name], Great news! Your wholesale application for [Business Name] has been approved. You can now log in to our wholesale portal to browse products and place orders. — Stonebridge Bagels
-
-**Rejected:**
-> Subject: Wholesale Application Update | Stonebridge Bagels
->
-> Hi [Contact Name], Thank you for your interest in partnering with Stonebridge Bagels. Unfortunately, we're unable to approve your wholesale application for [Business Name] at this time. If you have questions, please reach out to us. — Stonebridge Bagels
+### No Code Changes Needed
+The existing Edge Functions are already correctly coded for GHL v1 API. We just need a valid Location API key.
 

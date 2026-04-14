@@ -17,7 +17,9 @@ import {
   Truck,
   ExternalLink,
   Ship,
-  Home
+  Home,
+  Menu,
+  X
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -29,6 +31,7 @@ import { CategoryForm } from "@/components/admin/CategoryForm";
 import { OrderDetailModal } from "@/components/admin/OrderDetailModal";
 import { ShippingDashboard } from "@/components/admin/shipping/ShippingDashboard";
 import { cn } from "@/lib/utils";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface Order {
   id: string;
@@ -60,6 +63,7 @@ const statusColors: Record<string, string> = {
 export default function Admin() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const isMobile = useIsMobile();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("orders");
@@ -68,6 +72,7 @@ export default function Admin() {
   const [editingProduct, setEditingProduct] = useState<any>(null);
   const [editingCategory, setEditingCategory] = useState<any>(null);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -77,7 +82,6 @@ export default function Admin() {
         return;
       }
 
-      // Check admin role
       const { data } = await supabase
         .from("user_roles")
         .select("role")
@@ -181,7 +185,6 @@ export default function Admin() {
         .eq("id", id);
       if (error) throw error;
       
-      // Send SMS notification when status changes to "ready"
       if (status === 'ready') {
         const result = await sendOrderNotification(id);
         return { id, status, notificationResult: result };
@@ -191,7 +194,6 @@ export default function Admin() {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["admin-orders"] });
       
-      // Update selectedOrder if it's the one being updated
       if (selectedOrder && data?.id === selectedOrder.id) {
         setSelectedOrder({ ...selectedOrder, status: data.status });
       }
@@ -263,79 +265,153 @@ export default function Admin() {
     return null;
   }
 
+  const navItems = [
+    { id: "home", label: "View Site", icon: Home, href: "/" },
+    { id: "orders", label: "Orders", icon: ShoppingCart },
+    { id: "products", label: "Products", icon: Package },
+    { id: "categories", label: "Categories", icon: LayoutDashboard },
+    { id: "wholesale", label: "Wholesale", icon: Building2 },
+    { id: "shipping", label: "Shipping", icon: Ship },
+    { id: "settings", label: "Settings", icon: Settings },
+  ];
+
+  const handleNavClick = (item: typeof navItems[0]) => {
+    if (item.href) {
+      navigate(item.href);
+    } else {
+      setActiveTab(item.id);
+    }
+    if (isMobile) setSidebarOpen(false);
+  };
+
+  const sidebarContent = (
+    <>
+      <div className="mb-8">
+        <h1 className="font-serif text-xl font-semibold text-sidebar-primary">
+          Stonebridge Admin
+        </h1>
+      </div>
+
+      <nav className="space-y-1">
+        {navItems.map((item) => {
+          const pendingCount = item.id === "wholesale"
+            ? wholesaleAccounts?.filter((a) => a.status === "pending").length || 0
+            : 0;
+
+          return (
+            <button
+              key={item.id}
+              onClick={() => handleNavClick(item)}
+              className={cn(
+                "w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors",
+                activeTab === item.id
+                  ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                  : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50"
+              )}
+            >
+              <item.icon className="h-5 w-5" />
+              <span className="flex-1">{item.label}</span>
+              {pendingCount > 0 && (
+                <Badge className="bg-destructive text-destructive-foreground text-xs h-5 min-w-5 flex items-center justify-center rounded-full px-1.5">
+                  {pendingCount}
+                </Badge>
+              )}
+            </button>
+          );
+        })}
+      </nav>
+
+      <div className="absolute bottom-4 left-4 right-4">
+        <Button
+          variant="ghost"
+          className="w-full justify-start text-sidebar-foreground/70 hover:text-sidebar-foreground"
+          onClick={handleLogout}
+        >
+          <LogOut className="mr-2 h-4 w-4" />
+          Logout
+        </Button>
+      </div>
+    </>
+  );
+
   return (
     <div className="min-h-screen bg-secondary/30">
-      {/* Sidebar */}
-      <div className="fixed left-0 top-0 h-full w-64 bg-sidebar text-sidebar-foreground p-4">
-        <div className="mb-8">
-          <h1 className="font-serif text-xl font-semibold text-sidebar-primary">
-            Stonebridge Admin
-          </h1>
-        </div>
+      {/* Mobile top bar */}
+      <div className="md:hidden sticky top-0 z-40 bg-sidebar text-sidebar-foreground flex items-center justify-between px-4 h-14 border-b border-sidebar-border">
+        <button onClick={() => setSidebarOpen(true)} className="p-2 -ml-2">
+          <Menu className="h-5 w-5" />
+        </button>
+        <h1 className="font-serif text-lg font-semibold text-sidebar-primary">Stonebridge Admin</h1>
+        <Button variant="ghost" size="icon" className="text-sidebar-foreground/70" onClick={handleLogout}>
+          <LogOut className="h-4 w-4" />
+        </Button>
+      </div>
 
-        <nav className="space-y-1">
-          {[
-            { id: "home", label: "View Site", icon: Home, href: "/" },
-            { id: "orders", label: "Orders", icon: ShoppingCart },
-            { id: "products", label: "Products", icon: Package },
-            { id: "categories", label: "Categories", icon: LayoutDashboard },
-            { id: "wholesale", label: "Wholesale", icon: Building2 },
-            { id: "shipping", label: "Shipping", icon: Ship },
-            { id: "settings", label: "Settings", icon: Settings },
-          ].map((item) => {
-            const pendingCount = item.id === "wholesale"
-              ? wholesaleAccounts?.filter((a) => a.status === "pending").length || 0
-              : 0;
-
-            return (
-              <button
-                key={item.id}
-                onClick={() => {
-                  if (item.href) {
-                    navigate(item.href);
-                  } else {
-                    setActiveTab(item.id);
-                  }
-                }}
-                className={cn(
-                  "w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors",
-                  activeTab === item.id
-                    ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                    : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50"
-                )}
-              >
-                <item.icon className="h-5 w-5" />
-                <span className="flex-1">{item.label}</span>
-                {pendingCount > 0 && (
-                  <Badge className="bg-destructive text-destructive-foreground text-xs h-5 min-w-5 flex items-center justify-center rounded-full px-1.5">
-                    {pendingCount}
-                  </Badge>
-                )}
+      {/* Mobile sidebar overlay */}
+      {sidebarOpen && isMobile && (
+        <div className="fixed inset-0 z-50 md:hidden">
+          <div className="fixed inset-0 bg-black/50" onClick={() => setSidebarOpen(false)} />
+          <div className="fixed left-0 top-0 h-full w-64 bg-sidebar text-sidebar-foreground p-4 shadow-lg">
+            <div className="flex items-center justify-between mb-4">
+              <h1 className="font-serif text-xl font-semibold text-sidebar-primary">Admin</h1>
+              <button onClick={() => setSidebarOpen(false)} className="p-1">
+                <X className="h-5 w-5 text-sidebar-foreground/70" />
               </button>
-            );
-          })}
-        </nav>
-
-        <div className="absolute bottom-4 left-4 right-4">
-          <Button
-            variant="ghost"
-            className="w-full justify-start text-sidebar-foreground/70 hover:text-sidebar-foreground"
-            onClick={handleLogout}
-          >
-            <LogOut className="mr-2 h-4 w-4" />
-            Logout
-          </Button>
+            </div>
+            <nav className="space-y-1">
+              {navItems.map((item) => {
+                const pendingCount = item.id === "wholesale"
+                  ? wholesaleAccounts?.filter((a) => a.status === "pending").length || 0
+                  : 0;
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => handleNavClick(item)}
+                    className={cn(
+                      "w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors",
+                      activeTab === item.id
+                        ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                        : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50"
+                    )}
+                  >
+                    <item.icon className="h-5 w-5" />
+                    <span className="flex-1">{item.label}</span>
+                    {pendingCount > 0 && (
+                      <Badge className="bg-destructive text-destructive-foreground text-xs h-5 min-w-5 flex items-center justify-center rounded-full px-1.5">
+                        {pendingCount}
+                      </Badge>
+                    )}
+                  </button>
+                );
+              })}
+            </nav>
+            <div className="absolute bottom-4 left-4 right-4">
+              <Button
+                variant="ghost"
+                className="w-full justify-start text-sidebar-foreground/70 hover:text-sidebar-foreground"
+                onClick={handleLogout}
+              >
+                <LogOut className="mr-2 h-4 w-4" />
+                Logout
+              </Button>
+            </div>
+          </div>
         </div>
+      )}
+
+      {/* Desktop sidebar */}
+      <div className="hidden md:block fixed left-0 top-0 h-full w-64 bg-sidebar text-sidebar-foreground p-4">
+        {sidebarContent}
       </div>
 
       {/* Main Content */}
-      <div className="ml-64 p-8">
+      <div className="md:ml-64 p-4 md:p-8">
         {/* Orders Tab */}
         {activeTab === "orders" && (
           <div>
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
               <h2 className="font-serif text-2xl font-semibold">Orders</h2>
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-wrap">
                 {["pending", "confirmed", "preparing", "ready"].map((status) => (
                   <Badge
                     key={status}
@@ -348,7 +424,92 @@ export default function Admin() {
               </div>
             </div>
 
-            <div className="bg-card rounded-xl border border-border overflow-hidden">
+            {/* Mobile: card layout */}
+            <div className="md:hidden space-y-3">
+              {orders?.map((order) => (
+                <div
+                  key={order.id}
+                  className="bg-card rounded-xl border border-border p-4 cursor-pointer active:bg-secondary/30"
+                  onClick={() => setSelectedOrder(order)}
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="font-medium">{order.order_number}</span>
+                    <Badge className={cn("capitalize", statusColors[order.status || "pending"])}>
+                      {order.status || "pending"}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-sm">{order.customer_name}</span>
+                    <Badge variant="outline" className="capitalize text-xs">
+                      {order.order_type}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center justify-between text-sm text-muted-foreground">
+                    <span>${order.total.toFixed(2)}</span>
+                    <span>
+                      {order.created_at
+                        ? new Date(order.created_at).toLocaleDateString()
+                        : "N/A"}
+                    </span>
+                  </div>
+                  {order.tracking_number && (
+                    <div className="mt-2 flex items-center gap-1">
+                      <Badge variant="outline" className="text-xs">
+                        <Truck className="h-3 w-3 mr-1" />
+                        {order.carrier_code?.toUpperCase() || 'SHIPPED'}
+                      </Badge>
+                    </div>
+                  )}
+                  <div className="mt-3 flex gap-2">
+                    <Button variant="outline" size="sm" className="h-8 text-xs" onClick={(e) => { e.stopPropagation(); setSelectedOrder(order); }}>
+                      <Eye className="h-3 w-3 mr-1" /> View
+                    </Button>
+                    {order.status !== "completed" && order.status !== "cancelled" && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-8 text-xs"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          const nextStatus: Record<string, string> = {
+                            pending: "confirmed",
+                            confirmed: "preparing",
+                            preparing: "ready",
+                            ready: "completed",
+                          };
+                          updateOrderStatus.mutate({
+                            id: order.id,
+                            status: nextStatus[order.status || "pending"],
+                          });
+                        }}
+                      >
+                        <CheckCircle className="h-3 w-3 mr-1" /> Advance
+                      </Button>
+                    )}
+                    {order.order_type === 'wholesale' && !order.shipstation_order_id && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-8 text-xs"
+                        disabled={syncToShipStation.isPending}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          syncToShipStation.mutate(order.id);
+                        }}
+                      >
+                        <Truck className="h-3 w-3 mr-1" /> Sync
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              ))}
+              {orders?.length === 0 && (
+                <div className="p-8 text-center text-muted-foreground">No orders yet</div>
+              )}
+            </div>
+
+            {/* Desktop: table layout */}
+            <div className="hidden md:block bg-card rounded-xl border border-border overflow-hidden">
               <table className="w-full">
                 <thead className="bg-secondary/50 border-b border-border">
                   <tr>
@@ -539,7 +700,38 @@ export default function Admin() {
               </Button>
             </div>
 
-            <div className="bg-card rounded-xl border border-border overflow-hidden">
+            {/* Mobile: card layout */}
+            <div className="md:hidden space-y-3">
+              {categories?.map((category) => (
+                <div key={category.id} className="bg-card rounded-xl border border-border p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="font-medium">{category.name}</h3>
+                    <Badge variant={category.active ? "default" : "secondary"}>
+                      {category.active ? "Active" : "Inactive"}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex gap-2">
+                      <Badge variant="outline" className="capitalize text-xs">{category.visibility}</Badge>
+                      <span className="text-xs text-muted-foreground">{category.slug}</span>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => {
+                        setEditingCategory(category);
+                        setShowCategoryForm(true);
+                      }}
+                    >
+                      <Edit2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Desktop: table layout */}
+            <div className="hidden md:block bg-card rounded-xl border border-border overflow-hidden">
               <table className="w-full">
                 <thead className="bg-secondary/50 border-b border-border">
                   <tr>
@@ -592,7 +784,40 @@ export default function Admin() {
               Wholesale Accounts
             </h2>
 
-            <div className="bg-card rounded-xl border border-border overflow-hidden">
+            {/* Mobile: card layout */}
+            <div className="md:hidden space-y-3">
+              {wholesaleAccounts?.map((account) => (
+                <div key={account.id} className="bg-card rounded-xl border border-border p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="font-medium">{account.business_name}</h3>
+                    <Badge
+                      variant={account.status === "approved" ? "default" : "secondary"}
+                      className="capitalize"
+                    >
+                      {account.status}
+                    </Badge>
+                  </div>
+                  <p className="text-sm">{account.contact_name}</p>
+                  <p className="text-sm text-muted-foreground mb-1">{account.email}</p>
+                  <div className="flex items-center justify-between text-xs text-muted-foreground">
+                    <span className="capitalize">{account.tier}</span>
+                    <span>
+                      {account.created_at
+                        ? new Date(account.created_at).toLocaleDateString()
+                        : "N/A"}
+                    </span>
+                  </div>
+                </div>
+              ))}
+              {wholesaleAccounts?.length === 0 && (
+                <div className="p-8 text-center text-muted-foreground">
+                  No wholesale account applications yet
+                </div>
+              )}
+            </div>
+
+            {/* Desktop: table layout */}
+            <div className="hidden md:block bg-card rounded-xl border border-border overflow-hidden">
               <table className="w-full">
                 <thead className="bg-secondary/50 border-b border-border">
                   <tr>

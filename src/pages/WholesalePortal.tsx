@@ -161,7 +161,7 @@ function WholesalePortalContent() {
               </div>
               <h1 className="font-serif text-2xl font-semibold mb-3">Account Not Found</h1>
               <p className="text-muted-foreground mb-6">
-                No approved wholesale account found for your email.
+                No approved bulk order account found for your email.
               </p>
               <Button onClick={handleLogout} variant="outline">Sign Out</Button>
             </div>

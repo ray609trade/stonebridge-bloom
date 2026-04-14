@@ -68,13 +68,13 @@ export default function WholesaleLogin() {
 
       if (accountError || !account) {
         await supabase.auth.signOut();
-        toast.error("No wholesale account found for this email");
+        toast.error("No bulk order account found for this email");
         return;
       }
 
       if (account.status !== "approved") {
         await supabase.auth.signOut();
-        toast.error("Your wholesale account is pending approval");
+        toast.error("Your bulk order account is pending approval");
         return;
       }
 
@@ -108,13 +108,13 @@ export default function WholesaleLogin() {
 
         if (!account) {
           await supabase.auth.signOut();
-          toast.error("No wholesale account found for this email");
+          toast.error("No bulk order account found for this email");
           return;
         }
 
         if (account.status !== "approved") {
           await supabase.auth.signOut();
-          toast.error("Your wholesale account is pending approval");
+          toast.error("Your bulk order account is pending approval");
           return;
         }
 
@@ -151,7 +151,7 @@ export default function WholesaleLogin() {
         .single();
 
       if (!existingAccount) {
-        toast.error("No wholesale application found. Please apply first.", {
+        toast.error("No bulk order application found. Please apply first.", {
           action: {
             label: "Apply Now",
             onClick: () => navigate("/wholesale"),
@@ -161,7 +161,7 @@ export default function WholesaleLogin() {
       }
 
       if (existingAccount.status !== "approved") {
-        toast.error("Your wholesale application is still pending approval");
+        toast.error("Your bulk order application is still pending approval");
         return;
       }
 
@@ -212,7 +212,7 @@ export default function WholesaleLogin() {
           <Button variant="ghost" className="mb-6 -ml-2" asChild>
             <Link to="/wholesale">
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Wholesale
+              Back to Bulk Orders
             </Link>
           </Button>
 
@@ -227,10 +227,10 @@ export default function WholesaleLogin() {
                 <ShieldCheck className="h-8 w-8 text-accent" />
               </div>
               <h1 className="font-serif text-3xl font-semibold text-foreground">
-                Wholesale Portal
+                Bulk Orders Portal
               </h1>
               <p className="text-muted-foreground mt-2">
-                Sign in to access exclusive wholesale pricing
+                Sign in to access your bulk order account
               </p>
             </div>
 
@@ -334,7 +334,7 @@ export default function WholesaleLogin() {
                 <TabsContent value="signup">
                   <div className="bg-secondary/60 rounded-xl p-4 mb-6 border border-border/50">
                     <p className="text-sm text-muted-foreground">
-                      <strong className="text-foreground">Note:</strong> You must have an approved wholesale application before creating an account.{" "}
+                      <strong className="text-foreground">Note:</strong> You must have an approved bulk order application before creating an account.{" "}
                       <Link to="/wholesale" className="text-accent font-medium hover:underline">
                         Apply here
                       </Link>

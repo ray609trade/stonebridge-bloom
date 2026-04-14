@@ -21,23 +21,23 @@ import type { User } from "@supabase/supabase-js";
 const benefits = [
   {
     icon: DollarSign,
-    title: "Bulk Pricing",
-    description: "Competitive tiered pricing based on order volume.",
+    title: "Priced by the Dozen",
+    description: "Simple, transparent pricing starting at 1 dozen — the more you order, the more you save.",
   },
   {
     icon: Clock,
-    title: "Recurring Orders",
-    description: "Set up weekly or daily standing orders for convenience.",
+    title: "Set Your Schedule",
+    description: "Need bagels every Monday morning? Set up a recurring order and we'll have them ready — fresh, on time, every time.",
   },
   {
     icon: Truck,
-    title: "Nationwide Shipping",
-    description: "We ship fresh to your door or offer local pickup.",
+    title: "Ship Nationwide or Pick Up Local",
+    description: "We ship fresh bagels straight to your door anywhere in the country, or skip the wait and pick up right from our Allentown location.",
   },
   {
     icon: Building2,
-    title: "Flexible Payment",
-    description: "Invoice-based payment options for approved accounts.",
+    title: "Easy Business Billing",
+    description: "Businesses and approved accounts can invoice with flexible payment options — built for teams that order regularly.",
   },
 ];
 

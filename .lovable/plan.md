@@ -1,15 +1,24 @@
 
 
-## Update Benefits Section Copy
+## Rebrand Login and Portal Pages to "Bulk Orders"
 
-### Changes to `src/pages/Wholesale.tsx` (lines 21-42)
+### WholesaleLogin.tsx
 
-Replace the current `benefits` array with updated titles, descriptions, and icons:
+1. **Line 215**: "Back to Wholesale" → "Back to Bulk Orders"
+2. **Line 230**: "Wholesale Portal" → "Bulk Orders Portal"
+3. **Line 233**: "Sign in to access exclusive wholesale pricing" → "Sign in to access your bulk order account"
+4. **Line 71**: Toast "No wholesale account found for this email" → "No bulk order account found for this email"
+5. **Line 77**: Toast "Your wholesale account is pending approval" → "Your bulk order account is pending approval"
+6. **Line 111**: Toast "No wholesale account found for this email" → "No bulk order account found for this email"
+7. **Line 117**: Toast "Your wholesale account is pending approval" → "Your bulk order account is pending approval"
+8. **Line 154**: Toast "No wholesale application found..." → "No bulk order application found..."
+9. **Line 163**: Toast "Your wholesale application is still pending approval" → "Your bulk order application is still pending approval"
+10. **Line 337**: "approved wholesale application" → "approved bulk order application"
 
-1. **"Priced by the Dozen"** (DollarSign icon) — "Simple, transparent pricing starting at 1 dozen — the more you order, the more you save."
-2. **"Set Your Schedule"** (Clock icon) — "Need bagels every Monday morning? Set up a recurring order and we'll have them ready — fresh, on time, every time."
-3. **"Ship Nationwide or Pick Up Local"** (Truck icon) — "We ship fresh bagels straight to your door anywhere in the country, or skip the wait and pick up right from our Allentown location."
-4. **"Easy Business Billing"** (Building2 icon) — "Businesses and approved accounts can invoice with flexible payment options — built for teams that order regularly."
+### WholesalePortal.tsx
 
-No other files or backend changes needed.
+1. **Line 164**: "No approved wholesale account found" → "No approved bulk order account found"
+
+### What Stays the Same
+- URL routes (`/wholesale/*`), database tables, internal variable/component names all unchanged
 

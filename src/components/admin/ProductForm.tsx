@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { X } from "lucide-react";
+import { X, Plus, Trash2, ChevronDown, ChevronUp } from "lucide-react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,6 +17,18 @@ interface Category {
   name: string;
 }
 
+interface OptionChoice {
+  label: string;
+  price: number;
+}
+
+interface OptionGroup {
+  name: string;
+  type: "single" | "multiple";
+  required: boolean;
+  choices: OptionChoice[];
+}
+
 interface ProductFormProps {
   product?: any;
   categories: Category[];
@@ -24,9 +36,25 @@ interface ProductFormProps {
   onSuccess: () => void;
 }
 
+function parseExistingOptions(options: any): OptionGroup[] {
+  if (!options || !Array.isArray(options)) return [];
+  return options.map((opt: any) => ({
+    name: opt.name || "",
+    type: opt.type === "multiple" ? "multiple" : "single",
+    required: !!opt.required,
+    choices: Array.isArray(opt.choices)
+      ? opt.choices.map((c: any) => ({ label: c.label || "", price: Number(c.price) || 0 }))
+      : [],
+  }));
+}
+
 export function ProductForm({ product, categories, onClose, onSuccess }: ProductFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [optionGroups, setOptionGroups] = useState<OptionGroup[]>(
+    parseExistingOptions(product?.options)
+  );
+  const [optionsExpanded, setOptionsExpanded] = useState(optionGroups.length > 0);
   const [formData, setFormData] = useState({
     name: product?.name || "",
     slug: product?.slug || "",
@@ -41,10 +69,40 @@ export function ProductForm({ product, categories, onClose, onSuccess }: Product
     sort_order: product?.sort_order?.toString() || "0",
   });
 
+  const addOptionGroup = () => {
+    setOptionGroups([...optionGroups, { name: "", type: "single", required: false, choices: [{ label: "", price: 0 }] }]);
+    setOptionsExpanded(true);
+  };
+
+  const removeOptionGroup = (index: number) => {
+    setOptionGroups(optionGroups.filter((_, i) => i !== index));
+  };
+
+  const updateOptionGroup = (index: number, updates: Partial<OptionGroup>) => {
+    setOptionGroups(optionGroups.map((g, i) => (i === index ? { ...g, ...updates } : g)));
+  };
+
+  const addChoice = (groupIndex: number) => {
+    const updated = [...optionGroups];
+    updated[groupIndex].choices.push({ label: "", price: 0 });
+    setOptionGroups(updated);
+  };
+
+  const removeChoice = (groupIndex: number, choiceIndex: number) => {
+    const updated = [...optionGroups];
+    updated[groupIndex].choices = updated[groupIndex].choices.filter((_, i) => i !== choiceIndex);
+    setOptionGroups(updated);
+  };
+
+  const updateChoice = (groupIndex: number, choiceIndex: number, updates: Partial<OptionChoice>) => {
+    const updated = [...optionGroups];
+    updated[groupIndex].choices[choiceIndex] = { ...updated[groupIndex].choices[choiceIndex], ...updates };
+    setOptionGroups(updated);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validate form data
     const validation = validateForm(productFormSchema, formData);
     if (!validation.success) {
       setFieldErrors((validation as { success: false; errors: Record<string, string> }).errors);
@@ -58,6 +116,15 @@ export function ProductForm({ product, categories, onClose, onSuccess }: Product
     try {
       const validatedData = validation.data;
       
+      // Filter out empty option groups/choices
+      const cleanedOptions = optionGroups
+        .filter(g => g.name.trim())
+        .map(g => ({
+          ...g,
+          choices: g.choices.filter(c => c.label.trim()),
+        }))
+        .filter(g => g.choices.length > 0);
+
       const data = {
         name: validatedData.name,
         slug: validatedData.slug || validatedData.name.toLowerCase().replace(/\s+/g, "-"),
@@ -72,6 +139,7 @@ export function ProductForm({ product, categories, onClose, onSuccess }: Product
         active: validatedData.active,
         featured: validatedData.featured,
         sort_order: parseInt(validatedData.sort_order) || 0,
+        options: cleanedOptions,
       };
 
       if (product?.id) {
@@ -226,6 +294,121 @@ export function ProductForm({ product, categories, onClose, onSuccess }: Product
             />
             {fieldErrors.dietary_tags && (
               <p className="text-sm text-destructive">{fieldErrors.dietary_tags}</p>
+            )}
+          </div>
+
+          {/* Product Options Editor */}
+          <div className="border border-border rounded-lg">
+            <button
+              type="button"
+              className="flex items-center justify-between w-full p-3 text-left"
+              onClick={() => setOptionsExpanded(!optionsExpanded)}
+            >
+              <span className="font-medium text-sm">
+                Product Options {optionGroups.length > 0 && `(${optionGroups.length})`}
+              </span>
+              {optionsExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+            </button>
+
+            {optionsExpanded && (
+              <div className="px-3 pb-3 space-y-4">
+                {optionGroups.map((group, gi) => (
+                  <div key={gi} className="border border-border/50 rounded-md p-3 space-y-3 bg-muted/30">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex-1 space-y-2">
+                        <Input
+                          placeholder="Option group name (e.g. Spread Choice)"
+                          value={group.name}
+                          onChange={(e) => updateOptionGroup(gi, { name: e.target.value })}
+                        />
+                        <div className="flex items-center gap-4">
+                          <Select
+                            value={group.type}
+                            onValueChange={(v) => updateOptionGroup(gi, { type: v as "single" | "multiple" })}
+                          >
+                            <SelectTrigger className="w-32 h-8 text-xs">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="single">Single</SelectItem>
+                              <SelectItem value="multiple">Multiple</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <div className="flex items-center gap-1.5">
+                            <Switch
+                              checked={group.required}
+                              onCheckedChange={(v) => updateOptionGroup(gi, { required: v })}
+                              className="scale-75"
+                            />
+                            <span className="text-xs text-muted-foreground">Required</span>
+                          </div>
+                        </div>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-destructive"
+                        onClick={() => removeOptionGroup(gi)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label className="text-xs text-muted-foreground">Choices</Label>
+                      {group.choices.map((choice, ci) => (
+                        <div key={ci} className="flex items-center gap-2">
+                          <Input
+                            placeholder="Choice label"
+                            value={choice.label}
+                            onChange={(e) => updateChoice(gi, ci, { label: e.target.value })}
+                            className="flex-1 h-8 text-sm"
+                          />
+                          <Input
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            placeholder="$0.00"
+                            value={choice.price || ""}
+                            onChange={(e) => updateChoice(gi, ci, { price: parseFloat(e.target.value) || 0 })}
+                            className="w-20 h-8 text-sm"
+                          />
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                            onClick={() => removeChoice(gi, ci)}
+                            disabled={group.choices.length <= 1}
+                          >
+                            <X className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      ))}
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="text-xs h-7"
+                        onClick={() => addChoice(gi)}
+                      >
+                        <Plus className="h-3 w-3 mr-1" /> Add Choice
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="w-full"
+                  onClick={addOptionGroup}
+                >
+                  <Plus className="h-4 w-4 mr-1" /> Add Option Group
+                </Button>
+              </div>
             )}
           </div>
 

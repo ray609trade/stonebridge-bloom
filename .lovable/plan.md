@@ -1,23 +1,15 @@
 
 
-## Rebrand Wholesale Page to "Bulk Orders"
+## Update Benefits Section Copy
 
-### What Changes
+### Changes to `src/pages/Wholesale.tsx` (lines 21-42)
 
-1. **Navigation label**: Change "Wholesale" → "Bulk Orders" in the Header nav links and MobileBottomNav
-2. **Page hero heading**: Change "Wholesale Partnership" → **"Fresh by the Dozen"**
-3. **Hero subheading**: Replace current description with: *"Ordering for your business, event, or team? We ship nationwide and offer local pickup starting at just 1 dozen. Set up a one-time or recurring order and we'll handle the rest."*
-4. **Page title/meta**: Update any references to "wholesale" in user-facing text throughout the page (benefits section titles, form heading, button labels, etc.) to use "bulk order" language where appropriate
+Replace the current `benefits` array with updated titles, descriptions, and icons:
 
-### Files to Edit
+1. **"Priced by the Dozen"** (DollarSign icon) — "Simple, transparent pricing starting at 1 dozen — the more you order, the more you save."
+2. **"Set Your Schedule"** (Clock icon) — "Need bagels every Monday morning? Set up a recurring order and we'll have them ready — fresh, on time, every time."
+3. **"Ship Nationwide or Pick Up Local"** (Truck icon) — "We ship fresh bagels straight to your door anywhere in the country, or skip the wait and pick up right from our Allentown location."
+4. **"Easy Business Billing"** (Building2 icon) — "Businesses and approved accounts can invoice with flexible payment options — built for teams that order regularly."
 
-- `src/components/layout/Header.tsx` — nav link label "Wholesale" → "Bulk Orders"
-- `src/components/layout/MobileBottomNav.tsx` — if wholesale link exists there
-- `src/pages/Wholesale.tsx` — hero heading, subheading, and relevant user-facing copy
-
-### What Stays the Same
-
-- URL routes remain `/wholesale` (no breaking changes)
-- All backend logic, form fields, and database tables unchanged
-- Internal code variable names stay as-is (wholesale terminology in code only)
+No other files or backend changes needed.
 

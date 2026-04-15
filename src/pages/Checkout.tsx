@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useCart } from "@/hooks/useCart";
+import { SEOHead } from "@/components/SEOHead";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -160,6 +161,11 @@ export default function Checkout() {
 
   return (
     <div className="min-h-screen bg-background pb-20 md:pb-0">
+      <SEOHead
+        title="Checkout — Place Your Pickup Order"
+        description="Complete your order for fresh bagels and deli items from Stonebridge Bagels & Deli. Choose your pickup time and pay at the counter."
+        path="/order/checkout"
+      />
       <Header />
 
       <main className="pt-20 md:pt-24 pb-8 md:pb-16">

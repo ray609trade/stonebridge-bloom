@@ -13,6 +13,7 @@ import { Separator } from "@/components/ui/separator";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { toast } from "sonner";
+import { SEOHead } from "@/components/SEOHead";
 
 export default function WholesaleLogin() {
   const navigate = useNavigate();
@@ -205,6 +206,11 @@ export default function WholesaleLogin() {
 
   return (
     <div className="min-h-screen bg-background pb-20 md:pb-0">
+      <SEOHead
+        title="Wholesale Login"
+        description="Sign in to your Stonebridge Bagels wholesale account to place bulk orders, track shipments, and manage your business purchases."
+        path="/wholesale/login"
+      />
       <Header />
 
       <main className="pt-24 md:pt-32 pb-16">

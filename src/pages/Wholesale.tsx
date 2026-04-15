@@ -13,6 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { SEOHead } from "@/components/SEOHead";
 import { wholesaleAccountSchema, validateForm } from "@/lib/validation";
 import { logError, getUserFriendlyError } from "@/lib/errorUtils";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -145,6 +146,11 @@ export default function Wholesale() {
 
   return (
     <div className="min-h-screen bg-background pb-16 md:pb-0">
+      <SEOHead
+        title="Buy by the Dozen — Bulk Bagel Orders"
+        description="Order fresh NY-style bagels by the dozen from Stonebridge Bagels & Deli. Wholesale accounts, bulk pricing, and reliable delivery for businesses in NJ."
+        path="/wholesale"
+      />
       <Header />
       <CartDrawer />
 

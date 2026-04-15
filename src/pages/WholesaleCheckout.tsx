@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { SEOHead } from "@/components/SEOHead";
 import { WholesaleCartProvider, useWholesaleCart } from "@/hooks/useWholesaleCart";
 
 interface ShippingAddress {
@@ -202,6 +203,11 @@ function WholesaleCheckoutContent() {
 
   return (
     <div className="min-h-screen bg-background pb-20 md:pb-0">
+      <SEOHead
+        title="Wholesale Checkout"
+        description="Complete your bulk bagel order from Stonebridge Bagels & Deli. Review items, confirm shipping, and place your wholesale order."
+        path="/wholesale/checkout"
+      />
       <Header />
 
       <main className="pt-20 md:pt-24 pb-8 md:pb-16">

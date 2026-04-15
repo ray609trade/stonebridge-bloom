@@ -5,6 +5,7 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import { CartDrawer } from "@/components/cart/CartDrawer";
+import { SEOHead } from "@/components/SEOHead";
 import { useIsMobile } from "@/hooks/use-mobile";
 import bagelsOutside from "@/assets/bagels_outside.jpg";
 import bagelshopPhotos from "@/assets/bagelshop_potos.jpg";
@@ -48,6 +49,11 @@ export default function About() {
 
   return (
     <div className="min-h-screen pb-16 md:pb-0">
+      <SEOHead
+        title="About Us — Our Story"
+        description="Learn about Stonebridge Bagels & Deli, a family-owned New York-style bagel shop in Allentown, NJ. Handcrafting authentic boiled bagels since 2013."
+        path="/about"
+      />
       <Header />
       <CartDrawer />
 

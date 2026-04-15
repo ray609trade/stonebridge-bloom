@@ -7,10 +7,16 @@ import { HowItWorks } from "@/components/home/HowItWorks";
 import { Testimonials } from "@/components/home/Testimonials";
 import { LocationSection } from "@/components/home/LocationSection";
 import { CartDrawer } from "@/components/cart/CartDrawer";
+import { SEOHead } from "@/components/SEOHead";
 
 const Index = () => {
   return (
     <div className="min-h-screen pb-16 md:pb-0">
+      <SEOHead
+        title="Stonebridge Bagels & Deli | Fresh NY-Style Bagels in Allentown NJ"
+        description="Handcrafted New York-style boiled bagels baked fresh daily in Allentown, NJ. Order pickup, buy by the dozen, or cater your next event. Family-owned since 2013."
+        path="/"
+      />
       <Header />
       <CartDrawer />
       <main>

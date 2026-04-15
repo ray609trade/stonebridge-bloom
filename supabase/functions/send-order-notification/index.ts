@@ -32,6 +32,34 @@ serve(async (req) => {
       { global: { headers: { Authorization: authHeader } } }
     );
 
+    // Verify user has admin or staff role
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) {
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const supabaseAdmin = createClient(
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+    );
+
+    const { data: roleData } = await supabaseAdmin
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', user.id)
+      .in('role', ['admin', 'staff'])
+      .limit(1);
+
+    if (!roleData || roleData.length === 0) {
+      return new Response(
+        JSON.stringify({ error: 'Forbidden' }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     const { data: body } = await req.json().then(d => ({ data: d })).catch(() => ({ data: null }));
     
     if (!body?.orderId) {
@@ -42,10 +70,6 @@ serve(async (req) => {
     }
 
     // Fetch order details using service role for full access
-    const supabaseAdmin = createClient(
-      Deno.env.get('SUPABASE_URL')!,
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-    );
 
     const { data: order, error: orderError } = await supabaseAdmin
       .from('orders')

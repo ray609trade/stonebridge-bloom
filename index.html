@@ -4,10 +4,20 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://www.stonebridgebagels.com/" />
+
     <!-- App Title & Description -->
-    <title>Stonebridge Bagels | Fresh Bagels & Deli</title>
-    <meta name="description" content="Order fresh, hand-rolled bagels for pickup from Stonebridge Bagels & Deli. Authentic New York style bagels made daily." />
-    <meta name="author" content="Stonebridge Bagels" />
+    <title>Stonebridge Bagels & Deli | Fresh NY-Style Bagels in Allentown NJ</title>
+    <meta name="description" content="Stonebridge Bagels & Deli — handcrafted New York-style boiled bagels baked fresh daily in Allentown, NJ. Order pickup, buy by the dozen, or cater your next event. Family-owned since 2013." />
+    <meta name="author" content="Stonebridge Bagels & Deli" />
+    <meta name="keywords" content="bagels, New York style bagels, Allentown NJ, bagel shop, fresh bagels, cream cheese, deli, catering, wholesale bagels, breakfast, lunch, Stonebridge Bagels" />
+
+    <!-- Geo Tags for local SEO -->
+    <meta name="geo.region" content="US-NJ" />
+    <meta name="geo.placename" content="Allentown, New Jersey" />
+    <meta name="geo.position" content="40.1768;-74.5886" />
+    <meta name="ICBM" content="40.1768, -74.5886" />
 
     <!-- PWA Meta Tags -->
     <meta name="theme-color" content="#D97706" />
@@ -22,17 +32,110 @@
     <link rel="mask-icon" href="/pwa-512x512.png" color="#D97706" />
 
     <!-- Open Graph -->
-    <meta property="og:title" content="Stonebridge Bagels | Fresh Bagels & Deli" />
-    <meta property="og:description" content="Order fresh, hand-rolled bagels for pickup. Authentic New York style bagels made daily." />
+    <meta property="og:title" content="Stonebridge Bagels & Deli | Fresh NY-Style Bagels in Allentown NJ" />
+    <meta property="og:description" content="Handcrafted New York-style boiled bagels baked fresh daily. Order pickup, buy by the dozen, or cater your next event. Family-owned since 2013." />
     <meta property="og:type" content="website" />
-    <meta property="og:image" content="/pwa-512x512.png" />
-    <meta property="og:site_name" content="Stonebridge Bagels" />
+    <meta property="og:url" content="https://www.stonebridgebagels.com/" />
+    <meta property="og:image" content="https://www.stonebridgebagels.com/pwa-512x512.png" />
+    <meta property="og:image:alt" content="Stonebridge Bagels & Deli logo" />
+    <meta property="og:site_name" content="Stonebridge Bagels & Deli" />
+    <meta property="og:locale" content="en_US" />
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Stonebridge Bagels | Fresh Bagels & Deli" />
-    <meta name="twitter:description" content="Order fresh, hand-rolled bagels for pickup. Authentic New York style." />
-    <meta name="twitter:image" content="/pwa-512x512.png" />
+    <meta name="twitter:title" content="Stonebridge Bagels & Deli | Fresh NY-Style Bagels" />
+    <meta name="twitter:description" content="Handcrafted New York-style boiled bagels baked fresh daily in Allentown, NJ. Order pickup or buy by the dozen." />
+    <meta name="twitter:image" content="https://www.stonebridgebagels.com/pwa-512x512.png" />
+
+    <!-- JSON-LD Structured Data: Local Business -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Bakery",
+      "name": "Stonebridge Bagels & Deli",
+      "description": "Family-owned New York-style bagel shop in Allentown, NJ. Handcrafted boiled bagels baked fresh daily since 2013. Offering breakfast, lunch, spreads, catering, and wholesale.",
+      "url": "https://www.stonebridgebagels.com",
+      "telephone": "+1-609-738-3222",
+      "email": "steven@stonebridgebagels.com",
+      "image": "https://www.stonebridgebagels.com/pwa-512x512.png",
+      "logo": "https://www.stonebridgebagels.com/pwa-512x512.png",
+      "priceRange": "$",
+      "servesCuisine": ["Bagels", "Deli", "Breakfast", "Lunch"],
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "1278 Yardville-Allentown Road",
+        "addressLocality": "Allentown",
+        "addressRegion": "NJ",
+        "postalCode": "08501",
+        "addressCountry": "US"
+      },
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": 40.1768,
+        "longitude": -74.5886
+      },
+      "openingHoursSpecification": [
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+          "opens": "05:30",
+          "closes": "15:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": ["Saturday", "Sunday"],
+          "opens": "06:00",
+          "closes": "14:00"
+        }
+      ],
+      "sameAs": [],
+      "hasMenu": {
+        "@type": "Menu",
+        "url": "https://www.stonebridgebagels.com/order",
+        "hasMenuSection": [
+          {
+            "@type": "MenuSection",
+            "name": "Bagels",
+            "description": "Fresh hand-rolled and boiled New York-style bagels"
+          },
+          {
+            "@type": "MenuSection",
+            "name": "Spreads",
+            "description": "House-made cream cheeses and spreads"
+          },
+          {
+            "@type": "MenuSection",
+            "name": "Breakfast Sandwiches",
+            "description": "Made-to-order breakfast sandwiches on fresh bagels"
+          }
+        ]
+      },
+      "potentialAction": {
+        "@type": "OrderAction",
+        "target": {
+          "@type": "EntryPoint",
+          "urlTemplate": "https://www.stonebridgebagels.com/order",
+          "actionPlatform": ["http://schema.org/DesktopWebPlatform", "http://schema.org/MobileWebPlatform"]
+        },
+        "deliveryMethod": "http://schema.org/OnSitePickup"
+      }
+    }
+    </script>
+
+    <!-- JSON-LD: Website with SearchAction for sitelinks search -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "Stonebridge Bagels & Deli",
+      "url": "https://www.stonebridgebagels.com",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://www.stonebridgebagels.com/order?q={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
   </head>
 
   <body>

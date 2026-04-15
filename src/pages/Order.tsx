@@ -8,6 +8,7 @@ import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import { CartDrawer } from "@/components/cart/CartDrawer";
 import { ProductCard } from "@/components/menu/ProductCard";
 import { ProductModal } from "@/components/menu/ProductModal";
+import { SEOHead } from "@/components/SEOHead";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -83,6 +84,11 @@ export default function Order() {
 
   return (
     <div className="min-h-screen bg-background pb-20 md:pb-0">
+      <SEOHead
+        title="Order Fresh Bagels for Pickup"
+        description="Browse our full menu and order fresh bagels, spreads, sandwiches, and more for pickup at Stonebridge Bagels & Deli in Allentown, NJ."
+        path="/order"
+      />
       <Header />
       <CartDrawer />
 

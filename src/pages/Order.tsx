@@ -84,6 +84,11 @@ export default function Order() {
 
   return (
     <div className="min-h-screen bg-background pb-20 md:pb-0">
+      <SEOHead
+        title="Order Fresh Bagels for Pickup"
+        description="Browse our full menu and order fresh bagels, spreads, sandwiches, and more for pickup at Stonebridge Bagels & Deli in Allentown, NJ."
+        path="/order"
+      />
       <Header />
       <CartDrawer />
 

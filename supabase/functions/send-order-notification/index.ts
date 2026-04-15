@@ -70,10 +70,6 @@ serve(async (req) => {
     }
 
     // Fetch order details using service role for full access
-    const supabaseAdmin = createClient(
-      Deno.env.get('SUPABASE_URL')!,
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-    );
 
     const { data: order, error: orderError } = await supabaseAdmin
       .from('orders')

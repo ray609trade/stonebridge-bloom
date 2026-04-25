@@ -182,7 +182,7 @@ function WholesalePortalContent() {
         <section className="relative overflow-hidden border-b border-border">
           <div className="absolute inset-0 bg-gradient-to-br from-secondary via-secondary/50 to-background" />
           <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E\")" }} />
-          <div className="container mx-auto px-4 py-8 md:py-10 relative">
+          <div className="container mx-auto px-4 md:px-6 py-6 md:py-10 relative">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-5">
               <div className="flex items-center gap-4">
                 <div className="h-14 w-14 rounded-2xl bg-accent/15 border border-accent/20 flex items-center justify-center">
@@ -206,9 +206,9 @@ function WholesalePortalContent() {
         </section>
 
         {/* Tabs */}
-        <section className="border-b border-border bg-card/50">
-          <div className="container mx-auto px-4">
-            <div className="flex gap-1">
+        <section className="border-b border-border bg-card/50 sticky top-14 md:top-20 z-20">
+          <div className="container mx-auto px-4 md:px-6">
+            <div className="flex gap-1 overflow-x-auto scrollbar-hide">
               {[
                 { key: "order", label: "Place Order", icon: ShoppingBag },
                 { key: "history", label: "Order History", icon: Clock },
@@ -217,7 +217,7 @@ function WholesalePortalContent() {
                   key={tab.key}
                   onClick={() => setActiveTab(tab.key as any)}
                   className={cn(
-                    "px-5 py-3.5 text-sm font-medium border-b-2 transition-all flex items-center gap-2",
+                    "px-4 sm:px-5 h-12 md:h-auto md:py-3.5 text-sm font-medium border-b-2 transition-all flex items-center gap-2 shrink-0",
                     activeTab === tab.key
                       ? "border-accent text-foreground"
                       : "border-transparent text-muted-foreground hover:text-foreground"
@@ -233,7 +233,7 @@ function WholesalePortalContent() {
 
         {/* Content */}
         <section className="py-6 md:py-8">
-          <div className="container mx-auto px-4">
+          <div className="container mx-auto px-4 md:px-6">
             {activeTab === "order" ? (
               <motion.div
                 initial={{ opacity: 0 }}
@@ -341,7 +341,7 @@ function WholesalePortalContent() {
         <motion.div
           initial={{ y: 100, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          className="fixed bottom-20 md:bottom-6 left-4 right-4 md:left-auto md:right-6 md:w-auto z-30"
+          className="fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] md:bottom-6 left-4 right-4 md:left-auto md:right-6 md:w-auto z-30"
         >
           <Button
             onClick={toggleCart}

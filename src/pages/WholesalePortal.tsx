@@ -173,7 +173,7 @@ function WholesalePortalContent() {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-20 md:pb-0">
+    <div className={cn("min-h-screen bg-background", itemCount > 0 ? "pb-40 md:pb-0" : "pb-20 md:pb-0")}>
       <Header />
       <WholesaleCartDrawer />
 

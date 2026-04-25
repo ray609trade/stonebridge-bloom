@@ -249,7 +249,7 @@ export default function OrderLookup() {
 
       <Header />
 
-      <main className="flex-1 pt-28 md:pt-32 pb-24 md:pb-16">
+      <main className="flex-1 pt-24 md:pt-28 pb-32 md:pb-16">
         <div className="container mx-auto px-4">
           <div className="max-w-xl mx-auto">
             {/* Heading */}
@@ -446,42 +446,42 @@ export default function OrderLookup() {
 
                 <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-sm">
                   {/* Status */}
-                  <div className="px-6 py-5 border-b border-border flex items-center justify-between flex-wrap gap-3">
-                    <div>
-                      <p className="text-xs uppercase tracking-wide text-muted-foreground mb-1">Status</p>
+                  <div className="px-5 sm:px-6 py-5 border-b border-border flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div className="min-w-0">
+                      <p className="text-xs uppercase tracking-wide text-muted-foreground mb-1.5">Status</p>
                       <Badge variant="outline" className={`text-sm font-medium ${status.tone}`}>
                         {status.label}
                       </Badge>
                     </div>
-                    <div className="text-right">
-                      <p className="text-xs uppercase tracking-wide text-muted-foreground mb-1">Pickup</p>
-                      <p className="text-sm font-medium text-foreground flex items-center gap-1.5">
-                        <Clock className="h-4 w-4 text-accent" />
-                        {formatPickup(result.scheduled_time, result.pickup_type)}
+                    <div className="sm:text-right min-w-0">
+                      <p className="text-xs uppercase tracking-wide text-muted-foreground mb-1.5">Pickup</p>
+                      <p className="text-sm font-medium text-foreground flex items-center sm:justify-end gap-1.5">
+                        <Clock className="h-4 w-4 text-accent shrink-0" />
+                        <span className="truncate">{formatPickup(result.scheduled_time, result.pickup_type)}</span>
                       </p>
                     </div>
                   </div>
 
                   {/* Customer */}
-                  <div className="px-6 py-5 border-b border-border space-y-2 text-sm">
-                    <div className="flex items-center gap-2 text-muted-foreground">
+                  <div className="px-5 sm:px-6 py-5 border-b border-border space-y-2 text-sm">
+                    <div className="flex items-center gap-2 text-muted-foreground min-w-0">
                       <User className="h-4 w-4 shrink-0" />
-                      <span className="text-foreground">{result.customer_name}</span>
+                      <span className="text-foreground truncate">{result.customer_name}</span>
                     </div>
-                    <div className="flex items-center gap-2 text-muted-foreground">
+                    <div className="flex items-center gap-2 text-muted-foreground min-w-0">
                       <Mail className="h-4 w-4 shrink-0" />
-                      <span className="text-foreground break-all">{result.customer_email}</span>
+                      <span className="text-foreground truncate">{result.customer_email}</span>
                     </div>
                     {result.customer_phone && (
-                      <div className="flex items-center gap-2 text-muted-foreground">
+                      <div className="flex items-center gap-2 text-muted-foreground min-w-0">
                         <Phone className="h-4 w-4 shrink-0" />
-                        <span className="text-foreground">{result.customer_phone}</span>
+                        <span className="text-foreground truncate">{result.customer_phone}</span>
                       </div>
                     )}
                   </div>
 
                   {/* Items */}
-                  <div className="px-6 py-5">
+                  <div className="px-5 sm:px-6 py-5">
                     <h2 className="font-semibold text-foreground mb-3">Your items</h2>
                     <ul className="divide-y divide-border">
                       {result.items.map((it, idx) => {
@@ -495,7 +495,7 @@ export default function OrderLookup() {
                                 {it.name}
                               </p>
                               {it.options && Object.keys(it.options).length > 0 && (
-                                <p className="text-xs text-muted-foreground mt-0.5">
+                                <p className="text-xs text-muted-foreground mt-0.5 break-words">
                                   {Object.entries(it.options)
                                     .map(([k, v]) => `${k}: ${v}`)
                                     .join(" · ")}
@@ -512,7 +512,7 @@ export default function OrderLookup() {
                   </div>
 
                   {/* Totals */}
-                  <div className="px-6 py-5 border-t border-border space-y-1.5 text-sm">
+                  <div className="px-5 sm:px-6 py-5 border-t border-border space-y-1.5 text-sm bg-muted/30">
                     <div className="flex justify-between text-muted-foreground">
                       <span>Subtotal</span>
                       <span>{formatCurrency(result.subtotal)}</span>
@@ -521,16 +521,16 @@ export default function OrderLookup() {
                       <span>Tax</span>
                       <span>{formatCurrency(result.tax)}</span>
                     </div>
-                    <div className="flex justify-between text-base font-semibold text-foreground pt-2">
+                    <div className="flex justify-between text-base font-semibold text-foreground pt-2 border-t border-border mt-2">
                       <span>Total</span>
                       <span>{formatCurrency(result.total)}</span>
                     </div>
                   </div>
                 </div>
 
-                {/* Actions (desktop) */}
-                <div className="hidden md:flex flex-col sm:flex-row gap-3 mt-6">
-                  <Button size="lg" className="h-12 flex-1" onClick={handleReorder} disabled={reordering}>
+                {/* Actions (desktop & tablet) */}
+                <div className="hidden md:flex flex-wrap gap-3 mt-6">
+                  <Button size="lg" className="h-12 flex-1 min-w-[200px]" onClick={handleReorder} disabled={reordering}>
                     {reordering ? (
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                     ) : (

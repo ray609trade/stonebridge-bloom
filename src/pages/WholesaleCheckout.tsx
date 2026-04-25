@@ -210,8 +210,8 @@ function WholesaleCheckoutContent() {
       />
       <Header />
 
-      <main className="pt-20 md:pt-24 pb-8 md:pb-16">
-        <div className="container mx-auto px-4">
+      <main className="pt-20 md:pt-24 pb-32 md:pb-16">
+        <div className="container mx-auto px-4 md:px-6 max-w-6xl">
           <Button variant="ghost" className="mb-4 md:mb-6 -ml-2" asChild>
             <Link to="/wholesale/portal">
               <ArrowLeft className="mr-2 h-4 w-4" />
@@ -232,18 +232,18 @@ function WholesaleCheckoutContent() {
                 </h1>
 
                 {/* Step Indicators */}
-                <div className="flex items-center gap-2 mb-8">
+                <div className="flex items-center gap-2 mb-6 md:mb-8">
                   {STEPS.map((step, i) => (
                     <div key={step.key} className="flex items-center gap-2 flex-1">
                       <div className={cn(
-                        "flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium flex-1 justify-center transition-colors",
+                        "flex items-center gap-2 px-3 h-10 rounded-xl text-sm font-medium flex-1 justify-center transition-colors",
                         "bg-accent/10 text-accent border border-accent/20"
                       )}>
-                        <step.icon className="h-4 w-4" />
+                        <step.icon className="h-4 w-4 shrink-0" />
                         <span className="hidden sm:inline">{step.label}</span>
                       </div>
                       {i < STEPS.length - 1 && (
-                        <div className="w-4 h-px bg-border shrink-0" />
+                        <div className="w-2 sm:w-4 h-px bg-border shrink-0" />
                       )}
                     </div>
                   ))}
@@ -349,7 +349,7 @@ function WholesaleCheckoutContent() {
                       value={notes}
                       onChange={(e) => setNotes(e.target.value)}
                       rows={3}
-                      className="min-h-[100px]"
+                      className="min-h-[100px] text-base"
                     />
                   </div>
 

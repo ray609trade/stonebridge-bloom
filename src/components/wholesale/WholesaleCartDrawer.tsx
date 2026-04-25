@@ -156,7 +156,7 @@ export function WholesaleCartDrawer() {
             </div>
 
             {/* Footer */}
-            <div className="border-t border-border px-5 py-5 space-y-4 bg-card/80">
+            <div className="border-t border-border px-5 pt-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] space-y-4 bg-card/80">
               <div className="flex justify-between items-baseline">
                 <span className="text-sm text-muted-foreground">Subtotal</span>
                 <span className="text-2xl font-bold text-foreground">${subtotal.toFixed(2)}</span>

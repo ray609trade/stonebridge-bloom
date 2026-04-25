@@ -152,13 +152,13 @@ export function WholesaleMenu({ searchQuery }: WholesaleMenuProps) {
 
       {/* Products Grid */}
       {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
           {[...Array(6)].map((_, i) => (
             <div key={i} className="h-52 rounded-2xl bg-secondary animate-pulse" />
           ))}
         </div>
       ) : filteredProducts && filteredProducts.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
           {filteredProducts.map((product, index) => {
             const minimum = product.wholesale_minimum || 1;
             const quantity = getQuantity(product.id, minimum);
@@ -215,7 +215,7 @@ export function WholesaleMenu({ searchQuery }: WholesaleMenuProps) {
                   </div>
 
                   {/* Quantity & Add */}
-                  <div className="flex items-center gap-3 mt-4">
+                  <div className="flex flex-wrap items-center gap-2 sm:gap-3 mt-4">
                     <div className="flex items-center gap-1 bg-secondary rounded-xl p-1">
                       <Button
                         variant="ghost"
@@ -238,7 +238,7 @@ export function WholesaleMenu({ searchQuery }: WholesaleMenuProps) {
                     </div>
                     <Button
                       onClick={() => handleAddToCart(product)}
-                      className="flex-1 h-10 bg-accent hover:bg-amber-dark text-accent-foreground font-semibold rounded-xl transition-all"
+                      className="flex-1 min-w-[8rem] h-10 bg-accent hover:bg-amber-dark text-accent-foreground font-semibold rounded-xl transition-all"
                     >
                       Add to Cart
                     </Button>

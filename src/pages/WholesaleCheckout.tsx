@@ -210,8 +210,8 @@ function WholesaleCheckoutContent() {
       />
       <Header />
 
-      <main className="pt-20 md:pt-24 pb-8 md:pb-16">
-        <div className="container mx-auto px-4">
+      <main className="pt-20 md:pt-24 pb-32 md:pb-16">
+        <div className="container mx-auto px-4 md:px-6 max-w-6xl">
           <Button variant="ghost" className="mb-4 md:mb-6 -ml-2" asChild>
             <Link to="/wholesale/portal">
               <ArrowLeft className="mr-2 h-4 w-4" />
@@ -232,18 +232,18 @@ function WholesaleCheckoutContent() {
                 </h1>
 
                 {/* Step Indicators */}
-                <div className="flex items-center gap-2 mb-8">
+                <div className="flex items-center gap-2 mb-6 md:mb-8">
                   {STEPS.map((step, i) => (
                     <div key={step.key} className="flex items-center gap-2 flex-1">
                       <div className={cn(
-                        "flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium flex-1 justify-center transition-colors",
+                        "flex items-center gap-2 px-3 h-10 rounded-xl text-sm font-medium flex-1 justify-center transition-colors",
                         "bg-accent/10 text-accent border border-accent/20"
                       )}>
-                        <step.icon className="h-4 w-4" />
+                        <step.icon className="h-4 w-4 shrink-0" />
                         <span className="hidden sm:inline">{step.label}</span>
                       </div>
                       {i < STEPS.length - 1 && (
-                        <div className="w-4 h-px bg-border shrink-0" />
+                        <div className="w-2 sm:w-4 h-px bg-border shrink-0" />
                       )}
                     </div>
                   ))}
@@ -349,7 +349,7 @@ function WholesaleCheckoutContent() {
                       value={notes}
                       onChange={(e) => setNotes(e.target.value)}
                       rows={3}
-                      className="min-h-[100px]"
+                      className="min-h-[100px] text-base"
                     />
                   </div>
 
@@ -379,12 +379,12 @@ function WholesaleCheckoutContent() {
                   <button
                     type="button"
                     onClick={() => setShowOrderSummary(!showOrderSummary)}
-                    className="w-full flex items-center justify-between p-4 rounded-xl bg-card border border-border"
+                    className="w-full flex items-center justify-between gap-3 p-4 rounded-xl bg-card border border-border"
                   >
-                    <span className="font-serif text-lg font-semibold">
+                    <span className="font-serif text-base sm:text-lg font-semibold truncate">
                       Order Summary ({items.length} items)
                     </span>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 shrink-0">
                       <span className="font-semibold">${total.toFixed(2)}</span>
                       {showOrderSummary ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
                     </div>
@@ -398,14 +398,14 @@ function WholesaleCheckoutContent() {
                     >
                       <div className="space-y-3 mb-4">
                         {items.map((item) => (
-                          <div key={item.id} className="flex justify-between text-sm">
-                            <div>
-                              <p className="font-medium">{item.name}</p>
+                          <div key={item.id} className="flex justify-between gap-3 text-sm">
+                            <div className="min-w-0">
+                              <p className="font-medium truncate">{item.name}</p>
                               <p className="text-muted-foreground">
                                 {item.quantity} × ${item.wholesalePrice.toFixed(2)}
                               </p>
                             </div>
-                            <p className="font-medium">
+                            <p className="font-medium shrink-0">
                               ${(item.wholesalePrice * item.quantity).toFixed(2)}
                             </p>
                           </div>
@@ -461,7 +461,7 @@ function WholesaleCheckoutContent() {
       </main>
 
       {/* Mobile Submit Button */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-background border-t border-border md:hidden z-30">
+      <div className="fixed bottom-16 left-0 right-0 px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] bg-background/95 backdrop-blur border-t border-border md:hidden z-30">
         <Button
           type="submit"
           form="checkout-form"

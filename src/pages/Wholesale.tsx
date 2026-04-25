@@ -156,7 +156,7 @@ export default function Wholesale() {
 
       <main className="pt-14 md:pt-20">
         {/* Hero */}
-        <section className="relative py-16 md:py-24 overflow-hidden">
+        <section className="relative py-12 sm:py-16 md:py-24 overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary/90 to-espresso-dark" />
           {!isMobile && (
             <div className="absolute inset-0 overflow-hidden">
@@ -164,17 +164,17 @@ export default function Wholesale() {
             </div>
           )}
 
-          <div className="relative z-10 container mx-auto px-4">
+          <div className="relative z-10 container mx-auto px-4 md:px-6">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
               className="max-w-3xl"
             >
-              <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl font-semibold text-primary-foreground mb-4 md:mb-6">
+              <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-semibold text-primary-foreground mb-4 md:mb-6 leading-tight">
                 Fresh by the Dozen
               </h1>
-              <p className="text-lg md:text-xl text-primary-foreground/80 leading-relaxed mb-6">
+              <p className="text-base sm:text-lg md:text-xl text-primary-foreground/80 leading-relaxed mb-6">
                 Ordering for your business, event, or team? We ship nationwide and offer 
                 local pickup starting at just 1 dozen. Set up a one-time or recurring order 
                 and we'll handle the rest.
@@ -190,9 +190,9 @@ export default function Wholesale() {
         </section>
 
         {/* Benefits */}
-        <section className="py-12 md:py-20 bg-secondary/50">
-          <div className="container mx-auto px-4">
-            <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8 max-w-6xl mx-auto">
+        <section className="py-10 sm:py-12 md:py-20 bg-secondary/50">
+          <div className="container mx-auto px-4 md:px-6">
+            <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-8 max-w-6xl mx-auto">
               {benefits.map((benefit, index) => (
                 <motion.div
                   key={benefit.title}
@@ -216,8 +216,8 @@ export default function Wholesale() {
         </section>
 
         {/* Application Form */}
-        <section className="py-12 md:py-20 bg-background">
-          <div className="container mx-auto px-4">
+        <section className="py-10 sm:py-12 md:py-20 bg-background">
+          <div className="container mx-auto px-4 md:px-6">
             <div className="max-w-2xl mx-auto">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}

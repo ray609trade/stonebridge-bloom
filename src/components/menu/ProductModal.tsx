@@ -70,7 +70,13 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
     return total * quantity;
   };
 
+  const missingRequired = options
+    .filter((o) => o.required)
+    .filter((o) => !selectedOptions[o.name]);
+  const canAdd = missingRequired.length === 0;
+
   const handleAddToCart = () => {
+    if (!canAdd) return;
     addItem({
       productId: product.id,
       name: product.name,
@@ -244,10 +250,13 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
                 </div>
 
                 <Button
-                  className="flex-1 h-12 bg-accent hover:bg-amber-dark text-accent-foreground font-semibold"
+                  className="flex-1 h-12 bg-accent hover:bg-amber-dark text-accent-foreground font-semibold disabled:opacity-60 disabled:cursor-not-allowed"
                   onClick={handleAddToCart}
+                  disabled={!canAdd}
                 >
-                  Add to Order · ${calculateTotal().toFixed(2)}
+                  {canAdd
+                    ? `Add to Order · $${calculateTotal().toFixed(2)}`
+                    : `Pick ${missingRequired[0].name.toLowerCase()} to continue`}
                 </Button>
               </div>
             </div>
@@ -280,12 +289,20 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
 
               {/* Add to Cart Button */}
               <Button
-                className="flex-1 h-14 bg-accent hover:bg-amber-dark text-accent-foreground font-semibold text-base active:scale-[0.98] transition-transform touch-manipulation"
+                className="flex-1 h-14 bg-accent hover:bg-amber-dark text-accent-foreground font-semibold text-base active:scale-[0.98] transition-transform touch-manipulation disabled:opacity-60 disabled:cursor-not-allowed"
                 onClick={handleAddToCart}
+                disabled={!canAdd}
               >
-                Add · ${calculateTotal().toFixed(2)}
+                {canAdd
+                  ? `Add · $${calculateTotal().toFixed(2)}`
+                  : `Pick ${missingRequired[0].name.toLowerCase()}`}
               </Button>
             </div>
+            {!canAdd && (
+              <p className="text-xs text-muted-foreground text-center mt-2">
+                Please select a {missingRequired[0].name.toLowerCase()} above to continue.
+              </p>
+            )}
           </div>
         </motion.div>
       </motion.div>

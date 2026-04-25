@@ -129,6 +129,9 @@ export function Footer() {
               <Link to="/wholesale" className="text-primary-foreground/80 hover:text-primary-foreground transition-colors text-sm py-1">
                 Wholesale
               </Link>
+              <Link to="/order/lookup" className="text-primary-foreground/80 hover:text-primary-foreground transition-colors text-sm py-1">
+                Look up your order
+              </Link>
             </nav>
           </AccordionSection>
 

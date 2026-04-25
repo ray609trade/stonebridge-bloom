@@ -10,6 +10,7 @@ import About from "./pages/About";
 import Order from "./pages/Order";
 import Checkout from "./pages/Checkout";
 import OrderConfirmation from "./pages/OrderConfirmation";
+import OrderLookup from "./pages/OrderLookup";
 import Wholesale from "./pages/Wholesale";
 import WholesaleLogin from "./pages/WholesaleLogin";
 import WholesalePortal from "./pages/WholesalePortal";
@@ -35,6 +36,7 @@ const App = () => (
               <Route path="/order" element={<Order />} />
               <Route path="/order/checkout" element={<Checkout />} />
               <Route path="/order/confirmation/:orderNumber" element={<OrderConfirmation />} />
+              <Route path="/order/lookup" element={<OrderLookup />} />
               <Route path="/wholesale" element={<Wholesale />} />
               <Route path="/wholesale/login" element={<WholesaleLogin />} />
               <Route path="/wholesale/portal" element={<WholesalePortal />} />

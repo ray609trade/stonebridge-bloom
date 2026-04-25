@@ -83,6 +83,17 @@ export default function OrderConfirmation() {
                 <Link to="/">Back to Home</Link>
               </Button>
             </div>
+
+            <p className="mt-8 text-sm text-muted-foreground">
+              Want to check on this order later? Save your order number and look it up anytime at{" "}
+              <Link
+                to={`/order/lookup?order=${encodeURIComponent(orderNumber || "")}`}
+                className="text-accent hover:underline font-medium"
+              >
+                /order/lookup
+              </Link>
+              .
+            </p>
           </motion.div>
         </div>
       </main>

@@ -1,82 +1,79 @@
-# Responsive Polish Pass — Mobile, Tablet & Desktop
+# Wholesale Portal Responsive Polish
 
-Goal: make every customer-facing page feel intentional at any screen size — no cramped buttons on phones, no awkward stretched columns on desktops, and consistent spacing/typography across the site. No new features, no behavior changes.
+Goal: make the entire bulk-order flow feel intentional and easy to use on any device — from the public account application all the way through checkout. No new features, no logic changes, only layout, spacing, and breakpoint tuning.
 
-## Scope (pages we'll touch)
+## Pages & components in scope
 
-1. **OrderLookup** (`/order/lookup`) — your current page
-2. **Order menu** (`/order`)
-3. **Checkout** (`/order/checkout`)
-4. **OrderConfirmation** (`/order/confirmation`)
-5. **CartDrawer**
-6. **Header** + **Footer** + **MobileBottomNav**
-7. **Home** (Hero, FeaturedProducts, LocationSection, Testimonials)
-8. **About**
+1. **Wholesale account application** (`/wholesale` — `src/pages/Wholesale.tsx`)
+2. **Wholesale login / signup** (`/wholesale/login` — `src/pages/WholesaleLogin.tsx`)
+3. **Wholesale portal** (`/wholesale/portal` — `src/pages/WholesalePortal.tsx`)
+4. **Wholesale menu** (`src/components/wholesale/WholesaleMenu.tsx`)
+5. **Wholesale cart drawer** (`src/components/wholesale/WholesaleCartDrawer.tsx`)
+6. **Wholesale checkout** (`/wholesale/checkout` — `src/pages/WholesaleCheckout.tsx`) — this is the recurring-template-style order form
+7. **Order history card** (`src/components/wholesale/OrderHistoryCard.tsx`)
 
-## What "perfect" means here
+## Targets
 
-- **Mobile (≤640px)**: 16px+ tap targets, 16px font on inputs (prevents iOS zoom), no horizontal scroll, sticky CTAs don't cover content, safe-area padding for notched phones, bottom-nav clearance.
-- **Tablet (641–1024px)**: 2-column layouts where appropriate (item lists, forms with summary), generous gutters, no orphaned single columns.
-- **Desktop (≥1025px)**: max-width caps so text/forms don't stretch absurdly wide, clear hierarchy, hover states.
-- **Consistency**: same heading scale, button heights, card radii, and section padding rhythm sitewide.
+- Mobile (≤640px): 16px inputs (no iOS zoom), `h-12` thumb-friendly controls, sticky CTAs above MobileBottomNav with safe-area padding, no horizontal scroll, content not hidden behind sticky bars.
+- Tablet (641–1024px): 2-column form layouts where natural, generous gutters.
+- Desktop (≥1025px): max-width caps (forms `max-w-2xl`, page shell `max-w-6xl`), sticky 2-col layout for checkout (form 2/3, summary 1/3).
+- Consistency: same heading scale, button heights, card radii sitewide.
 
-## Specific fixes
+## Specific changes
 
-### OrderLookup
-- Tighten top padding (`pt-28 md:pt-32` → `pt-24 md:pt-28`) so heading isn't pushed too low on phones.
-- Ensure all inputs use `text-base` (already done) and `h-12` for thumb-friendly targets.
-- Result view: stack status + pickup vertically on `<sm`, side-by-side on `≥sm` (currently uses `flex-wrap` which can look uneven). Add `min-w-0` and truncation on long emails.
-- Sticky mobile reorder bar: add `pb-[calc(...+env(safe-area-inset-bottom))]` (already present) and ensure result content has matching bottom padding so the last total row isn't hidden behind it.
-- Desktop: cap card to `max-w-xl` (already), but lift action buttons row to align nicely; add subtle divider above totals.
+### Wholesale (account application)
+- Cap form card width and align with site rhythm.
+- Tighten hero top padding on mobile so headline doesn't push too low.
+- Application form: ensure 2-col fields collapse to 1-col under `sm`, all inputs already `h-12` — verify and add `text-base` where missing.
+- Submit button: full-width on mobile, auto-width right-aligned on `sm+`; add safe-area bottom padding on the page so the button isn't covered by `MobileBottomNav`.
+- Benefits grid: keep 2-col mobile / 4-col desktop but tighten gap on small phones.
 
-### Order menu (`/order`)
-- Verify category tabs scroll horizontally on mobile without clipping; add `scrollbar-hide` and snap.
-- Product cards: 1 col mobile, 2 col `sm`, 3 col `lg`; equalize image aspect ratios.
+### WholesaleLogin
+- Cap card to `max-w-md` (already), but reduce top padding on mobile (`pt-20 md:pt-28`).
+- Make tab triggers larger tap targets on mobile.
+- OAuth buttons: keep stacked, add subtle spacing.
+- Forgot-password inline panel: ensure it doesn't overflow the card on 320px screens.
 
-### Checkout
-- On mobile, place order summary in a collapsible drawer/accordion at the top so the form is reachable.
-- Desktop: 2-column layout (form left 2/3, sticky summary right 1/3) capped at `max-w-6xl`.
-- All inputs `h-12`, full-width, with clear labels above (not floating).
+### WholesalePortal
+- Account header: stack avatar/name and Sign Out vertically on mobile (already does), but reduce vertical padding so the menu starts higher on phones.
+- Tabs row: add horizontal scroll fallback and consistent active underline thickness; increase tap height to 48px on mobile.
+- Stats grid: 2-col mobile / 4-col desktop (already), tighten label/value font size scaling.
+- Search input: full-width on mobile, `max-w-md` on desktop (already).
+- Floating cart button: ensure it sits above `MobileBottomNav` (raise `bottom-24` on mobile) and respects safe-area inset.
 
-### OrderConfirmation
-- Center column capped `max-w-xl`; ensure the new "Look up your order" hint sits inside the card with consistent padding.
-- Action buttons stack on mobile, inline on `≥sm`.
+### WholesaleMenu
+- Product cards: confirm 1/2/3 column grid, consistent gap (`gap-3 md:gap-4`).
+- Card internal layout: image + info + qty controls — on very narrow screens (≤360px), let qty controls and Add button stack to two rows so nothing clips.
+- Category pills: confirm horizontal scroll with `scrollbar-hide` and `snap-x`.
 
-### CartDrawer
-- Full-height sheet on mobile with sticky checkout button at bottom respecting safe area.
-- Desktop: 420px wide right-side drawer.
+### WholesaleCartDrawer
+- Sheet: full-width on mobile, `sm:max-w-md` on tablet+ (already).
+- Footer "Proceed to Checkout" button: add `pb-[calc(1.25rem+env(safe-area-inset-bottom))]` on the footer wrapper for notched phones.
+- Item rows: ensure long product names truncate cleanly; price column never wraps.
 
-### Header
-- Logo: `h-10 md:h-16 lg:h-20` (current `h-12 md:h-20 lg:h-24` is oversized on small phones and pushes layout).
-- Mobile menu: ensure full-screen overlay clears the header (currently `top-14` ✓) and content is scrollable.
+### WholesaleCheckout (recurring-template-style order form)
+- Page shell: cap to `max-w-6xl mx-auto`.
+- Layout: 1-col mobile, 3-col grid on `lg+` (form `lg:col-span-2`, summary `lg:col-span-1` sticky `top-24`) — already in place; tighten padding and fix order of summary on tablet.
+- Step indicator: on mobile, show only icons (already hides label `<sm`); make pill heights uniform `h-10`.
+- Address fields: City/State on one row at `sm+`, ZIP/Country on one row at `sm+`, all inputs `h-12 text-base`.
+- Notes textarea: `min-h-[100px]`, full width.
+- Mobile collapsible summary: ensure the chevron and total stay aligned on 320px screens; add `truncate` on item names inside the expanded list.
+- Sticky mobile "Place Order" bar: add safe-area bottom padding and increase bottom inset so it sits above `MobileBottomNav`. Add matching `pb-40` to the page so the form's last field isn't hidden.
+- Desktop submit button inside the form (already `hidden md:flex`): keep, ensure it appears only when sticky bar is hidden.
 
-### Footer
-- Mobile accordion already in place; tighten vertical rhythm and ensure quick-action call/directions buttons don't wrap.
-- Desktop: keep 4-column grid; verify `Look up your order` link wraps cleanly on narrow desktop widths.
-
-### MobileBottomNav
-- Confirm 64px height + safe-area; verify it doesn't overlap sticky page CTAs (lookup page reorder bar should sit above it on mobile).
-
-### Home page
-- Hero: clamp title with `text-4xl sm:text-5xl md:text-6xl lg:text-7xl`; ensure CTA buttons stack on mobile.
-- FeaturedProducts: 1/2/3 column grid by breakpoint with consistent gap.
-- LocationSection map: aspect-ratio container so it doesn't collapse on mobile.
-- Testimonials: snap-x carousel on mobile, 3-up grid on desktop.
-
-### Global
-- Add a small `.container` review pass: most pages should use `container mx-auto px-4 md:px-6` consistently.
-- Confirm `body` font sizes don't shrink below 14px anywhere.
-- Add `overflow-x-hidden` safety on `<html>`/`<body>` to prevent rogue horizontal scroll.
+### OrderHistoryCard
+- Header row on mobile: order number + status badge can wrap (already `flex-wrap`); ensure total stays right-aligned and chevron doesn't get pushed off.
+- Expanded status timeline: ensure step labels don't overlap on 320px — shorten to abbreviations under `sm`.
+- Tracking + Ship-To grid: 1-col mobile / 2-col `md+` (already).
 
 ## Technical Details
 
-- All changes are Tailwind class adjustments + a few small wrapper structure tweaks. No new dependencies.
-- No database, RLS, or edge function changes.
-- No changes to `useCart`, routing, or business logic.
-- QA: after edits, spot-check each page at 375px, 768px, 1024px, 1440px viewports.
+- All changes are Tailwind class adjustments and a few small wrapper restructures. No new dependencies, no DB or RLS changes, no business-logic edits.
+- No changes to `useWholesaleCart`, routing, or Supabase queries.
+- After edits, spot-check at 320px, 375px, 768px, 1024px, and 1440px viewports for: horizontal scroll, sticky-bar overlap with bottom nav, input zoom on iOS, card alignment.
 
-## Out of Scope
+## Out of scope
 
-- Admin pages, Wholesale portal, Auth pages (unless quick win surfaces).
-- Visual redesign / new components / color or font changes.
-- Dark mode polish.
+- New features (e.g., true recurring-order scheduling backend).
+- Visual redesign (colors, fonts, illustrations).
+- Admin-side wholesale tools.

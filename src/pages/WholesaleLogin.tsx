@@ -213,8 +213,8 @@ export default function WholesaleLogin() {
       />
       <Header />
 
-      <main className="pt-24 md:pt-32 pb-16">
-        <div className="container mx-auto px-4 max-w-md">
+      <main className="pt-20 sm:pt-24 md:pt-32 pb-12 md:pb-16">
+        <div className="container mx-auto px-4 md:px-6 max-w-md">
           <Button variant="ghost" className="mb-6 -ml-2" asChild>
             <Link to="/wholesale">
               <ArrowLeft className="mr-2 h-4 w-4" />
@@ -240,14 +240,14 @@ export default function WholesaleLogin() {
               </p>
             </div>
 
-            <div className="rounded-2xl border border-border bg-card shadow-[var(--card-shadow)] p-6">
+            <div className="rounded-2xl border border-border bg-card shadow-[var(--card-shadow)] p-5 sm:p-6">
               <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "login" | "signup")}>
                 <TabsList className="grid w-full grid-cols-2 mb-6 h-12 rounded-xl">
-                  <TabsTrigger value="login" className="flex items-center gap-2 rounded-lg text-sm">
+                  <TabsTrigger value="login" className="flex items-center gap-2 rounded-lg text-sm h-10">
                     <LogIn className="h-4 w-4" />
                     Login
                   </TabsTrigger>
-                  <TabsTrigger value="signup" className="flex items-center gap-2 rounded-lg text-sm">
+                  <TabsTrigger value="signup" className="flex items-center gap-2 rounded-lg text-sm h-10">
                     <UserPlus className="h-4 w-4" />
                     Create Account
                   </TabsTrigger>

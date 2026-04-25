@@ -358,6 +358,27 @@ export type Database = {
         }
         Returns: boolean
       }
+      lookup_guest_order: {
+        Args: { p_email: string; p_order_number: string }
+        Returns: {
+          created_at: string
+          customer_email: string
+          customer_name: string
+          customer_phone: string
+          id: string
+          items: Json
+          notes: string
+          order_number: string
+          payment_method: string
+          payment_status: string
+          pickup_type: string
+          scheduled_time: string
+          status: Database["public"]["Enums"]["order_status"]
+          subtotal: number
+          tax: number
+          total: number
+        }[]
+      }
     }
     Enums: {
       app_role: "admin" | "staff" | "wholesale_customer"

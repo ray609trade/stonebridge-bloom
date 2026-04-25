@@ -379,12 +379,12 @@ function WholesaleCheckoutContent() {
                   <button
                     type="button"
                     onClick={() => setShowOrderSummary(!showOrderSummary)}
-                    className="w-full flex items-center justify-between p-4 rounded-xl bg-card border border-border"
+                    className="w-full flex items-center justify-between gap-3 p-4 rounded-xl bg-card border border-border"
                   >
-                    <span className="font-serif text-lg font-semibold">
+                    <span className="font-serif text-base sm:text-lg font-semibold truncate">
                       Order Summary ({items.length} items)
                     </span>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 shrink-0">
                       <span className="font-semibold">${total.toFixed(2)}</span>
                       {showOrderSummary ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
                     </div>
@@ -398,14 +398,14 @@ function WholesaleCheckoutContent() {
                     >
                       <div className="space-y-3 mb-4">
                         {items.map((item) => (
-                          <div key={item.id} className="flex justify-between text-sm">
-                            <div>
-                              <p className="font-medium">{item.name}</p>
+                          <div key={item.id} className="flex justify-between gap-3 text-sm">
+                            <div className="min-w-0">
+                              <p className="font-medium truncate">{item.name}</p>
                               <p className="text-muted-foreground">
                                 {item.quantity} × ${item.wholesalePrice.toFixed(2)}
                               </p>
                             </div>
-                            <p className="font-medium">
+                            <p className="font-medium shrink-0">
                               ${(item.wholesalePrice * item.quantity).toFixed(2)}
                             </p>
                           </div>
@@ -461,7 +461,7 @@ function WholesaleCheckoutContent() {
       </main>
 
       {/* Mobile Submit Button */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-background border-t border-border md:hidden z-30">
+      <div className="fixed bottom-16 left-0 right-0 px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] bg-background/95 backdrop-blur border-t border-border md:hidden z-30">
         <Button
           type="submit"
           form="checkout-form"

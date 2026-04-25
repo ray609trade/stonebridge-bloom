@@ -303,7 +303,7 @@ export default function OrderLookup() {
                       exit={{ opacity: 0, x: -20 }}
                       transition={{ duration: 0.2 }}
                       onSubmit={handleStep1Submit}
-                      className="p-6"
+                      className="p-5 sm:p-6"
                     >
                       <Label htmlFor="order-number" className="text-base font-medium">
                         What's your order number?
@@ -348,7 +348,7 @@ export default function OrderLookup() {
                       exit={{ opacity: 0, x: -20 }}
                       transition={{ duration: 0.2 }}
                       onSubmit={handleStep2Submit}
-                      className="p-6"
+                      className="p-5 sm:p-6"
                     >
                       <Label htmlFor="email" className="text-base font-medium">
                         What email did you use at checkout?

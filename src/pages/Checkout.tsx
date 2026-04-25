@@ -168,7 +168,7 @@ export default function Checkout() {
       />
       <Header />
 
-      <main className="pt-20 md:pt-24 pb-8 md:pb-16">
+      <main className="pt-20 md:pt-24 pb-40 md:pb-16">
         <div className="container mx-auto px-4">
           <Button variant="ghost" className="mb-4 md:mb-6 -ml-2" asChild>
             <Link to="/order">

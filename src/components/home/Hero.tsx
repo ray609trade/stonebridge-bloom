@@ -88,7 +88,7 @@ export function Hero() {
             initial={shouldAnimate ? { opacity: 0, y: 30 } : undefined}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.3 }}
-            className="font-serif text-4xl md:text-6xl lg:text-7xl font-semibold text-primary-foreground leading-tight mb-4 md:mb-6"
+            className="font-serif text-[2.5rem] leading-[1.05] sm:text-5xl md:text-6xl lg:text-7xl font-semibold text-primary-foreground mb-4 md:mb-6"
           >
             Handcrafted
             <span className="block text-gradient">Bagels</span>

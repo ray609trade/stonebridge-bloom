@@ -432,7 +432,7 @@ export default function WholesaleLogin() {
               </Tabs>
             </div>
             {showForgotPassword && (
-              <div className="mt-4 p-6 rounded-2xl border border-border bg-card shadow-[var(--card-shadow)] space-y-4">
+              <div className="mt-4 p-5 sm:p-6 rounded-2xl border border-border bg-card shadow-[var(--card-shadow)] space-y-4">
                 <h2 className="font-serif text-lg font-semibold">Reset Password</h2>
                 <p className="text-sm text-muted-foreground">
                   Enter your email and we'll send you a reset link.

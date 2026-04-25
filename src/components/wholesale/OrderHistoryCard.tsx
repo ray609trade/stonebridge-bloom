@@ -81,7 +81,7 @@ export function OrderHistoryCard({ order }: OrderHistoryCardProps) {
       {/* Collapsed Header */}
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full p-4 md:p-5 flex items-center gap-4 text-left"
+        className="w-full p-4 md:p-5 flex items-center gap-3 sm:gap-4 text-left"
       >
         <div className="h-11 w-11 rounded-xl bg-secondary flex items-center justify-center shrink-0">
           <Package className="h-5 w-5 text-muted-foreground" />
@@ -89,13 +89,13 @@ export function OrderHistoryCard({ order }: OrderHistoryCardProps) {
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="font-semibold text-foreground">{order.order_number}</span>
+            <span className="font-semibold text-foreground truncate">{order.order_number}</span>
             <Badge variant="outline" className={cn("text-xs font-medium", statusConfig.color)}>
               <StatusIcon className="h-3 w-3 mr-1" />
               {statusConfig.label}
             </Badge>
           </div>
-          <div className="flex items-center gap-3 mt-1 text-sm text-muted-foreground">
+          <div className="flex items-center gap-2 sm:gap-3 mt-1 text-xs sm:text-sm text-muted-foreground">
             <span>{format(new Date(order.created_at), "MMM d, yyyy")}</span>
             <span className="text-border">·</span>
             <span>{parsedItems.length} item{parsedItems.length !== 1 ? "s" : ""}</span>
@@ -103,7 +103,7 @@ export function OrderHistoryCard({ order }: OrderHistoryCardProps) {
         </div>
 
         <div className="text-right shrink-0">
-          <p className="font-semibold text-foreground text-lg">${Number(order.total).toFixed(2)}</p>
+          <p className="font-semibold text-foreground text-base sm:text-lg">${Number(order.total).toFixed(2)}</p>
           <motion.div
             animate={{ rotate: isExpanded ? 180 : 0 }}
             transition={{ duration: 0.2 }}

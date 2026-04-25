@@ -117,6 +117,12 @@
     -webkit-tap-highlight-color: transparent;
   }
 
+  html, body {
+    /* Prevent rogue horizontal scroll on small screens */
+    overflow-x: hidden;
+    max-width: 100%;
+  }
+
   body {
     @apply bg-background text-foreground antialiased;
     font-family: 'DM Sans', system-ui, sans-serif;
@@ -124,6 +130,15 @@
     -webkit-text-size-adjust: 100%;
     /* Add padding for mobile bottom nav */
     padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+
+  /* Prevent iOS auto-zoom on input focus (requires ≥16px on inputs) */
+  @media (max-width: 767px) {
+    input,
+    textarea,
+    select {
+      font-size: 16px !important;
+    }
   }
 
   h1, h2, h3, h4, h5, h6 {

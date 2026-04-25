@@ -1,55 +1,82 @@
-## Guest Order Lookup — Order # + Email
+# Responsive Polish Pass — Mobile, Tablet & Desktop
 
-A friendly, step-by-step lookup flow at `/order/lookup`, gated by order number + the email used at checkout. Shows full order details with a one-tap "Reorder these items" button.
+Goal: make every customer-facing page feel intentional at any screen size — no cramped buttons on phones, no awkward stretched columns on desktops, and consistent spacing/typography across the site. No new features, no behavior changes.
 
-### How it works
+## Scope (pages we'll touch)
 
-1. Customer clicks **"Look up your order"** in the footer.
-2. Step 1 of 2: enters their **order number** (placeholder shows `SB-YYMMDD-XXXX` format with helper text "Find this in your confirmation email or text").
-3. Step 2 of 2: enters the **email address used at checkout**.
-4. On submit we call a server function that returns the order **only if both fields match** (case-insensitive email). 
-5. Success → full order details page (items, qty, totals, pickup time, status, customer name) with a sticky **"Reorder these items"** button that adds everything back to the cart and routes to `/order/checkout`.
-6. Failure → friendly inline error: "We couldn't find an order with that number and email. Double-check both fields, or call us at (609) 738-3222." No info leaked about which field was wrong.
+1. **OrderLookup** (`/order/lookup`) — your current page
+2. **Order menu** (`/order`)
+3. **Checkout** (`/order/checkout`)
+4. **OrderConfirmation** (`/order/confirmation`)
+5. **CartDrawer**
+6. **Header** + **Footer** + **MobileBottomNav**
+7. **Home** (Hero, FeaturedProducts, LocationSection, Testimonials)
+8. **About**
 
-### Security model
+## What "perfect" means here
 
-- A `SECURITY DEFINER` Postgres function `lookup_guest_order(p_order_number text, p_email text)` does the matching. RLS on `orders` stays strict — no anonymous SELECT.
-- The function does a case-insensitive comparison on both fields and only returns rows where **both match exactly**. No "fuzzy" matching.
-- **Rate limiting** to prevent brute-forcing order numbers: track lookup attempts per IP in a small `order_lookup_attempts` table; the function blocks after 10 failed attempts in 15 minutes from the same IP and returns a generic "too many attempts" error.
-- Wholesale orders are excluded from this guest lookup (they go through the wholesale portal).
+- **Mobile (≤640px)**: 16px+ tap targets, 16px font on inputs (prevents iOS zoom), no horizontal scroll, sticky CTAs don't cover content, safe-area padding for notched phones, bottom-nav clearance.
+- **Tablet (641–1024px)**: 2-column layouts where appropriate (item lists, forms with summary), generous gutters, no orphaned single columns.
+- **Desktop (≥1025px)**: max-width caps so text/forms don't stretch absurdly wide, clear hierarchy, hover states.
+- **Consistency**: same heading scale, button heights, card radii, and section padding rhythm sitewide.
 
-### UX details (the "refined" part)
+## Specific fixes
 
-**Lookup page (`/order/lookup`)**
-- Two-step wizard with a clear progress indicator ("Step 1 of 2 · Order Number").
-- Each step has: heading, one input, helper text below, one primary button, "Back" link on step 2.
-- Live validation: order number is normalized to uppercase and pattern-checked (`SB-` prefix expected) before allowing step 2.
-- Email is trim+lowercased before submit.
-- On error, focus returns to the first field and a non-dismissible inline message appears above step 1.
-- Loading state on the submit button ("Looking up your order...").
-- "Need help? Call (609) 738-3222" footer below the form.
+### OrderLookup
+- Tighten top padding (`pt-28 md:pt-32` → `pt-24 md:pt-28`) so heading isn't pushed too low on phones.
+- Ensure all inputs use `text-base` (already done) and `h-12` for thumb-friendly targets.
+- Result view: stack status + pickup vertically on `<sm`, side-by-side on `≥sm` (currently uses `flex-wrap` which can look uneven). Add `min-w-0` and truncation on long emails.
+- Sticky mobile reorder bar: add `pb-[calc(...+env(safe-area-inset-bottom))]` (already present) and ensure result content has matching bottom padding so the last total row isn't hidden behind it.
+- Desktop: cap card to `max-w-xl` (already), but lift action buttons row to align nicely; add subtle divider above totals.
 
-**Result view (same page, swapped after success)**
-- Big green check + "Order found" heading + order number + status pill (Pending / Preparing / Ready / Picked up / Cancelled).
-- Pickup time, pickup type, customer name, contact info.
-- Itemized list with quantities and per-line price; subtotal / tax / total.
-- Sticky bottom bar (mobile) and inline button (desktop): **"Reorder these items"** → repopulates cart, toast "Items added to your cart", navigates to `/order/checkout`.
-- Secondary buttons: "Look up another order" and "Back to menu".
+### Order menu (`/order`)
+- Verify category tabs scroll horizontally on mobile without clipping; add `scrollbar-hide` and snap.
+- Product cards: 1 col mobile, 2 col `sm`, 3 col `lg`; equalize image aspect ratios.
 
-**Confirmation page tweak (`/order/confirmation/:orderNumber`)**
-- Add a small "Save this link or look it up later at /order/lookup" hint so customers know how to come back.
+### Checkout
+- On mobile, place order summary in a collapsible drawer/accordion at the top so the form is reachable.
+- Desktop: 2-column layout (form left 2/3, sticky summary right 1/3) capped at `max-w-6xl`.
+- All inputs `h-12`, full-width, with clear labels above (not floating).
 
-**Footer**
-- Add a "Look up your order" link in the Quick Links section.
+### OrderConfirmation
+- Center column capped `max-w-xl`; ensure the new "Look up your order" hint sits inside the card with consistent padding.
+- Action buttons stack on mobile, inline on `≥sm`.
 
-### Files changed / created
+### CartDrawer
+- Full-height sheet on mobile with sticky checkout button at bottom respecting safe area.
+- Desktop: 420px wide right-side drawer.
 
-- **Migration**:
-  - `lookup_guest_order(text, text)` function (SECURITY DEFINER, returns full order row)
-  - `order_lookup_attempts` table + cleanup logic + rate-limit check inside the function
-  - `GRANT EXECUTE ... TO anon, authenticated`
-- **New** `src/pages/OrderLookup.tsx` — two-step wizard + result view
-- `src/App.tsx` — add `/order/lookup` route
-- `src/components/layout/Footer.tsx` — add "Look up your order" link
-- `src/pages/OrderConfirmation.tsx` — add small lookup hint
-- `src/hooks/useCart.tsx` — verify `addItem`/bulk-add path supports a "reorder" helper (add one if missing)
+### Header
+- Logo: `h-10 md:h-16 lg:h-20` (current `h-12 md:h-20 lg:h-24` is oversized on small phones and pushes layout).
+- Mobile menu: ensure full-screen overlay clears the header (currently `top-14` ✓) and content is scrollable.
+
+### Footer
+- Mobile accordion already in place; tighten vertical rhythm and ensure quick-action call/directions buttons don't wrap.
+- Desktop: keep 4-column grid; verify `Look up your order` link wraps cleanly on narrow desktop widths.
+
+### MobileBottomNav
+- Confirm 64px height + safe-area; verify it doesn't overlap sticky page CTAs (lookup page reorder bar should sit above it on mobile).
+
+### Home page
+- Hero: clamp title with `text-4xl sm:text-5xl md:text-6xl lg:text-7xl`; ensure CTA buttons stack on mobile.
+- FeaturedProducts: 1/2/3 column grid by breakpoint with consistent gap.
+- LocationSection map: aspect-ratio container so it doesn't collapse on mobile.
+- Testimonials: snap-x carousel on mobile, 3-up grid on desktop.
+
+### Global
+- Add a small `.container` review pass: most pages should use `container mx-auto px-4 md:px-6` consistently.
+- Confirm `body` font sizes don't shrink below 14px anywhere.
+- Add `overflow-x-hidden` safety on `<html>`/`<body>` to prevent rogue horizontal scroll.
+
+## Technical Details
+
+- All changes are Tailwind class adjustments + a few small wrapper structure tweaks. No new dependencies.
+- No database, RLS, or edge function changes.
+- No changes to `useCart`, routing, or business logic.
+- QA: after edits, spot-check each page at 375px, 768px, 1024px, 1440px viewports.
+
+## Out of Scope
+
+- Admin pages, Wholesale portal, Auth pages (unless quick win surfaces).
+- Visual redesign / new components / color or font changes.
+- Dark mode polish.

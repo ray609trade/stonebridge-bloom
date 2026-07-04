@@ -50,7 +50,7 @@ export function Hero() {
         className="absolute inset-0 parallax-bg"
       >
         <img
-          src={heroBagels}
+          src="/hero-bagels.jpg"
           alt="Fresh bagels"
           width={1920}
           height={1280}

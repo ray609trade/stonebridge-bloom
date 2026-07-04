@@ -1,20 +1,25 @@
-# Hard guard for row-level "+" quick-add
+# Fix desktop modal scroll + verify mobile product list
 
-The previous change to `src/components/menu/ProductCard.tsx` already routes any product with options through the modal. This plan adds a stricter guard so the quick-add path can never bypass required options, even in edge cases (missing `onSelect`, malformed options data, future callers).
+Two related layout issues to close out:
 
-## Change
-Update `handleQuickAdd` in `src/components/menu/ProductCard.tsx`:
+## 1. Desktop ProductModal doesn't scroll
+`src/components/menu/ProductModal.tsx` outer wrapper uses `max-h-[90vh]` with `overflow-hidden`, and inner scroll uses `h-full overflow-y-auto`. Because the outer has no fixed height, `h-full` collapses and the scroll never activates — at ~590px viewport height the bottom spreads and Add-to-Cart button are unreachable.
 
-1. Normalize `product.options` defensively — treat non-array or empty as "no options".
-2. If any option has `required === true`:
-   - Always call `onSelect()` when provided.
-   - If `onSelect` is missing, show `toast.error("Please choose options for {product.name}")` and return. Never call `addItem`.
-3. If options exist but none are required:
-   - Prefer `onSelect()` (opens modal so the user can pick).
-   - Only allow the direct quick-add fallback when neither options nor `onSelect` are present.
-4. Also guard the card-level `onClick={onSelect}`: no behavior change, but confirm it's the only other add path.
+**Fix:** convert the modal panel to a flex column and let the scroll area grow.
+- Outer `motion.div`: add `flex flex-col`.
+- Inner scroll wrapper: replace `h-full` with `flex-1 min-h-0 overflow-y-auto`.
+- Keep mobile bottom-sheet behavior (drag handle, sticky footer) unchanged.
 
-## Verification
-- Typecheck.
-- Playwright on mobile viewport: tap "+" on a bagel → spread modal opens; "Add" stays disabled until a spread is picked.
-- Tap "+" on a product with no options → adds directly as today.
+## 2. Verify mobile product list on `/order`
+`src/pages/Order.tsx` already applies `pb-44` when `isMobile && itemCount > 0` to clear the floating cart + bottom nav. Verify across common breakpoints that:
+- Every `ProductCard` is fully visible and tappable, including the last item.
+- The floating "View Cart" button doesn't cover the last product's "+" button.
+- Category pill row stays horizontally scrollable.
+
+**Verification (Playwright, headless Chromium):**
+- Viewports: 375×667 (iPhone SE), 390×844 (iPhone 14), 414×896 (iPhone 11 Pro Max).
+- Steps: load `/order`, add one bagel via modal to force `itemCount > 0`, scroll to the bottom of the product grid, screenshot, confirm the last card's "+" button is not overlapped by the floating cart bar or bottom nav.
+- If overlap is detected on any viewport, increase the mobile bottom padding (e.g. `pb-48`) or restructure the floating cart offset so the last card clears both bars.
+
+## Scope
+Frontend/presentation only — no cart logic, DB, or business-rule changes.

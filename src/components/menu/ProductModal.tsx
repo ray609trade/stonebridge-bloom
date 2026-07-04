@@ -112,7 +112,7 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
           exit={{ opacity: 0, y: isMobile ? "100%" : 50 }}
           transition={{ type: "spring", damping: 25, stiffness: 300 }}
           className={cn(
-            "relative w-full bg-background overflow-hidden shadow-2xl",
+            "relative w-full bg-background overflow-hidden shadow-2xl flex flex-col",
             isMobile 
               ? "h-auto max-h-[85vh] rounded-t-3xl" 
               : "max-w-2xl max-h-[90vh] rounded-2xl"
@@ -133,7 +133,7 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
             <X className="h-5 w-5" />
           </Button>
 
-          <div className="overflow-y-auto h-full pb-24 md:pb-0">
+          <div className="flex-1 min-h-0 overflow-y-auto pb-24 md:pb-0">
             {/* Content */}
             <div className="p-5 pt-10 md:p-6 md:pt-14">
               {/* Header */}

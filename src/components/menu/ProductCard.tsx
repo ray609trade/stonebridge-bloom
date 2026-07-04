@@ -34,13 +34,21 @@ export function ProductCard({ product, className, onSelect }: ProductCardProps) 
   const handleQuickAdd = (e: React.MouseEvent) => {
     e.stopPropagation();
 
-    if (hasOptions) {
+    if (hasRequiredOptions) {
       if (onSelect) {
         onSelect();
-      } else if (hasRequiredOptions) {
+      } else {
         toast.error(`Please choose options for ${product.name}`);
       }
       return;
+    }
+
+    if (hasOptions) {
+      if (onSelect) {
+        onSelect();
+        return;
+      }
+      // No required options and no modal handler — fall through to quick-add.
     }
 
     setIsAdding(true);

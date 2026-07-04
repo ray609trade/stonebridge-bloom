@@ -27,13 +27,19 @@ export function ProductCard({ product, className, onSelect }: ProductCardProps) 
   const { addItem } = useCart();
   const [isAdding, setIsAdding] = useState(false);
 
-  const hasOptions = Array.isArray(product.options) && (product.options as unknown[]).length > 0;
+  const optionsArray = Array.isArray(product.options) ? (product.options as Array<{ required?: boolean }>) : [];
+  const hasOptions = optionsArray.length > 0;
+  const hasRequiredOptions = optionsArray.some((o) => o?.required === true);
 
   const handleQuickAdd = (e: React.MouseEvent) => {
     e.stopPropagation();
 
-    if (hasOptions && onSelect) {
-      onSelect();
+    if (hasOptions) {
+      if (onSelect) {
+        onSelect();
+      } else if (hasRequiredOptions) {
+        toast.error(`Please choose options for ${product.name}`);
+      }
       return;
     }
 

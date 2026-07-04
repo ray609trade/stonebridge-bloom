@@ -1,25 +1,35 @@
-# Fix desktop modal scroll + verify mobile product list
+## Goal
+On bagel products (One Bagel, 1/2 Dozen, Dozen), keep the current combined spread choices ("Butter and Jelly", "Peanut Butter and Jelly", etc.) AND add standalone buttons for each individual spread so a customer can pick just Butter, just Jelly, etc. Selection stays single-choice (one button lights up at a time).
 
-Two related layout issues to close out:
+## Changes
 
-## 1. Desktop ProductModal doesn't scroll
-`src/components/menu/ProductModal.tsx` outer wrapper uses `max-h-[90vh]` with `overflow-hidden`, and inner scroll uses `h-full overflow-y-auto`. Because the outer has no fixed height, `h-full` collapses and the scroll never activates — at ~590px viewport height the bottom spreads and Add-to-Cart button are unreachable.
+### 1. Data update (products table)
+Update the `Spread` option's `choices` array on the three bagel products to include individual spread entries in addition to the existing combos. Priced to match current per-add pricing.
 
-**Fix:** convert the modal panel to a flex column and let the scroll area grow.
-- Outer `motion.div`: add `flex flex-col`.
-- Inner scroll wrapper: replace `h-full` with `flex-1 min-h-0 overflow-y-auto`.
-- Keep mobile bottom-sheet behavior (drag handle, sticky footer) unchanged.
+Added choices (in this order, appended after "Plain (No Spread)" and before the existing combos so individuals are easy to find):
+- Butter — $1.08
+- Jelly — $1.08
+- Cream Cheese — $1.55 (already exists, keep as is)
+- Peanut Butter — $2.25 (already exists, keep as is)
+- Breakfast Spread — $1.75 (already exists)
+- Flavored Cream Cheese — $2.49 (already exists)
+- Lox Spread — $5.50 (already exists)
 
-## 2. Verify mobile product list on `/order`
-`src/pages/Order.tsx` already applies `pb-44` when `isMobile && itemCount > 0` to clear the floating cart + bottom nav. Verify across common breakpoints that:
-- Every `ProductCard` is fully visible and tappable, including the last item.
-- The floating "View Cart" button doesn't cover the last product's "+" button.
-- Category pill row stays horizontally scrollable.
+Net new entries: **Butter** ($1.08) and **Jelly** ($1.08). Existing combined entries ("Butter or Jelly", "Butter and Jelly", "Cream Cheese and Jelly", "Cream Cheese and Butter", "Peanut Butter and Jelly", "Sliced Lox and Cream Cheese") stay untouched.
 
-**Verification (Playwright, headless Chromium):**
-- Viewports: 375×667 (iPhone SE), 390×844 (iPhone 14), 414×896 (iPhone 11 Pro Max).
-- Steps: load `/order`, add one bagel via modal to force `itemCount > 0`, scroll to the bottom of the product grid, screenshot, confirm the last card's "+" button is not overlapped by the floating cart bar or bottom nav.
-- If overlap is detected on any viewport, increase the mobile bottom padding (e.g. `pb-48`) or restructure the floating cart offset so the last card clears both bars.
+Applied to all three products: One Bagel, 1/2 Dozen Bagels, Dozen Bagels.
 
-## Scope
-Frontend/presentation only — no cart logic, DB, or business-rule changes.
+### 2. UI (ProductModal.tsx)
+No structural changes needed — the existing `flex flex-wrap gap-2` already renders one button per choice. Each spread (individual or combo) will get its own tappable pill automatically once the data is updated.
+
+Optional polish: keep buttons visually grouped — no sub-headers, just the flat list, since the user asked for "each spread has its own button" and combos remain valid choices.
+
+## Out of scope
+- No change to option type (stays `single`) — one selection at a time.
+- No cart, pricing-trigger, or checkout changes.
+- Other products (sandwiches, platters) untouched.
+
+## Verification
+- Open One Bagel modal → see new "Butter" and "Jelly" buttons alongside "Butter and Jelly".
+- Selecting "Butter" adds $1.08; selecting "Butter and Jelly" adds $1.45; only one is active at a time.
+- Repeat on 1/2 Dozen and Dozen.

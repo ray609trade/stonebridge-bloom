@@ -5,7 +5,6 @@ import { ArrowRight, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getBusinessStatus } from "@/lib/businessHours";
 import { useIsMobile } from "@/hooks/use-mobile";
-import heroBagels from "@/assets/hero-bagels.jpg";
 
 export function Hero() {
   const [businessStatus, setBusinessStatus] = useState(getBusinessStatus());
@@ -51,7 +50,7 @@ export function Hero() {
         className="absolute inset-0 parallax-bg"
       >
         <img
-          src={heroBagels}
+          src="/hero-bagels.jpg"
           alt="Fresh bagels"
           width={1920}
           height={1280}

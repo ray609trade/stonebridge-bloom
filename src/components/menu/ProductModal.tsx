@@ -133,7 +133,7 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
             <X className="h-5 w-5" />
           </Button>
 
-          <div className="overflow-y-auto h-full pb-24 md:pb-0">
+          <div className="flex-1 min-h-0 overflow-y-auto pb-24 md:pb-0">
             {/* Content */}
             <div className="p-5 pt-10 md:p-6 md:pt-14">
               {/* Header */}

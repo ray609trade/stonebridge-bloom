@@ -2,6 +2,13 @@
 
 > Family-owned New York-style bagel shop in Allentown, NJ — handcrafted boiled bagels baked fresh daily since 2013.
 
+## Pages
+
+- [Home](/): Browse our menu, place pickup orders, and learn about our fresh daily bagels.
+- [About](/about): Our story, location, hours, and what makes Stonebridge special.
+- [Order](/order): View the full menu and place a pickup order online.
+- [Wholesale](/wholesale): Bulk and wholesale ordering information for businesses and events.
+
 ## About
 
 Stonebridge Bagels & Deli is a family-owned bakery and deli located at 1278 Yardville-Allentown Road, Allentown, NJ 08501. We specialize in authentic New York-style boiled bagels, house-made cream cheese spreads, breakfast and lunch sandwiches, salads, homemade cookies, and our signature Chorizo Bagel.

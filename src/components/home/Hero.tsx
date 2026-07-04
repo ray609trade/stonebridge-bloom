@@ -5,7 +5,6 @@ import { ArrowRight, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getBusinessStatus } from "@/lib/businessHours";
 import { useIsMobile } from "@/hooks/use-mobile";
-import heroBagels from "@/assets/hero-bagels.jpg";
 
 export function Hero() {
   const [businessStatus, setBusinessStatus] = useState(getBusinessStatus());

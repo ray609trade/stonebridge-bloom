@@ -53,9 +53,14 @@ export function Hero() {
         <img
           src={heroBagels}
           alt="Fresh bagels"
+          width={1920}
+          height={1280}
           className="w-full h-full object-cover"
           loading="eager"
+          decoding="async"
+          fetchPriority="high"
         />
+
         {/* Gradient Overlay */}
         <div className="absolute inset-0 bg-gradient-to-r from-primary/90 via-primary/70 to-primary/50" />
         
